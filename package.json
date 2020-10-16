@@ -1,0 +1,52 @@
+{
+  "name": "grader",
+  "version": "0.0.1",
+  "description": "Cross-platform apps without the bloat. 'Massless' apps.",
+  "main": "src/index.js",
+  "bin": {
+    "myapp": "grader.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "build": "npm run clean || : && npx webpack && npx nexe -t windows -o bin/grader.exe -i .js -r \"./build/?.grader.js\" -r \"./src/public/*\" && npx nexe -t linux-x64 -o bin/grader.nix -i build/grader.js -r \"./build/?.grader.js\" -r \"./src/public/*\" && npx nexe -t macos-x64 -o bin/grader.mac -i build/grader.js -r \"./build/?.grader.js\" -r \"./src/public/*\" && npx nexe -t windows-x32 -o bin/grader.win32.exe -i build/grader.js -r \"./build/?.grader.js\" -r \"./src/public/*\" && npx nexe -t linux-x32 -o bin/grader.nix32 -i build/grader.js -r \"./build/?.grader.js\" -r \"./src/public/*\"",
+    "clean": "rm -rf build/ bin/ || : && mkdir -p build && mkdir -p bin",
+    "pack": "upx bin/grader*",
+    "test": "node-dev src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/c9fe/grader.git"
+  },
+  "keywords": [
+    "devtools",
+    "node",
+    "hybrid",
+    "desktop",
+    "template",
+    "electron",
+    "sciter",
+    "gradebr",
+    "cross-platform apps",
+    "chromium",
+    "chrome"
+  ],
+  "author": "@dosy",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/c9fe/grader/issues"
+  },
+  "homepage": "https://github.com/c9fe/grader#readme",
+  "dependencies": {
+    "chrome-launcher": "latest",
+    "esm": "latest",
+    "express": "latest",
+    "node-fetch": "latest",
+    "ws": "latest"
+  },
+  "devDependencies": {
+    "nexe": "latest",
+    "node-dev": "latest",
+    "webpack": "latest",
+    "webpack-cli": "latest"
+  }
+}
