@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset=utf-8>
+<title>Your Cross-Platform App</title>
+<style>
+  :root {
+    font-family: sans-serif;
+    background: lavenderblush;
+  }
+  body {
+    display: table;
+    margin: 0 auto;
+    background: silver;
+    padding: 0.5em;
+    box-shadow: 0 1px 1px purple;
+  }
+  h1 {
+    margin: 0;
+  }
+  h2 {
+    margin-top: 0;
+  }
+</style>
+<h1>Hello World!</h1>
+<h2>Meet <i>Grader</i></h2>
+<p>
+  <button onclick="grader.ui.minimize();">_</button>
+  <button onclick="grader.ui.restore();">&#11036;</button>
+  <button onclick="grader.ui.close();">x</button>
+<script>
+  (async () => {
+    await graderReady();
+
+    const [title, favicon, startURL] = (await Promise.allSettled([
+      grader.meta.getTitle(),
+      grader.meta.getFavicon(),
+      grader.meta.getStartURL()
+    ])).map(({status, value, reason}) => {
+      if ( status == 'fulfilled' ) return value;
+      return reason;
+    });
+
+    console.log({title, favicon, startURL});
+
+    document.title = title;
+  })();
+</script>

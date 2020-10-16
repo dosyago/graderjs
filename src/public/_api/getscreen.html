@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<meta charset=utf-8>
+<script>
+  (async () => {
+    await graderReady();
+
+    await grader.util.kv('screen', {
+      screenWidth: screen.width,
+      screenHeight: screen.height
+    });
+  })();
+</script>
