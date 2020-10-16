@@ -8,18 +8,19 @@ import {DEBUG, context, sleep, NO_SANDBOX} from './lib/common.js';
 const {server_port, chrome_port} = args;
 
 const CHROME_OPTS = !NO_SANDBOX ? [
-  '--app=http://localhost:grader',
+  `--app=http://localhost:${server_port}`,
   '--restore-last-session',
   `--disk-cache-dir=${args.temp_browser_cache()}`,
   `--aggressive-cache-discard`
 ] : [
-  '--app=http://localhost:grader',
+  `--app=http://localhost:${server_port}`,
   '--restore-last-session',
   `--disk-cache-dir=${args.temp_browser_cache()}`,
   `--aggressive-cache-discard`,
   '--no-sandbox'
 ];
 const LAUNCH_OPTS = {
+  logLevel: 'verbose',
   port: chrome_port, 
   chromeFlags:CHROME_OPTS, 
   userDataDir:false, 
@@ -61,7 +62,9 @@ async function start() {
   await sleep(1000);
 
   console.log(`Launching chrome...`);
+  console.log({LAUNCH_OPTS});
   const browser = await ChromeLaunch(LAUNCH_OPTS);
+  console.log({browser, ChromeLaunch});
   console.log(`Chrome started.`);
 
   console.log(`Waiting 1 second...`);

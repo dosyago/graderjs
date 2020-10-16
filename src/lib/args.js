@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 
 const DSP = 22121;
-const DCP = 9222;
+const DCP = 8222;
 
 export const server_port = process.env.PORT || process.argv[2] || DSP;
 export const chrome_port = process.argv[3] || DCP;
