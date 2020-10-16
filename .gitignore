@@ -5,6 +5,7 @@ bin/*
 
 #Leave these to allow install by npm -g
 #build/*
+build/*.LICENSE.txt
 
 # Logs
 logs
