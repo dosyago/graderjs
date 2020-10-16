@@ -16,6 +16,7 @@ loadPref();
 
 let BasePath = Pref.BasePath;
 const temp_browser_cache = () => path.resolve(os.homedir(), '.temp-browser-cache' + cacheId);
+const app_data_dir = () => path.resolve(os.homedir(), '.app-data');
 
 console.log(`Args usage: <server_port> <chrome_port> <... other args>`);
 
@@ -27,6 +28,7 @@ const args = {
   updateBasePath,
   getBasePath,
   temp_browser_cache,
+  app_data_dir
 };
 
 export default args;

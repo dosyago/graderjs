@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 import args from './lib/args.js';
 import connect from './lib/protocol.js';
 
@@ -23,7 +25,7 @@ const LAUNCH_OPTS = {
   logLevel: 'verbose',
   port: chrome_port, 
   chromeFlags:CHROME_OPTS, 
-  userDataDir:false, 
+  userDataDir:args.app_data_dir(), 
   ignoreDefaultFlags: true
 }
 const KILL_ON = {
@@ -45,7 +47,6 @@ async function start() {
   process.on('SIGTERM', cleanup);
 
   console.log(`Importing dependencies...`);
-  const fs = await import('fs');
   const {launch:ChromeLaunch} = await import('chrome-launcher');
 
   console.log(`Removing grader's existing temporary browser cache if it exists...`);
@@ -53,6 +54,11 @@ async function start() {
     console.log(`Temp browser cache directory (${args.temp_browser_cache()}) exists, deleting...`);
     fs.rmdirSync(args.temp_browser_cache(), {recursive:true});
     console.log(`Deleted.`);
+  }
+  if ( !fs.existsSync(args.app_data_dir()) ) {
+    console.log(`App data dir does not exist. Creating...`);
+    fs.mkdirSync(args.app_data_dir(), {recursive:true});
+    console.log(`Created.`);
   }
   console.log(`Launching app server...`);
   await AppServer.start({server_port});
@@ -91,7 +97,9 @@ async function cleanup(reason) {
   }
   quitting = true;
 
-  appWindow.close();
+  if ( appWindow ) {
+    appWindow.close();
+  }
 
   if ( fs.existsSync(args.temp_browser_cache()) ) {
     console.log(`Temp browser cache directory (${args.temp_browser_cache()}) exists, deleting...`);
@@ -99,7 +107,7 @@ async function cleanup(reason) {
     console.log(`Deleted.`);
   }
 
-  Server.stop();
+  AppServer.stop();
 
   console.log(`Take a breath. Everything's done. grader is exiting in 3 seconds...`);
 
