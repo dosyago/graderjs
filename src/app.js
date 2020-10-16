@@ -1,3 +1,4 @@
+import {spawn} from 'child_process';
 import fs from 'fs';
 
 import args from './lib/args.js';
@@ -40,11 +41,11 @@ let quitting, appWindow;
 start();
 
 async function start() {
-  process.on('beforeExit', cleanup);
-  process.on('SIGBREAK', cleanup);
-  process.on('SIGHUP', cleanup);
-  process.on('SIGINT', cleanup);
-  process.on('SIGTERM', cleanup);
+  //process.on('beforeExit', cleanup);
+  //process.on('SIGBREAK', cleanup);
+  //process.on('SIGHUP', cleanup);
+  //process.on('SIGINT', cleanup);
+  //process.on('SIGTERM', cleanup);
 
   console.log(`Importing dependencies...`);
   const {launch:ChromeLaunch} = await import('chrome-launcher');
@@ -64,7 +65,6 @@ async function start() {
   await AppServer.start({server_port});
   console.log(`App server started.`);
 
-  return;
   console.log(`Waiting 1 second...`);
   await sleep(1000);
 
@@ -78,15 +78,16 @@ async function start() {
   await sleep(1000);
 
   console.log(`Connecting to chrome...`);
-  const AppWindow = await connect({port:chrome_port});
+  //const AppWindow = await connect({port:chrome_port});
+  spawn('./server.js', {windowsHide:true});
 
-  AppWindow.close = async () => await browser.kill();
+  //AppWindow.close = async () => await browser.kill();
 
   appWindow = AppWindow;
 
   console.log(`Ready`);
 
-  return AppWindow;
+  return appWindow;
 }
 
 async function cleanup(reason) {

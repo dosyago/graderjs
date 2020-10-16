@@ -16,6 +16,10 @@ const AppServer = {
 
 export default AppServer;
 
+if ( require.main === module ) {
+  start({server_port:22121});
+}
+
 async function start({server_port}) {
   let resolve, reject;
   const pr = new Promise((res, rej) => (resolve = res, reject = rej));
