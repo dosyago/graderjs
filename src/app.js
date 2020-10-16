@@ -78,14 +78,17 @@ async function start() {
   await sleep(1000);
 
   console.log(`Connecting to chrome...`);
-  //const AppWindow = await connect({port:chrome_port});
-  spawn('./server.js', {windowsHide:true});
+  const AppWindow = await connect({port:chrome_port});
+  //spawn('./server.js', );
+  //{windowsHide:true, detached:true, stdio:'ignore'});
 
-  //AppWindow.close = async () => await browser.kill();
+  AppWindow.close = async () => await browser.kill();
 
   appWindow = AppWindow;
 
   console.log(`Ready`);
+
+  //await sleep(10000);
 
   return appWindow;
 }
