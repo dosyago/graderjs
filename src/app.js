@@ -64,6 +64,7 @@ async function start() {
   await AppServer.start({server_port});
   console.log(`App server started.`);
 
+  return;
   console.log(`Waiting 1 second...`);
   await sleep(1000);
 
