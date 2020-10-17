@@ -4,7 +4,9 @@ import express from 'express';
 import args from './lib/args.js';
 import {say} from './lib/common.js';
 
-const SITE_PATH = path.resolve(__dirname, 'public');
+const SITE_PATH = path.resolve(__dirname, '..', 'src', 'public');
+
+console.log({SITE_PATH});
 
 const app = express();
 
