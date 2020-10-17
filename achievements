@@ -1,0 +1,11 @@
+- add a build step that zips up our website / app directory
+- add the website zip into the nexe build
+- write the server.js and website zip to a temp directory 
+- unzip the website zip
+- start the server
+
+
+FUCK YEAH I AM AWESOME!!! :p ;) xx
+
+
+
