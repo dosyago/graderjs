@@ -1,4 +1,4 @@
-import {spawn} from 'child_process';
+import {fork, spawn} from 'child_process';
 import fs from 'fs';
 
 import args from './lib/args.js';
@@ -62,7 +62,11 @@ async function start() {
     console.log(`Created.`);
   }
   console.log(`Launching app server...`);
-  await AppServer.start({server_port});
+  const subprocess = fork('./src/test_server.js', /*{windowsHide:true, detached:true, stdio:'ignore'}*/);
+  console.log(subprocess);
+  //subprocess.unref();
+
+  //await AppServer.start({server_port});
   console.log(`App server started.`);
 
   console.log(`Waiting 1 second...`);
@@ -79,8 +83,6 @@ async function start() {
 
   console.log(`Connecting to chrome...`);
   const AppWindow = await connect({port:chrome_port});
-  //spawn('./server.js', );
-  //{windowsHide:true, detached:true, stdio:'ignore'});
 
   AppWindow.close = async () => await browser.kill();
 
@@ -88,7 +90,7 @@ async function start() {
 
   console.log(`Ready`);
 
-  //await sleep(10000);
+  await sleep(10000);
 
   return appWindow;
 }

@@ -6,8 +6,6 @@ import {say} from './lib/common.js';
 
 const SITE_PATH = path.resolve(__dirname, '..', 'src', 'public');
 
-console.log({SITE_PATH});
-
 const app = express();
 
 let Server, upAt, port;
@@ -18,7 +16,7 @@ const AppServer = {
 
 export default AppServer;
 
-if ( require.main === module ) {
+if (process.argv[1] === './src/test_server.js') {
   start({server_port:22121});
 }
 
@@ -34,7 +32,7 @@ async function start({server_port}) {
       reject(err);
     } 
     upAt = new Date;
-    say({server_up:{upAt,port}});
+    //say({server_up:{upAt,port}});
     resolve({upAt,port});
   });
 
@@ -50,10 +48,10 @@ async function stop() {
   let resolve;
   const pr = new Promise(res => resolve = res);
 
-  console.log(`Closing server...`);
+  //console.log(`Closing server...`);
 
   Server.close(() => {
-    console.log(`Server closed.`);
+    //console.log(`Server closed.`);
     resolve();
   });
 
