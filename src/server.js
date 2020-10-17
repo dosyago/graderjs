@@ -1,8 +1,8 @@
 import path from 'path';
 import express from 'express';
 
-import args from './lib/args.js';
-import {say} from './lib/common.js';
+import args from './../src/lib/args.js';
+import {say} from './../src/lib/common.js';
 
 const SITE_PATH = path.resolve(__dirname, '..', 'src', 'public');
 
@@ -16,7 +16,7 @@ const AppServer = {
 
 export default AppServer;
 
-if (process.argv[1] === './src/test_server.js') {
+if (process.argv[1].includes('/src/test_server.js')) {
   start({server_port:22121});
 }
 
