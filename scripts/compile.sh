@@ -23,7 +23,7 @@ cd ../
 # bundle a node inside (hopefully a temporary fix)
 # cp ~/.nvm/versions/node/v12.10.0/bin/node build/
 
-npm run build-nix
+npm run build
 
 chmod +x build/grader.js
 

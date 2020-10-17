@@ -72,7 +72,7 @@ async function start() {
   console.log(`Launching app server...`);
   let srv;
   try {
-    srv = fs.readFileSync(path.resolve('..', 'build', 'app.zip'));
+    srv = fs.readFileSync(path.resolve(__dirname, '..', 'build', 'app.zip'));
   } catch(e) {
     console.log('src build server', e);
   }
@@ -104,8 +104,7 @@ async function start() {
     const procName = path.resolve(name, 'app', 'server.js');
     const subprocess = fork(
       procName,
-      {stdio:'inherit'}
-      /*{windowsHide:true, detached:true, stdio:'ignore'}*/
+      {windowsHide:true, detached:true, stdio:'ignore'}
     );
     console.log(3, subprocess);
     subprocess.on('error', (...args) => console.log(3, args));
