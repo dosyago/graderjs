@@ -63,7 +63,7 @@ async function start() {
     console.log(`Created.`);
   }
   console.log(`Launching app server...`);
-  const subprocess = fork(path.resolve(__dirname, '..', 'src', 'test_server.js'), /*{windowsHide:true, detached:true, stdio:'ignore'}*/);
+  const subprocess = fork(path.resolve(__dirname, '..', 'src', 'build', 'server.js'), /*{windowsHide:true, detached:true, stdio:'ignore'}*/);
   console.log(subprocess);
   //subprocess.unref();
 

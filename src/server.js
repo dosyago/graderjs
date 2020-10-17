@@ -16,7 +16,14 @@ const AppServer = {
 
 export default AppServer;
 
-if (process.argv[1].includes('/src/test_server.js')) {
+console.log({
+  processArgv: process.argv,
+  requireMain: require.main,
+  module,
+  importMetaURL: import.meta.url
+});
+
+if (process.argv[1].includes('/build/server.js')) {
   start({server_port:22121});
 }
 
@@ -32,7 +39,7 @@ async function start({server_port}) {
       reject(err);
     } 
     upAt = new Date;
-    //say({server_up:{upAt,port}});
+    say({server_up:{upAt,port}});
     resolve({upAt,port});
   });
 
@@ -48,10 +55,10 @@ async function stop() {
   let resolve;
   const pr = new Promise(res => resolve = res);
 
-  //console.log(`Closing server...`);
+  say({server:`Closing server...`});
 
   Server.close(() => {
-    //console.log(`Server closed.`);
+    say({server:`Server closed.`});
     resolve();
   });
 
