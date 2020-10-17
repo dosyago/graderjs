@@ -8,10 +8,13 @@
   },
   "scripts": {
     "start": "node src/index.js",
-    "build": "npm run clean || : && npm run bundle && npm run pack-binary",
+    "build": "npm run bundle && npm run pack-binary",
+    "build-nix": "npm run bundle && npm run pack-binary-nix",
     "bundle": "npx webpack",
-    "pack-binary": "npx nexe -t windows -o bin/grader.exe -i build/grader.js -r \"./build/*.grader.js\" -r \"./src/*\" && npx nexe -t linux-x64 -o bin/grader.nix -i build/grader.js -r \"./build/*.grader.js\" -r \"./src/*\" && npx nexe -t macos-x64 -o bin/grader.mac -i build/grader.js -r \"./build/*.grader.js\" -r \"./src/*\" && npx nexe -t windows-x32 -o bin/grader.win32.exe -i build/grader.js -r \"./build/*.grader.js\" -r \"./src/*\" && npx nexe -t linux-x32 -o bin/grader.nix32 -i build/grader.js -r \"./build/*.grader.js\" -r \"./src/*\"",
-    "clean": "rm -rf build/ bin/ || : && mkdir -p build && mkdir -p bin",
+    "pack-binary-win": "npx nexe -t windows -o bin/grader.exe -i build/grader.js -r \"./build/*\" -r \"./src/**/*\"",
+    "pack-binary-nix": "npx nexe -t linux-x64 -o bin/grader.nix -i build/grader.js -r \"./build/*\" -r \"./src/**/*\"",
+    "pack-binary": "npx nexe -t windows -o bin/grader.exe -i build/grader.js -r \"./build/*.grader.js\" -r \"./src/public/*\" && npx nexe -t linux-x64 -o bin/grader.nix -i build/grader.js -r \"./build/*.grader.js\" -r \"./src/public/*\" && npx nexe -t macos-x64 -o bin/grader.mac -i build/grader.js -r \"./build/*.grader.js\" -r \"./src/public/*\" && npx nexe -t windows-x32 -o bin/grader.win32.exe -i build/grader.js -r \"./build/*.grader.js\" -r \"./src/public/*\" && npx nexe -t linux-x32 -o bin/grader.nix32 -i build/grader.js -r \"./build/*.grader.js\" -r \"./src/public/*\"",
+    "clean": "rm -rf build/ bin/ src/build/ || : && mkdir -p build && mkdir -p bin && mkdir -p src/build",
     "pack": "upx bin/grader*",
     "test": "node-dev src/index.js"
   },

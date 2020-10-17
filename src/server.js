@@ -23,7 +23,7 @@ console.log({
   importMetaURL: import.meta.url
 });
 
-if (process.argv[1].includes('/build/server.js')) {
+if (process.argv[1].includes('_grader_server.js')) {
   start({server_port:22121});
 }
 

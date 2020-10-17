@@ -1,3 +1,4 @@
-- fix path issue in test_server tree via either:
-  - using dynamic imports with dirname
-  - compiling test_server tree into a single file using webpack and forking on that
+- somehow when using spawn or fork (both work), I cannot access the internal filesystem anymore 
+so i need to write the app to a temp directory. In order for that to work, I need to write the whole app to a temp directory.
+
+

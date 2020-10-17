@@ -1,11 +1,12 @@
 import {fork, spawn} from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 import args from './lib/args.js';
 import connect from './lib/protocol.js';
 
-import AppServer from './server.js';
+//import AppServer from './server.js';
 
 import {DEBUG, context, sleep, NO_SANDBOX} from './lib/common.js';
 
@@ -39,7 +40,12 @@ const KILL_ON = {
 
 let quitting, appWindow;
 
+process.on('error', (...args) => {
+  console.log(args);
+});
+
 start();
+
 
 async function start() {
   //process.on('beforeExit', cleanup);
@@ -63,9 +69,47 @@ async function start() {
     console.log(`Created.`);
   }
   console.log(`Launching app server...`);
-  const subprocess = fork(path.resolve(__dirname, '..', 'src', 'build', 'server.js'), /*{windowsHide:true, detached:true, stdio:'ignore'}*/);
-  console.log(subprocess);
-  //subprocess.unref();
+  let srv;
+  try {
+    srv = fs.readFileSync(path.resolve(__dirname, '..', 'src', 'build', 'server.js'));
+  } catch(e) {
+    console.log('src build server', e);
+  }
+  try {
+    console.log(fs.readFileSync(path.resolve(__dirname, '..', 'build', 'node')));
+  } catch(e) {
+    console.log('build node', e);
+  }
+  const subx = '123';
+  /**
+  try {
+    const name = path.resolve(os.homedir(), Math.random().toString(36) + '_grader_server.js');
+    fs.writeFileSync(name, srv);
+    const subprocess = spawn(
+      path.resolve('..', 'build', 'node'), 
+      [
+        name
+      ],
+      {stdio:'inherit'}
+      //{windowsHide:true, detached:true, stdio:'ignore'}
+    );
+    console.log(3, subprocess);
+    subprocess.on('error', (...args) => console.log(3, args));
+    //subprocess.unref();
+  } catch (e) { console.log(e) }
+  **/
+  try {
+    const name = path.resolve(os.homedir(), Math.random().toString(36) + '_grader_server.js');
+    fs.writeFileSync(name, srv);
+    const subprocess = fork(
+      name,
+      {stdio:'inherit'}
+      /*{windowsHide:true, detached:true, stdio:'ignore'}*/
+    );
+    console.log(3, subprocess);
+    subprocess.on('error', (...args) => console.log(3, args));
+    //subprocess.unref();
+  } catch (e) { console.log(e) }
 
   //await AppServer.start({server_port});
   console.log(`App server started.`);
@@ -115,7 +159,7 @@ async function cleanup(reason) {
     console.log(`Deleted.`);
   }
 
-  AppServer.stop();
+  //AppServer.stop();
 
   console.log(`Take a breath. Everything's done. grader is exiting in 3 seconds...`);
 
