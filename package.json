@@ -42,6 +42,7 @@
   },
   "homepage": "https://github.com/c9fe/grader#readme",
   "dependencies": {
+    "adm-zip": "^0.4.16",
     "chrome-launcher": "latest",
     "esm": "latest",
     "express": "latest",
