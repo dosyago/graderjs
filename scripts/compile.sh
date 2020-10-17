@@ -23,11 +23,11 @@ cd ../
 # bundle a node inside (hopefully a temporary fix)
 # cp ~/.nvm/versions/node/v12.10.0/bin/node build/
 
-npm run build-nix
+npm run build
 
 chmod +x build/grader.js
 
 cp -r build ~/
 cp -r bin ~/
 
-#serve -p 8080
+serve -p 8080
