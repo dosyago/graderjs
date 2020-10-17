@@ -1,4 +1,5 @@
 import {fork, spawn} from 'child_process';
+import AdmZip from 'adm-zip';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -71,14 +72,9 @@ async function start() {
   console.log(`Launching app server...`);
   let srv;
   try {
-    srv = fs.readFileSync(path.resolve(__dirname, '..', 'src', 'build', 'server.js'));
+    srv = fs.readFileSync(path.resolve('..', 'build', 'app.zip'));
   } catch(e) {
     console.log('src build server', e);
-  }
-  try {
-    console.log(fs.readFileSync(path.resolve(__dirname, '..', 'build', 'node')));
-  } catch(e) {
-    console.log('build node', e);
   }
   const subx = '123';
   /**
@@ -99,10 +95,15 @@ async function start() {
   } catch (e) { console.log(e) }
   **/
   try {
-    const name = path.resolve(os.homedir(), Math.random().toString(36) + '_grader_server.js');
-    fs.writeFileSync(name, srv);
+    const name = path.resolve(os.homedir(), '.grader_server_' + Math.random().toString(36));
+    const zipName = path.resolve(name, 'app.zip');
+    fs.mkdirSync(name, {recursive:true});
+    fs.writeFileSync(zipName, srv);
+    const file = new AdmZip(zipName);
+    file.extractAllTo(name);
+    const procName = path.resolve(name, 'app', 'server.js');
     const subprocess = fork(
-      name,
+      procName,
       {stdio:'inherit'}
       /*{windowsHide:true, detached:true, stdio:'ignore'}*/
     );

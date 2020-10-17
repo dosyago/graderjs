@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 source ~/.nvm/nvm.sh
 
 nvm use v12.10.0
@@ -13,8 +15,13 @@ npx webpack
 
 cd ../
 
+# make and zip file containing the server.js and 
+# the public folder of web assets
+# and copy to build/
+./scripts/webzip.js
+
 # bundle a node inside (hopefully a temporary fix)
-cp ~/.nvm/versions/node/v12.10.0/bin/node build/
+# cp ~/.nvm/versions/node/v12.10.0/bin/node build/
 
 npm run build-nix
 
