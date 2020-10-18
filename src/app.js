@@ -101,6 +101,7 @@ async function start() {
 
   while(true) {
     if ( !subprocess.connected || message == 'App started.' ) {
+      console.log('');
       break;
     }
 
@@ -117,11 +118,10 @@ async function start() {
 
   if ( message == 'App started.' ) {
     console.log('Launcher exiting successfully...');
-    await sleep(15000);
     process.exit(0);
   } else {
     console.info(message, state);
-    console.log('Launcher failed. Exiting...');
+    console.log('Launcher failed. Exiting in 15 seconds...');
     await sleep(15000);
     process.exit(1);
   }
