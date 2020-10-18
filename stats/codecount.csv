@@ -1,18 +1,16 @@
-language,filename,blank,comment,code,"github.com/AlDanial/cloc v 1.81  T=0.02 s (983.5 files/s, 38664.8 lines/s)"
+language,filename,blank,comment,code,"github.com/AlDanial/cloc v 1.81  T=0.01 s (964.5 files/s, 42989.5 lines/s)"
 JavaScript,./src/server.js,37,33,113
 JavaScript,./src/lib/protocol.js,15,1,97
 JavaScript,./src/app.js,20,1,69
 JavaScript,./src/lib/args.js,17,1,59
 HTML,./src/public/index.html,0,0,24
-JavaScript,./src/webpack.config.js,1,0,16
 JavaScript,./webpack.config.js,1,0,16
+JavaScript,./src/webpack.config.js,1,0,16
 JavaScript,./.eslintrc.js,0,0,13
 Bourne Shell,./scripts/compile.sh,13,7,13
 Bourne Shell,./scripts/upload.sh,4,0,10
-JavaScript,./scripts/webzip.js,7,0,8
 Bourne Shell,./scripts/build_setup.sh,3,0,8
+JavaScript,./scripts/webzip.js,7,0,8
 JavaScript,./src/lib/common.js,5,1,7
-JavaScript,./src/build/server.js,0,1,2
-JavaScript,./build/grader.js,0,0,2
 YAML,./.github/FUNDING.yml,1,1,2
-SUM,,124,46,459
+SUM,,124,45,455
