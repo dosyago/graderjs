@@ -73,8 +73,7 @@ async function start() {
     console.log('App process requested.');
     subprocess = fork(
       procName,
-      /*{windowsHide:true, detached:true, stdio:[null, null, null, 'ipc']}*/
-      {stdio:[null, null, null, 'ipc'], detached: true}
+      {stdio:[null, null, null, 'ipc'], detached: true, windowsHide: true}
     );
     subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
     subprocess.on('message', msg => (message = msg, process.stdout.write('\n'+msg), resolve(args)));
