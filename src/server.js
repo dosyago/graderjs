@@ -1,5 +1,5 @@
 import fs from 'fs';
-import os from 'os';
+//FFFimport os from 'os';
 import path from 'path';
 import express from 'express';
 import {launch as ChromeLaunch} from 'chrome-launcher';
@@ -11,7 +11,7 @@ import connect from './lib/protocol.js';
 const SITE_PATH = path.resolve(__dirname, 'public');
 console.log({SITE_PATH});
 
-import {DEBUG, context, sleep, NO_SANDBOX} from './lib/common.js';
+import {NO_SANDBOX} from './lib/common.js';
 
 const {server_port, chrome_port} = args;
 
@@ -38,12 +38,6 @@ const LAUNCH_OPTS = {
   userDataDir:args.app_data_dir(), 
   ignoreDefaultFlags: true
 }
-const KILL_ON = {
-  win32: 'taskkill /IM chrome.exe /F',
-  darwin: 'pkill -15 chrome',
-  freebsd: 'pkill -15 chrome',
-  linux: 'pkill -15 chrome',
-};
 
 //process.on('beforeExit', cleanup);
 //process.on('SIGBREAK', cleanup);
@@ -56,7 +50,7 @@ process.on('error', (...args) => {
 
 const app = express();
 
-let Server, upAt, port, quitting, appWindow;
+let Server, upAt, port;
 
 const AppServer = {
   start, stop
@@ -119,7 +113,6 @@ async function run() {
   process.disconnect && process.disconnect();
 
   AppWindow.close = async () => await browser.kill();
-  appWindow = AppWindow;
 }
 
 async function start({server_port}) {
@@ -163,6 +156,7 @@ async function stop() {
 }
 
 
+/*
 async function cleanup(reason) {
   console.log(`Cleanup called on reason: ${reason}`);
 
@@ -186,3 +180,4 @@ async function cleanup(reason) {
 
   process.exit(0);
 } 
+*/
