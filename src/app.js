@@ -44,7 +44,6 @@ start();
 
 async function start() {
   console.log('App launcher started.');
-  console.log(`Click this window and press any key...`);
 
   let state = 'pending';
   let resolve, reject;
@@ -77,9 +76,8 @@ async function start() {
       /*{windowsHide:true, detached:true, stdio:[null, null, null, 'ipc']}*/
       {stdio:[null, null, null, 'ipc'], detached: true}
     );
-    //console.log(3, subprocess);
     subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
-    subprocess.on('message', msg => (message = msg, console.log(msg), resolve(args)));
+    subprocess.on('message', msg => (message = msg, process.stdout.write('\n'+msg), resolve(args)));
     subprocess.unref();
   } catch (e) { 
     console.log('fork err', e) 
@@ -90,12 +88,6 @@ async function start() {
   console.log('App process created.');
 
   // keep parent spinning 
-
-  /**
-  if ( process.platform === "win32" ) {
-    execSync("pause press");
-  }
-  **/
 
   const progress = [];
 
@@ -120,7 +112,8 @@ async function start() {
     console.log('Launcher exiting successfully...');
     process.exit(0);
   } else {
-    console.info(message, state);
+    console.error('Error at', message);
+    console.info('Check state', state);
     console.log('Launcher failed. Exiting in 15 seconds...');
     await sleep(15000);
     process.exit(1);
