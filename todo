@@ -1,8 +1,8 @@
+- write config (grader.config.js) spec to set your app name, etc etc
 - handle case where a server process still exists form last launch (kill it? probably.)
 - handle cleanup (delete temp dir, etc)
-- clean up code and remove most of it
-- make simplest app
-- write documentation about how to use grader to build cross-platform apps
+- put archivist in this framework.
+- write documentation about how to use grader to build cross-platform apps (grader-create-app ?)
 
 
 
