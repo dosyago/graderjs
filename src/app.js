@@ -1,4 +1,4 @@
-import {execSync, fork, spawn} from 'child_process';
+import {fork} from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -6,39 +6,11 @@ import os from 'os';
 import AdmZip from 'adm-zip';
 
 import args from './lib/args.js';
-import {DEBUG, context, sleep, NO_SANDBOX} from './lib/common.js';
+import {sleep} from './lib/common.js';
 
 process.on('error', (...args) => {
   console.log(args);
 });
-
-const {server_port, chrome_port} = args;
-
-const CHROME_OPTS = !NO_SANDBOX ? [
-  `--app=http://localhost:${server_port}`,
-  '--restore-last-session',
-  `--disk-cache-dir=${args.temp_browser_cache()}`,
-  `--aggressive-cache-discard`
-] : [
-  `--app=http://localhost:${server_port}`,
-  '--restore-last-session',
-  `--disk-cache-dir=${args.temp_browser_cache()}`,
-  `--aggressive-cache-discard`,
-  '--no-sandbox'
-];
-const LAUNCH_OPTS = {
-  logLevel: 'verbose',
-  port: chrome_port, 
-  chromeFlags:CHROME_OPTS, 
-  userDataDir:args.app_data_dir(), 
-  ignoreDefaultFlags: true
-}
-const KILL_ON = {
-  win32: 'taskkill /IM chrome.exe /F',
-  darwin: 'pkill -15 chrome',
-  freebsd: 'pkill -15 chrome',
-  linux: 'pkill -15 chrome',
-};
 
 start();
 
@@ -90,12 +62,7 @@ async function start() {
 
   const progress = [];
 
-  while(true) {
-    if ( !subprocess.connected || message == 'App started.' ) {
-      console.log('');
-      break;
-    }
-
+  while( subprocess.connected && message != 'App started.' ) {
     if ( state == 'pending' ) {
       process.stdout.clearLine();
       process.stdout.cursorTo(0);
@@ -107,6 +74,8 @@ async function start() {
     progress.push('');
   }
 
+  console.log('');
+
   if ( message == 'App started.' ) {
     console.log('Launcher exiting successfully...');
     process.exit(0);
@@ -117,9 +86,5 @@ async function start() {
     await sleep(15000);
     process.exit(1);
   }
-}
-
-async function untilConnected(url) {
-  
 }
 

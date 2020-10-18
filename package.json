@@ -2,13 +2,13 @@
   "name": "grader",
   "version": "0.0.1",
   "description": "Template for cross-platform Node, JavaScript, HTML & CSS apps without the bloat. 'Massless' apps.",
-  "main": "src/index.js",
+  "main": "build/grader.js",
   "bin": {
     "myapp": "build/grader.js"
   },
   "scripts": {
     "postinstall": "bash ./scripts/build_setup.sh",
-    "start": "node src/index.js",
+    "start": "node -r esm src/app.js",
     "build": "npm run bundle && npm run pack-binary",
     "bundle": "npx webpack",
     "pack-binary": "npm run pack-binary-nix && npm run pack-binary-win && npm run pack-binary-mac && npm run pack-binary-32",
@@ -21,7 +21,7 @@
     "pack-binary-32": "npx nexe -t windows-x32 -o bin/grader.win32.exe -i build/grader.js -r \"./build/*\" && npx nexe -t linux-x32 -o bin/grader.nix32 -i build/grader.js -r \"./build/*\"",
     "clean": "rm -rf build/ bin/ src/build/ || : && mkdir -p build && mkdir -p bin && mkdir -p src/build",
     "pack": "upx bin/grader*",
-    "test": "node-dev src/index.js"
+    "test": "node-dev -r src/app.js"
   },
   "repository": {
     "type": "git",
@@ -55,6 +55,7 @@
     "ws": "latest"
   },
   "devDependencies": {
+    "eslint": "^7.11.0",
     "nexe": "latest",
     "node-dev": "latest",
     "webpack": "latest",

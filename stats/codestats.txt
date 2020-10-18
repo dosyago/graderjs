@@ -1,7 +1,7 @@
 
 ---------- Result ------------
 
-            Physical :  635
+         Physical :  635
               Source :  500
              Comment :  26
  Single-line comment :  16
