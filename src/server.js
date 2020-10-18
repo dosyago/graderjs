@@ -60,25 +60,30 @@ const AppServer = {
 
 export default AppServer;
 
+/**
 console.log({
   processArgv: process.argv,
   requireMain: require.main,
   module,
   importMetaURL: import.meta.url
 });
+**/
 
 if (process.argv[1].includes('grader_server_')) {
+  process.send('Request app start.');
   run();
-  process.send('ok2');
 }
 
 async function run() {
   console.log(`Start server...`);
+  process.send('Request server start.');
   await start({server_port:22121});
+  process.send('Server started.');
   console.log(`App server started.`);
 
   console.log(`Importing dependencies...`);
 
+  process.send('Request cache directory.');
   console.log(`Removing grader's existing temporary browser cache if it exists...`);
   if ( fs.existsSync(args.temp_browser_cache()) ) {
     console.log(`Temp browser cache directory (${args.temp_browser_cache()}) exists, deleting...`);
@@ -90,18 +95,23 @@ async function run() {
     fs.mkdirSync(args.app_data_dir(), {recursive:true});
     console.log(`Created.`);
   }
+  process.send('Cache directory created.');
 
+  process.send('Request user interface.');
   console.log(`Launching chrome...`);
   console.log({LAUNCH_OPTS});
   const browser = await ChromeLaunch(LAUNCH_OPTS);
   console.log({browser, ChromeLaunch});
   console.log(`Chrome started.`);
+  process.send('User interface created.');
 
+  process.send('Request interface connection.');
   console.log(`Connecting to chrome...`);
   const AppWindow = await connect({port:chrome_port});
   console.log(`Connected.`);
+  process.send('User interface online.');
 
-  process.send && process.send('ok');
+  process.send && process.send('App started.');
   process.disconnect && process.disconnect();
 
   AppWindow.close = async () => await browser.kill();

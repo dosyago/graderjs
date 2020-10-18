@@ -43,6 +43,7 @@ const KILL_ON = {
 start();
 
 async function start() {
+  console.log('App launcher started.');
   console.log(`Click this window and press any key...`);
 
   let state = 'pending';
@@ -51,7 +52,7 @@ async function start() {
   const pr = new Promise((res, rej) => (resolve = res, reject = rej));
   pr.then(() => state = 'complete').catch(() => state = 'rejected');
 
-  let srv, subprocess;
+  let srv, subprocess, message;
 
   try {
     srv = fs.readFileSync(path.resolve(__dirname, '..', 'build', 'app.zip'));
@@ -59,51 +60,70 @@ async function start() {
     console.log('src build server error', e);
   }
   try {
+    console.log('Preparing temp data directory.');
     const name = path.resolve(os.homedir(), '.grader_server_' + Math.random().toString(36));
     const zipName = path.resolve(name, 'app.zip');
     fs.mkdirSync(name, {recursive:true});
     fs.writeFileSync(zipName, srv);
+
+    console.log('Inflating app contents.');
     const file = new AdmZip(zipName);
     file.extractAllTo(name);
     const procName = path.resolve(name, 'app', 'server.js');
+
+    console.log('App process requested.');
     subprocess = fork(
       procName,
       /*{windowsHide:true, detached:true, stdio:[null, null, null, 'ipc']}*/
-      {stdio:'inherit'}
+      {stdio:[null, null, null, 'ipc'], detached: true}
     );
     //console.log(3, subprocess);
     subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
-    subprocess.on('message', (...args) => (console.log('msg', args), resolve(args)));
+    subprocess.on('message', msg => (message = msg, console.log(msg), resolve(args)));
     subprocess.unref();
-  } catch (e) { console.log('fork err', e) }
+  } catch (e) { 
+    console.log('fork err', e) 
+    console.log('App process failed. Exiting...');   
+    process.exit(1);
+  }
+
+  console.log('App process created.');
 
   // keep parent spinning 
 
-  const progress = [];
-
-
-  if ( process.platform == "win32" ) {
+  /**
+  if ( process.platform === "win32" ) {
     execSync("pause press");
   }
+  **/
+
+  const progress = [];
 
   while(true) {
-    process.stdout.write(`\rInstalling: ${progress.join('.')}`);
-    await sleep(Math.round(Math.random()*100));
-    if ( state != 'pending' ) {
-      console.log('Installed!');
+    if ( !subprocess.connected || message == 'App started.' ) {
       break;
     }
-    if ( !subprocess.connected ) {
-      console.log('Installed!');
-      break;
+
+    if ( state == 'pending' ) {
+      console.log('OK');
+      process.stdout.clearLine();
+      process.stdout.cursorTo(0);
+      process.stdout.write(`Waiting for your system security checks: ${progress.join('.')}`);
     }
+
+    await sleep(Math.round(Math.random()*370));
+
     progress.push('');
   }
 
-  console.log('Installer exiting...');
-  await sleep(10000);
-  //await untilConnected(`http://localhost:${chrome_port}`);
-  process.exit(0);
+  if ( message == 'App started.' ) {
+    console.log('Launcher exiting successfully...');
+    await sleep(15000);
+    process.exit(0);
+  } else {
+    console.log('Launcher failed. Exiting...');
+    process.exit(1);
+  }
 }
 
 async function untilConnected(url) {
