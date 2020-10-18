@@ -105,7 +105,6 @@ async function start() {
     }
 
     if ( state == 'pending' ) {
-      console.log('OK');
       process.stdout.clearLine();
       process.stdout.cursorTo(0);
       process.stdout.write(`Waiting for your system security checks: ${progress.join('.')}`);
@@ -121,7 +120,9 @@ async function start() {
     await sleep(15000);
     process.exit(0);
   } else {
+    console.info(message, state);
     console.log('Launcher failed. Exiting...');
+    await sleep(15000);
     process.exit(1);
   }
 }
