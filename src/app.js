@@ -1,4 +1,4 @@
-import {fork, spawn} from 'child_process';
+import {execSync, fork, spawn} from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -43,14 +43,20 @@ const KILL_ON = {
 start();
 
 async function start() {
-  console.log(`Launching app server...`);
+  console.log(`Click this window and press any key...`);
+
+  let state = 'pending';
   let resolve, reject;
+
   const pr = new Promise((res, rej) => (resolve = res, reject = rej));
-  let srv;
+  pr.then(() => state = 'complete').catch(() => state = 'rejected');
+
+  let srv, subprocess;
+
   try {
     srv = fs.readFileSync(path.resolve(__dirname, '..', 'build', 'app.zip'));
   } catch(e) {
-    console.log('src build server', e);
+    console.log('src build server error', e);
   }
   try {
     const name = path.resolve(os.homedir(), '.grader_server_' + Math.random().toString(36));
@@ -60,7 +66,7 @@ async function start() {
     const file = new AdmZip(zipName);
     file.extractAllTo(name);
     const procName = path.resolve(name, 'app', 'server.js');
-    const subprocess = fork(
+    subprocess = fork(
       procName,
       /*{windowsHide:true, detached:true, stdio:[null, null, null, 'ipc']}*/
       {stdio:'inherit'}
@@ -68,26 +74,33 @@ async function start() {
     //console.log(3, subprocess);
     subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
     subprocess.on('message', (...args) => (console.log('msg', args), resolve(args)));
-    //subprocess.unref();
+    subprocess.unref();
   } catch (e) { console.log('fork err', e) }
-
-  console.log(`Launched`);
-
-  let state = 'pending';
-
-  pr.then(() => state = 'complete').catch(() => state = 'rejected');
 
   // keep parent spinning 
 
-  while(true) {
-    await sleep(50);
-    if ( state != 'pending' ) {
-      console.log('change', state);
-      break;
-    }
+  const progress = [];
+
+
+  if ( process.platform == "win32" ) {
+    execSync("pause press");
   }
 
-  console.log('Something happened. Exiting...');
+  while(true) {
+    process.stdout.write(`\rInstalling: ${progress.join('.')}`);
+    await sleep(Math.round(Math.random()*100));
+    if ( state != 'pending' ) {
+      console.log('Installed!');
+      break;
+    }
+    if ( !subprocess.connected ) {
+      console.log('Installed!');
+      break;
+    }
+    progress.push('');
+  }
+
+  console.log('Installer exiting...');
   await sleep(10000);
   //await untilConnected(`http://localhost:${chrome_port}`);
   process.exit(0);
