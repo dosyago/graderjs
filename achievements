@@ -3,6 +3,13 @@
 - write the server.js and website zip to a temp directory 
 - unzip the website zip
 - start the server
+- refactor to have app as a launch process for a fatter server. app closes quickly, leaving no trace of console.
+- test this on windows and linux (ubuntu vnc)
+
+DONE! :p :) xxx
+
+I FUCKING ROCK OO RAAA OOO YEAH ;p ;) xx
+
 
 
 FUCK YEAH I AM AWESOME!!! :p ;) xx

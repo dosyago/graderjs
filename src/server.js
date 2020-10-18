@@ -16,11 +16,15 @@ import {DEBUG, context, sleep, NO_SANDBOX} from './lib/common.js';
 const {server_port, chrome_port} = args;
 
 const CHROME_OPTS = !NO_SANDBOX ? [
+  `--new-window`,
+  `--no-first-run`,
   `--app=http://localhost:${server_port}`,
   '--restore-last-session',
   `--disk-cache-dir=${args.temp_browser_cache()}`,
   `--aggressive-cache-discard`
 ] : [
+  `--new-window`,
+  `--no-first-run`,
   `--app=http://localhost:${server_port}`,
   '--restore-last-session',
   `--disk-cache-dir=${args.temp_browser_cache()}`,
