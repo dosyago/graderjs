@@ -7,8 +7,6 @@ const AdmZip = require('adm-zip');
 
 const file = new AdmZip();
 
-console.log("HELLO");
-
 file.addLocalFile(path.resolve(__dirname, '..', 'src', 'build', 'server.js'), 'app');
 file.addLocalFolder(path.resolve(__dirname, '..', 'src', 'public'), 'app/public');
 
