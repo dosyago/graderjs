@@ -1,5 +1,8 @@
+- write documentation about how to use grader to build cross-platform apps
+
 - handle case where a server process still exists form last launch (kill it? probably.)
 - handle cleanup (delete temp dir, etc)
+- clean up code and remove most of it
 
 
 

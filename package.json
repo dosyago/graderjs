@@ -7,6 +7,7 @@
     "myapp": "build/grader.js"
   },
   "scripts": {
+    "postinstall": "bash ./scripts/build_setup.sh",
     "start": "node src/index.js",
     "build": "npm run bundle && npm run pack-binary",
     "bundle": "npx webpack",
