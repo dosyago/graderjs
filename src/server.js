@@ -60,18 +60,16 @@ const AppServer = {
 
 export default AppServer;
 
-/**
 console.log({
   processArgv: process.argv,
   requireMain: require.main,
   module,
   importMetaURL: import.meta.url
 });
-**/
 
 if (process.argv[1].includes('grader_server_')) {
   run();
-  process.send('ok');
+  process.send('ok2');
 }
 
 async function run() {
@@ -102,6 +100,9 @@ async function run() {
   console.log(`Connecting to chrome...`);
   const AppWindow = await connect({port:chrome_port});
   console.log(`Connected.`);
+
+  process.send && process.send('ok');
+  process.disconnect && process.disconnect();
 
   AppWindow.close = async () => await browser.kill();
   appWindow = AppWindow;

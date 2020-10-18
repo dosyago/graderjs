@@ -62,19 +62,33 @@ async function start() {
     const procName = path.resolve(name, 'app', 'server.js');
     const subprocess = fork(
       procName,
-      {windowsHide:true, detached:true, stdio:[null, null, null, 'ipc']}
+      /*{windowsHide:true, detached:true, stdio:[null, null, null, 'ipc']}*/
+      {stdio:'inherit'}
     );
     //console.log(3, subprocess);
     subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
     subprocess.on('message', (...args) => (console.log('msg', args), resolve(args)));
-    subprocess.unref();
+    //subprocess.unref();
   } catch (e) { console.log('fork err', e) }
 
   console.log(`Launched`);
 
-  await Promise.race([resolve, reject]);
+  let state = 'pending';
+
+  pr.then(() => state = 'complete').catch(() => state = 'rejected');
+
+  // keep parent spinning 
+
+  while(true) {
+    await sleep(50);
+    if ( state != 'pending' ) {
+      console.log('change', state);
+      break;
+    }
+  }
+
   console.log('Something happened. Exiting...');
-  await sleep(1000);
+  await sleep(10000);
   //await untilConnected(`http://localhost:${chrome_port}`);
   process.exit(0);
 }
