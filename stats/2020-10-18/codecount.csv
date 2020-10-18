@@ -1,4 +1,4 @@
-language,filename,blank,comment,code,"github.com/AlDanial/cloc v 1.81  T=0.01 s (1068.6 files/s, 49654.0 lines/s)"
+language,filename,blank,comment,code,"github.com/AlDanial/cloc v 1.81  T=0.02 s (1064.4 files/s, 43952.2 lines/s)"
 JavaScript,./src/server.js,37,14,137
 JavaScript,./src/lib/protocol.js,19,1,113
 JavaScript,./src/app.js,24,1,100
@@ -11,7 +11,9 @@ Bourne Shell,./scripts/compile.sh,13,7,13
 Bourne Shell,./scripts/upload.sh,4,0,10
 JavaScript,./scripts/webzip.js,8,0,9
 Bourne Shell,./scripts/build_setup.sh,3,0,8
-JavaScript,./src/index.js,0,0,2
-JavaScript,./src/test_server.js,0,0,2
 YAML,./.github/FUNDING.yml,1,1,2
-SUM,,137,27,533
+JavaScript,./src/index.js,0,0,2
+JavaScript,./src/build/server.js,0,1,2
+JavaScript,./src/test_server.js,0,0,2
+JavaScript,./build/grader.js,0,0,2
+SUM,,137,28,537
