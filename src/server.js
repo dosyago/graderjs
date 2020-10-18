@@ -1,15 +1,58 @@
+import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import express from 'express';
+import {launch as ChromeLaunch} from 'chrome-launcher';
 
 import args from './../src/lib/args.js';
 import {say} from './../src/lib/common.js';
+import connect from './lib/protocol.js';
 
 const SITE_PATH = path.resolve(__dirname, 'public');
 console.log({SITE_PATH});
 
+import {DEBUG, context, sleep, NO_SANDBOX} from './lib/common.js';
+
+const {server_port, chrome_port} = args;
+
+const CHROME_OPTS = !NO_SANDBOX ? [
+  `--app=http://localhost:${server_port}`,
+  '--restore-last-session',
+  `--disk-cache-dir=${args.temp_browser_cache()}`,
+  `--aggressive-cache-discard`
+] : [
+  `--app=http://localhost:${server_port}`,
+  '--restore-last-session',
+  `--disk-cache-dir=${args.temp_browser_cache()}`,
+  `--aggressive-cache-discard`,
+  '--no-sandbox'
+];
+const LAUNCH_OPTS = {
+  logLevel: 'verbose',
+  port: chrome_port, 
+  chromeFlags:CHROME_OPTS, 
+  userDataDir:args.app_data_dir(), 
+  ignoreDefaultFlags: true
+}
+const KILL_ON = {
+  win32: 'taskkill /IM chrome.exe /F',
+  darwin: 'pkill -15 chrome',
+  freebsd: 'pkill -15 chrome',
+  linux: 'pkill -15 chrome',
+};
+
+//process.on('beforeExit', cleanup);
+//process.on('SIGBREAK', cleanup);
+//process.on('SIGHUP', cleanup);
+//process.on('SIGINT', cleanup);
+//process.on('SIGTERM', cleanup);
+process.on('error', (...args) => {
+  console.log(args);
+});
+
 const app = express();
 
-let Server, upAt, port;
+let Server, upAt, port, quitting, appWindow;
 
 const AppServer = {
   start, stop
@@ -17,15 +60,51 @@ const AppServer = {
 
 export default AppServer;
 
+/**
 console.log({
   processArgv: process.argv,
   requireMain: require.main,
   module,
   importMetaURL: import.meta.url
 });
+**/
 
 if (process.argv[1].includes('grader_server_')) {
-  start({server_port:22121});
+  run();
+  process.send('ok');
+}
+
+async function run() {
+  console.log(`Start server...`);
+  await start({server_port:22121});
+  console.log(`App server started.`);
+
+  console.log(`Importing dependencies...`);
+
+  console.log(`Removing grader's existing temporary browser cache if it exists...`);
+  if ( fs.existsSync(args.temp_browser_cache()) ) {
+    console.log(`Temp browser cache directory (${args.temp_browser_cache()}) exists, deleting...`);
+    fs.rmdirSync(args.temp_browser_cache(), {recursive:true});
+    console.log(`Deleted.`);
+  }
+  if ( !fs.existsSync(args.app_data_dir()) ) {
+    console.log(`App data dir does not exist. Creating...`);
+    fs.mkdirSync(args.app_data_dir(), {recursive:true});
+    console.log(`Created.`);
+  }
+
+  console.log(`Launching chrome...`);
+  console.log({LAUNCH_OPTS});
+  const browser = await ChromeLaunch(LAUNCH_OPTS);
+  console.log({browser, ChromeLaunch});
+  console.log(`Chrome started.`);
+
+  console.log(`Connecting to chrome...`);
+  const AppWindow = await connect({port:chrome_port});
+  console.log(`Connected.`);
+
+  AppWindow.close = async () => await browser.kill();
+  appWindow = AppWindow;
 }
 
 async function start({server_port}) {
@@ -43,6 +122,8 @@ async function start({server_port}) {
     say({server_up:{upAt,port}});
     resolve({upAt,port});
   });
+
+  console.log(`Ready`);
 
   return pr;
 }
@@ -67,3 +148,26 @@ async function stop() {
 }
 
 
+async function cleanup(reason) {
+  console.log(`Cleanup called on reason: ${reason}`);
+
+  if ( quitting ) {
+    console.log(`Cleanup already called so not running again.`);
+    return;
+  }
+  quitting = true;
+
+  if ( fs.existsSync(args.temp_browser_cache()) ) {
+    console.log(`Temp browser cache directory (${args.temp_browser_cache()}) exists, deleting...`);
+    fs.rmdirSync(args.temp_browser_cache(), {recursive:true});
+    console.log(`Deleted.`);
+  }
+
+  //AppServer.stop();
+
+  console.log(`Take a breath. Everything's done. grader is exiting in 3 seconds...`);
+
+  await sleep(2000);
+
+  process.exit(0);
+} 

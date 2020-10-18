@@ -1,0 +1,5 @@
+- refactor to have app as a launch process for a fatter server. app closes quickly, leaving no trace of console.
+- test this on windows and linux (ubuntu vnc)
+
+differentiate from pkg and nexe via:
+- support .node imports (binaries natives)
