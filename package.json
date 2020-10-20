@@ -7,6 +7,7 @@
     "myapp": "build/grader.js"
   },
   "scripts": {
+    "stats": "npm run clean || : && rm -rf node_modules || : && getstats && cat stats/* || :",
     "postinstall": "bash ./scripts/build_setup.sh",
     "start": "node -r esm src/app.js",
     "build": "npm run bundle && npm run pack-binary",
@@ -21,7 +22,9 @@
     "pack-binary-32": "npx nexe -t windows-x32 -o bin/grader.win32.exe -i build/grader.js -r \"./build/*\" && npx nexe -t linux-x32 -o bin/grader.nix32 -i build/grader.js -r \"./build/*\"",
     "clean": "rm -rf build/ bin/ src/build/ || : && mkdir -p build && mkdir -p bin && mkdir -p src/build",
     "pack": "upx bin/grader*",
-    "test": "node-dev -r esm src/app.js"
+    "test": "node-dev -r esm src/app.js",
+    "lint": "eslint 'src/**/*.js'",
+    "tsc": "tsc --types node --target ES2020 --checkJs --allowJs --outFile build/server-types.js  --module System src/app.js decs.d.ts"
   },
   "repository": {
     "type": "git",
@@ -55,9 +58,13 @@
     "ws": "latest"
   },
   "devDependencies": {
+    "@types/express": "^4.17.8",
+    "@types/node-fetch": "^2.5.7",
+    "@types/websocket": "^1.0.1",
     "eslint": "^7.11.0",
     "nexe": "latest",
     "node-dev": "latest",
+    "typescript": "^4.0.3",
     "webpack": "latest",
     "webpack-cli": "latest"
   }
