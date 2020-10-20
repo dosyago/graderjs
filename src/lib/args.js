@@ -10,7 +10,7 @@ export const chrome_port = process.argv[3] || DCP;
 
 const Pref = {};
 const pref_file = path.resolve(os.homedir(), '.grader.config.json');
-const cacheId = Math.random().toString('36');
+const cacheId = Math.random().toString(36);
 
 loadPref();
 
@@ -57,7 +57,7 @@ function getBasePath() {
 function loadPref() {
   if ( fs.existsSync(pref_file) ) {
     try {
-      Object.assign(Pref, JSON.parse(fs.readFileSync(pref_file)));
+      Object.assign(Pref, JSON.parse(fs.readFileSync(pref_file).toString('utf-8')));
     } catch(e) {
       console.warn("Error reading from preferences file", e);
     }

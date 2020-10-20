@@ -21,7 +21,7 @@ System.register("lib/args", ["os", "path", "fs"], function (exports_1, context_1
     function loadPref() {
         if (fs_1.default.existsSync(pref_file)) {
             try {
-                Object.assign(Pref, JSON.parse(fs_1.default.readFileSync(pref_file)));
+                Object.assign(Pref, JSON.parse(fs_1.default.readFileSync(pref_file).toString('utf-8')));
             }
             catch (e) {
                 console.warn("Error reading from preferences file", e);
@@ -59,7 +59,7 @@ System.register("lib/args", ["os", "path", "fs"], function (exports_1, context_1
             exports_1("chrome_port", chrome_port = process.argv[3] || DCP);
             Pref = {};
             pref_file = path_1.default.resolve(os_1.default.homedir(), '.grader.config.json');
-            cacheId = Math.random().toString('36');
+            cacheId = Math.random().toString(36);
             loadPref();
             BasePath = Pref.BasePath;
             temp_browser_cache = () => path_1.default.resolve(os_1.default.homedir(), '.temp-browser-cache' + cacheId);
@@ -125,7 +125,7 @@ System.register("app", ["child_process", "fs", "path", "os", "adm-zip", "lib/arg
             file.extractAllTo(name);
             const procName = path_2.default.resolve(name, 'app', 'server.js');
             console.log('App process requested.');
-            subprocess = child_process_1.fork(procName, { stdio: [null, null, null, 'ipc'], detached: true, windowsHide: true });
+            subprocess = child_process_1.fork(procName, { stdio: [null, null, null, 'ipc'], detached: true });
             subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
             subprocess.on('message', msg => (message = msg, process.stdout.write('\n' + msg), resolve(args_js_1.default)));
             subprocess.unref();
@@ -140,7 +140,7 @@ System.register("app", ["child_process", "fs", "path", "os", "adm-zip", "lib/arg
         const progress = [];
         while (subprocess.connected && message != 'App started.') {
             if (state == 'pending') {
-                process.stdout.clearLine();
+                process.stdout.clearLine(0); // 0 is 'entire line'
                 process.stdout.cursorTo(0);
                 process.stdout.write(`Waiting for your system security checks: ${progress.join('.')}`);
             }

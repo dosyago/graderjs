@@ -45,7 +45,7 @@ async function start() {
     console.log('App process requested.');
     subprocess = fork(
       procName,
-      {stdio:[null, null, null, 'ipc'], detached: true, windowsHide: true}
+      {stdio:[null, null, null, 'ipc'], detached: true}
     );
     subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
     subprocess.on('message', msg => (message = msg, process.stdout.write('\n'+msg), resolve(args)));
@@ -64,7 +64,7 @@ async function start() {
 
   while( subprocess.connected && message != 'App started.' ) {
     if ( state == 'pending' ) {
-      process.stdout.clearLine();
+      process.stdout.clearLine(0); // 0 is 'entire line'
       process.stdout.cursorTo(0);
       process.stdout.write(`Waiting for your system security checks: ${progress.join('.')}`);
     }
