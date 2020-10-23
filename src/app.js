@@ -45,7 +45,9 @@ async function start() {
     console.log('Preparing app data directory.');
     const name = path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`);
     const zipName = path.resolve(name, 'app.zip');
-    fs.mkdirSync(name, {recursive:true});
+    if ( ! fs.existsSync(name) ) {
+      fs.mkdirSync(name, {recursive:true});
+    }
     fs.writeFileSync(zipName, srv);
 
     console.log('Inflating app contents.');
@@ -53,10 +55,15 @@ async function start() {
     file.extractAllTo(name);
     const procName = path.resolve(name, 'app', 'service.js');
 
+    console.log({procName});
+
     console.log('App process requested.');
     subprocess = fork(
       procName,
+      /*
       {stdio:[null, null, null, 'ipc'], detached: true}
+      */
+      {stdio:'inherit'}
     );
     subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
     subprocess.on('message', msg => (message = msg, process.stdout.write('\n'+msg), resolve(args)));
