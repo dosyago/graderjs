@@ -20,14 +20,14 @@
   const CHROME_OPTS = !NO_SANDBOX ? [
     `--new-window`,
     `--no-first-run`,
-    `--app=http://localhost:${server_port}`,
+    `--app=http://localhost:${service_port}`,
     '--restore-last-session',
     `--disk-cache-dir=${args.temp_browser_cache()}`,
     `--aggressive-cache-discard`
   ] : [
     `--new-window`,
     `--no-first-run`,
-    `--app=http://localhost:${server_port}`,
+    `--app=http://localhost:${service_port}`,
     '--restore-last-session',
     `--disk-cache-dir=${args.temp_browser_cache()}`,
     `--aggressive-cache-discard`,
@@ -65,9 +65,9 @@
       });
       **/
 
-    if (process.argv[1].includes('grader_server_')) {     // our startup cue
+    if (process.argv[1].includes('grader_service_')) {     // our startup cue
       process.send('Request app start.');
-      run();
+      run(app);
     }
   }
 
@@ -77,7 +77,7 @@
       console.log(`Start service...`);
       process.send('Request service start.');
 
-      const {service, port, upAt} = await start({app, desiredPort:22121});
+      const {service} = await start({app, desiredPort:22121});
 
       process.send('Server started.');
       console.log(`App service started.`);
@@ -120,12 +120,11 @@
   }
 
   async function start({app, desiredPort}) {
-    let server, port, upAt;
-    let resolve, reject;
+    let upAt, resolve, reject;
     const pr = new Promise((res, rej) => (resolve = res, reject = rej));
 
-    port = desiredPort;
-    addHandlers();
+    let port = desiredPort;
+    addHandlers(app);
 
     const service = app.listen(Number(port), err => {
       if ( err ) { 
@@ -142,30 +141,29 @@
   }
 
 // helper functions
-  function addHandlers() {
+  function addHandlers(app) {
     app.use(express.urlencoded({extended:true}));
     app.use(express.static(SITE_PATH));
   }
 
-  async function stop() {
-    let resolve;
-    const pr = new Promise(res => resolve = res);
+  function installCleanupHandlers({ui, bg}) {
+    // someone closed the browser window
+    ui.socket.on('close', async () => {
+      await stop(bg);
+    });
+  }
+
+  async function stop(bg) {
+    const serviceTerminator = createHttpTerminator({
+      server:bg,
+      gracefulTerminatorTimeout: 1000
+    });
 
     say({service:`Closing service...`});
 
-    Server.close(() => {
-      say({server:`Server closed.`});
-      resolve();
-    });
+    await serviceTerminator.terminate();
 
-    return pr;
-  }
-
-  function installCleanupHandlers({ui, bg}) {
-    // someone closed the browser window
-    ui.socket.on('close', () => {
-      
-    });
+    say({service:'Closed'});
   }
 
 // saved code

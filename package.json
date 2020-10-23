@@ -22,7 +22,7 @@
     "pack-binary-32": "npx nexe -t windows-x32 -o bin/grader.win32.exe -i build/grader.js -r \"./build/*\" && npx nexe -t linux-x32 -o bin/grader.nix32 -i build/grader.js -r \"./build/*\"",
     "clean": "rm -rf build/ bin/ src/build/ || : && mkdir -p build && mkdir -p bin && mkdir -p src/build",
     "pack": "upx bin/grader*",
-    "test": "node-dev -r esm src/app.js",
+    "test": "npm run bundle && node src/build/grader.js",
     "lint": "eslint 'src/**/*.js'",
     "tsc": "tsc --types node --target ES2020 --checkJs --allowJs --outFile build/server-types.js  --module System src/app.js decs.d.ts"
   },
@@ -54,6 +54,7 @@
     "chrome-launcher": "latest",
     "esm": "latest",
     "express": "latest",
+    "http-terminator": "^2.0.3",
     "node-fetch": "latest",
     "ws": "latest"
   },
@@ -67,6 +68,6 @@
     "node-dev": "latest",
     "typescript": "^4.0.3",
     "webpack": "latest",
-    "webpack-cli": "latest"
+    "webpack-cli": "^4.1.0"
   }
 }

@@ -2,10 +2,10 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-  entry: "./server.js",
+  entry: "./service.js",
   output: {
     path: path.resolve(__dirname, 'build'),
-    filename: "server.js"
+    filename: "service.js"
   },
   target: "node",
   node: {

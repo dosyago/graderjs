@@ -28,11 +28,11 @@ async function start() {
   try {
     srv = fs.readFileSync(path.resolve(__dirname, '..', 'build', 'app.zip'));
   } catch(e) {
-    console.log('src build server error', e);
+    console.log('src build service error', e);
   }
   try {
     console.log('Preparing temp data directory.');
-    const name = path.resolve(os.homedir(), '.grader_server_' + Math.random().toString(36));
+    const name = path.resolve(os.homedir(), '.grader_service_' + Math.random().toString(36));
     const zipName = path.resolve(name, 'app.zip');
     fs.mkdirSync(name, {recursive:true});
     fs.writeFileSync(zipName, srv);
@@ -40,7 +40,7 @@ async function start() {
     console.log('Inflating app contents.');
     const file = new AdmZip(zipName);
     file.extractAllTo(name);
-    const procName = path.resolve(name, 'app', 'server.js');
+    const procName = path.resolve(name, 'app', 'service.js');
 
     console.log('App process requested.');
     subprocess = fork(
@@ -81,7 +81,7 @@ async function start() {
     process.exit(0);
   } else {
     console.error('Error at', message);
-    console.info('Check state', state);
+    console.info('Check state', state, 'subprocess.connected', subprocess.connected);
     console.log('Launcher failed. Exiting in 15 seconds...');
     await sleep(15000);
     process.exit(1);
