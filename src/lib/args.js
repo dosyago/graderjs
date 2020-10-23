@@ -5,8 +5,8 @@ import fs from 'fs';
 const DSP = 22121;
 const DCP = 8222;
 
-export const server_port = process.env.PORT || process.argv[2] || DSP;
-export const chrome_port = process.argv[3] || DCP;
+export const service_port = process.env.PORT || process.argv[2] || DSP;
+export const ui_port = process.argv[3] || DCP;
 
 const Pref = {};
 const pref_file = path.resolve(os.homedir(), '.grader.config.json');
@@ -18,13 +18,11 @@ let BasePath = Pref.BasePath;
 const temp_browser_cache = () => path.resolve(os.homedir(), '.temp-browser-cache' + cacheId);
 const app_data_dir = () => path.resolve(os.homedir(), '.app-data');
 
-//console.log(`Args usage: <server_port> <chrome_port> <... other args>`);
-
 updateBasePath(process.argv[5] || Pref.BasePath || os.homedir());
 
 const args = {
-  server_port, 
-  chrome_port,
+  service_port, 
+  ui_port,
   updateBasePath,
   getBasePath,
   temp_browser_cache,
