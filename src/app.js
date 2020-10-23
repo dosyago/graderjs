@@ -5,6 +5,7 @@ import os from 'os';
 
 import AdmZip from 'adm-zip';
 
+import CONFIG from './config.js';
 import args from './lib/args.js';
 import {say, sleep} from './lib/common.js';
 
@@ -42,7 +43,8 @@ async function start() {
   }
   try {
     console.log('Preparing temp data directory.');
-    const name = path.resolve(os.homedir(), '.grader_service_' + Math.random().toString(36));
+    // need to think about this
+    const name = path.resolve(os.homedir(), '.grader', `service_${CONFIG.name}` + Math.random().toString(36));
     const zipName = path.resolve(name, 'app.zip');
     fs.mkdirSync(name, {recursive:true});
     fs.writeFileSync(zipName, srv);

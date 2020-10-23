@@ -1,8 +1,9 @@
-- handle case where a server process still exists form last launch (kill it? probably.)
+- Decide how to handle config, names, folders of different apps
+- perf: try keeping the chrome profile dir (per app), and experiment with cache dir as temp or persistent. Also try opening chrome earlier and using DevTools if needed as fallback to make it load the UI
+- global $HOME/.grader directory for all grader apps, installs and configs
+- write config (grader.config.js) spec to set your app name, etc etc
 - handle cleanup (delete temp dir, etc)
 - handle picking a random port that's available
-- perf: try keeping the chrome profile dir (per app), and experiment with cache dir as temp or persistent. Also try opening chrome earlier and using DevTools if needed as fallback to make it load the UI
-- write config (grader.config.js) spec to set your app name, etc etc
 - put archivist in this framework.
 - write documentation about how to use grader to build cross-platform apps (grader-create-app ?)
 
