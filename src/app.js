@@ -6,11 +6,7 @@ import os from 'os';
 import AdmZip from 'adm-zip';
 
 import args from './lib/args.js';
-import {sleep} from './lib/common.js';
-
-process.on('error', (...args) => {
-  console.log(args);
-});
+import {say, sleep} from './lib/common.js';
 
 start();
 
@@ -24,6 +20,20 @@ async function start() {
   pr.then(() => state = 'complete').catch(() => state = 'rejected');
 
   let srv, subprocess, message;
+
+  // cleanup
+    const killService = (e) => {
+      subprocess.kill();
+      console.log();
+      say({exitTrigger:e});
+      process.exit(1);
+    }
+
+    process.on('SIGINT', killService);
+    process.on('SIGQUIT', killService);
+    process.on('SIGTSTP', killService);
+    process.on('SIGHUP', killService);
+    process.on('error', killService);
 
   try {
     srv = fs.readFileSync(path.resolve(__dirname, '..', 'build', 'app.zip'));
@@ -82,8 +92,8 @@ async function start() {
   } else {
     console.error('Error at', message);
     console.info('Check state', state, 'subprocess.connected', subprocess.connected);
-    console.log('Launcher failed. Exiting in 15 seconds...');
-    await sleep(15000);
+    console.log('Launcher failed. Exiting in 5 seconds...');
+    await sleep(5000);
     process.exit(1);
   }
 }

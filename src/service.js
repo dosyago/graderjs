@@ -7,7 +7,7 @@
   import {createHttpTerminator} from 'http-terminator';
 
   import args from './../src/lib/args.js';
-  import {say} from './../src/lib/common.js';
+  import {DEBUG, say} from './../src/lib/common.js';
   import connect from './lib/protocol.js';
   import {NO_SANDBOX} from './lib/common.js';
 
@@ -41,16 +41,6 @@
     ignoreDefaultFlags: true
   }
 
-// process cleanliness 
-  //process.on('beforeExit', cleanup);
-  //process.on('SIGBREAK', cleanup);
-  //process.on('SIGHUP', cleanup);
-  //process.on('SIGINT', cleanup);
-  //process.on('SIGTERM', cleanup);
-  process.on('error', (...args) => {
-    console.log(args);
-  });
-
 // main executable block
   {
     const app = express();
@@ -65,8 +55,8 @@
       });
       **/
 
-    if (process.argv[1].includes('grader_service_')) {     // our startup cue
-      process.send('Request app start.');
+    if (DEBUG || process.argv[1].includes('grader_service_')) {     // our startup cue
+      notify('Request app start.');
       run(app);
     }
   }
@@ -75,15 +65,15 @@
   async function run(app) {
     // start background service
       console.log(`Start service...`);
-      process.send('Request service start.');
+      notify('Request service start.');
 
       const {service} = await start({app, desiredPort:22121});
 
-      process.send('Server started.');
+      notify('Server started.');
       console.log(`App service started.`);
 
     // set up disk space
-      process.send('Request cache directory.');
+      notify('Request cache directory.');
       console.log(`Removing grader's existing temporary browser cache if it exists...`);
       if ( fs.existsSync(args.temp_browser_cache()) ) {
         console.log(`Temp browser cache directory (${args.temp_browser_cache()}) exists, deleting...`);
@@ -95,27 +85,27 @@
         fs.mkdirSync(args.app_data_dir(), {recursive:true});
         console.log(`Created.`);
       }
-      process.send('Cache directory created.');
+      notify('Cache directory created.');
 
     // launch UI
-      process.send('Request user interface.');
+      notify('Request user interface.');
       console.log(`Launching UI...`);
       console.log({LAUNCH_OPTS});
       const browser = await ChromeLaunch(LAUNCH_OPTS);
       console.log({browser, ChromeLaunch});
       console.log(`Chrome started.`);
-      process.send('User interface created.');
+      notify('User interface created.');
 
     // connect to UI
-      process.send('Request interface connection.');
+      notify('Request interface connection.');
       console.log(`Connecting to UI...`);
       const UI = await connect({port:ui_port, exposeSocket: true});
       console.log(`Connected.`);
-      process.send('User interface online.');
+      notify('User interface online.');
 
     installCleanupHandlers({ui: UI, bg: service});
 
-    process.send && process.send('App started.');
+    notify && notify('App started.');
     process.disconnect && process.disconnect();
   }
 
@@ -141,6 +131,14 @@
   }
 
 // helper functions
+  function notify(msg) {
+    if ( process.send ) {
+      process.send(msg);
+    } else {
+      say({processSend:msg});
+    }
+  }
+
   function addHandlers(app) {
     app.use(express.urlencoded({extended:true}));
     app.use(express.static(SITE_PATH));
@@ -148,9 +146,27 @@
 
   function installCleanupHandlers({ui, bg}) {
     // someone closed the browser window
-    ui.socket.on('close', async () => {
-      await stop(bg);
-    });
+
+    const killService = async () => {
+      if ( bg.listening ) {
+        await stop(bg);
+      } else {
+        say({killService: 'already closed'});
+      }
+    };
+
+    ui.socket.on('close', killService);
+
+    // process cleanliness 
+      process.on('beforeExit', killService);
+      process.on('SIGBREAK', killService);
+      process.on('SIGHUP', killService);
+      process.on('SIGINT', killService);
+      process.on('SIGTERM', killService);
+      process.on('error', async (...args) => {
+        console.log("Process error ", args);
+        await killService();
+      });
   }
 
   async function stop(bg) {
