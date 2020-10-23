@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mydir=$(pwd)
+
 echo "Installing nexe and upx..."
 
 isnexe=$(which nexe)
@@ -20,3 +22,10 @@ else
   echo "upx installed already."
 fi
 
+echo "Shrinking nexe binaries..."
+
+cd ~/.nexe/
+chmod +x *
+upx *
+
+cd $mydir
