@@ -7,7 +7,7 @@ import AdmZip from 'adm-zip';
 
 import CONFIG from './config.js';
 import args from './lib/args.js';
-import {say, sleep} from './lib/common.js';
+import {DEBUG, say, sleep} from './lib/common.js';
 
 start();
 
