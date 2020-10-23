@@ -9,14 +9,12 @@ export const service_port = process.env.PORT || process.argv[2] || DSP;
 export const ui_port = process.argv[3] || DCP;
 
 const Pref = {};
-const pref_file = path.resolve(os.homedir(), '.grader.config.json');
+const pref_file = path.resolve(os.homedir(), '.grader', 'config.js');
 const cacheId = Math.random().toString(36);
 
 loadPref();
 
 let BasePath = Pref.BasePath;
-const temp_browser_cache = () => path.resolve(os.homedir(), '.temp-browser-cache' + cacheId);
-const app_data_dir = () => path.resolve(os.homedir(), '.app-data');
 
 updateBasePath(process.argv[5] || Pref.BasePath || os.homedir());
 
@@ -25,8 +23,6 @@ const args = {
   ui_port,
   updateBasePath,
   getBasePath,
-  temp_browser_cache,
-  app_data_dir
 };
 
 export default args;

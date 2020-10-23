@@ -42,9 +42,8 @@ async function start() {
     console.log('src build service error', e);
   }
   try {
-    console.log('Preparing temp data directory.');
-    // need to think about this
-    const name = path.resolve(os.homedir(), '.grader', `service_${CONFIG.name}` + Math.random().toString(36));
+    console.log('Preparing app data directory.');
+    const name = path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`);
     const zipName = path.resolve(name, 'app.zip');
     fs.mkdirSync(name, {recursive:true});
     fs.writeFileSync(zipName, srv);
