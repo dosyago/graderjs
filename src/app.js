@@ -5,8 +5,9 @@ import os from 'os';
 
 import AdmZip from 'adm-zip';
 
+import CONFIG from './config.js';
 import args from './lib/args.js';
-import {say, sleep} from './lib/common.js';
+import {DEBUG, say, sleep} from './lib/common.js';
 
 start();
 
@@ -41,10 +42,12 @@ async function start() {
     console.log('src build service error', e);
   }
   try {
-    console.log('Preparing temp data directory.');
-    const name = path.resolve(os.homedir(), '.grader_service_' + Math.random().toString(36));
+    console.log('Preparing app data directory.');
+    const name = path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`);
     const zipName = path.resolve(name, 'app.zip');
-    fs.mkdirSync(name, {recursive:true});
+    if ( ! fs.existsSync(name) ) {
+      fs.mkdirSync(name, {recursive:true});
+    }
     fs.writeFileSync(zipName, srv);
 
     console.log('Inflating app contents.');
@@ -55,7 +58,10 @@ async function start() {
     console.log('App process requested.');
     subprocess = fork(
       procName,
-      {stdio:[null, null, null, 'ipc'], detached: true}
+      !DEBUG ? 
+        {stdio:[null, null, null, 'ipc'], detached: true}
+      :
+        {stdio:'inherit'}
     );
     subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
     subprocess.on('message', msg => (message = msg, process.stdout.write('\n'+msg), resolve(args)));

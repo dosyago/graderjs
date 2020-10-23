@@ -1,6 +1,6 @@
 // imports
   import fs from 'fs';
-  //FFFimport os from 'os';
+  import os from 'os';
   import path from 'path';
   import express from 'express';
   import {launch as ChromeLaunch} from 'chrome-launcher';
@@ -10,9 +10,12 @@
   import {DEBUG, say} from './../src/lib/common.js';
   import connect from './lib/protocol.js';
   import {NO_SANDBOX} from './lib/common.js';
+  import CONFIG from './config.js'
 
 // constants
   const SITE_PATH = path.resolve(__dirname, 'public');
+  const app_data_dir = () => path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, `ui-data`);
+  const temp_browser_cache = () => path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, `ui-cache`);
   console.log({SITE_PATH});
 
   const {service_port, ui_port} = args;
@@ -22,14 +25,14 @@
     `--no-first-run`,
     `--app=http://localhost:${service_port}`,
     '--restore-last-session',
-    `--disk-cache-dir=${args.temp_browser_cache()}`,
+    `--disk-cache-dir=${temp_browser_cache()}`,
     `--aggressive-cache-discard`
   ] : [
     `--new-window`,
     `--no-first-run`,
     `--app=http://localhost:${service_port}`,
     '--restore-last-session',
-    `--disk-cache-dir=${args.temp_browser_cache()}`,
+    `--disk-cache-dir=${temp_browser_cache()}`,
     `--aggressive-cache-discard`,
     '--no-sandbox'
   ];
@@ -37,7 +40,7 @@
     logLevel: 'verbose',
     port: ui_port, 
     chromeFlags:CHROME_OPTS, 
-    userDataDir:args.app_data_dir(), 
+    userDataDir:app_data_dir(), 
     ignoreDefaultFlags: true
   }
 
@@ -55,7 +58,7 @@
       });
       **/
 
-    if (DEBUG || process.argv[1].includes('grader_service_')) {     // our startup cue
+    if (DEBUG || process.argv[1].includes(`service_${CONFIG.name}`)) {     // our startup cue
       notify('Request app start.');
       run(app);
     }
@@ -74,15 +77,14 @@
 
     // set up disk space
       notify('Request cache directory.');
-      console.log(`Removing grader's existing temporary browser cache if it exists...`);
-      if ( fs.existsSync(args.temp_browser_cache()) ) {
-        console.log(`Temp browser cache directory (${args.temp_browser_cache()}) exists, deleting...`);
-        fs.rmdirSync(args.temp_browser_cache(), {recursive:true});
+      if ( !fs.existsSync(temp_browser_cache()) ) {
+        console.log(`Temp browser cache directory does not exist. Creating...`);
+        fs.mkdirSync(temp_browser_cache(), {recursive:true});
         console.log(`Deleted.`);
       }
-      if ( !fs.existsSync(args.app_data_dir()) ) {
+      if ( !fs.existsSync(app_data_dir()) ) {
         console.log(`App data dir does not exist. Creating...`);
-        fs.mkdirSync(args.app_data_dir(), {recursive:true});
+        fs.mkdirSync(app_data_dir(), {recursive:true});
         console.log(`Created.`);
       }
       notify('Cache directory created.');
@@ -182,29 +184,3 @@
     say({service:'Closed'});
   }
 
-// saved code
-  /*
-    async function cleanup(reason) {
-      console.log(`Cleanup called on reason: ${reason}`);
-
-      if ( quitting ) {
-        console.log(`Cleanup already called so not running again.`);
-        return;
-      }
-      quitting = true;
-
-      if ( fs.existsSync(args.temp_browser_cache()) ) {
-        console.log(`Temp browser cache directory (${args.temp_browser_cache()}) exists, deleting...`);
-        fs.rmdirSync(args.temp_browser_cache(), {recursive:true});
-        console.log(`Deleted.`);
-      }
-
-      service.close();
-
-      console.log(`Take a breath. Everything's done. grader is exiting in 3 seconds...`);
-
-      await sleep(2000);
-
-      process.exit(0);
-    } 
-  */
