@@ -184,29 +184,3 @@
     say({service:'Closed'});
   }
 
-// saved code
-  /*
-    async function cleanup(reason) {
-      console.log(`Cleanup called on reason: ${reason}`);
-
-      if ( quitting ) {
-        console.log(`Cleanup already called so not running again.`);
-        return;
-      }
-      quitting = true;
-
-      if ( fs.existsSync(args.temp_browser_cache()) ) {
-        console.log(`Temp browser cache directory (${args.temp_browser_cache()}) exists, deleting...`);
-        fs.rmdirSync(args.temp_browser_cache(), {recursive:true});
-        console.log(`Deleted.`);
-      }
-
-      service.close();
-
-      console.log(`Take a breath. Everything's done. grader is exiting in 3 seconds...`);
-
-      await sleep(2000);
-
-      process.exit(0);
-    } 
-  */

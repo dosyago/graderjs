@@ -6,6 +6,12 @@
 - refactor to have app as a launch process for a fatter server. app closes quickly, leaving no trace of console.
 - test this on windows and linux (ubuntu vnc)
 - clean up code and remove most of it
+- Decide how to handle config, names, folders of different apps
+- perf: try keeping the chrome profile dir (per app), and experiment with cache dir as temp or persistent. Also try opening chrome earlier and using DevTools if needed as fallback to make it load the UI
+- global $HOME/.grader directory for all grader apps, installs and configs
+
+FUCK YEAH I'M AWESOME
+
 
 DONE! :p :) xxx
 
