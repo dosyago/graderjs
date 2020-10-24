@@ -21,7 +21,7 @@ async function launchApp() {
     const pr = new Promise((res, rej) => (resolve = res, reject = rej));
     pr.then(() => state = 'complete').catch(() => state = 'rejected');
 
-  let appBundle, subprocess, message;
+  let appBundle, subprocess, message = '';
 
   // cleanup
     const killService = (e) => {
@@ -83,7 +83,7 @@ async function launchApp() {
   // keep this process spinning while we track startup progress
     const progress = [];
 
-    while( subprocess.connected && message != 'App started.' ) {
+    while( subprocess.connected && !message.startsWith('App started.') ) {
       if ( state == 'pending' ) {
         process.stdout.clearLine(0); // 0 is 'entire line'
         process.stdout.cursorTo(0);
@@ -98,8 +98,13 @@ async function launchApp() {
     console.log('');
 
   // report the outcome
-    if ( message == 'App started.' ) {
+    if ( message.startsWith('App started.') ) {
+      const port = Number(message.split('.')[1].trim());
+      console.log(`Service on port ${port}`);
       console.log('Launcher exiting successfully...');
+      if ( DEBUG ) {
+        await sleep(2000);
+      }
       process.exit(0);
     } else {
       console.error('Error at', message);

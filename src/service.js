@@ -13,6 +13,7 @@
   import CONFIG from './config.js'
 
 // constants
+  const MAX_RETRY = 10;
   const SITE_PATH = path.resolve(__dirname, 'public');
   const app_data_dir = () => path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, `ui-data`);
   const temp_browser_cache = () => path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, `ui-cache`);
@@ -44,6 +45,9 @@
     ignoreDefaultFlags: true
   }
 
+// global variables 
+  let retryCount = 0;
+
 // main executable block
   {
     const app = express();
@@ -70,7 +74,7 @@
       console.log(`Start service...`);
       notify('Request service start.');
 
-      const {service} = await start({app, desiredPort:22121});
+      const {service} = await start({app, desiredPort:CONFIG.desiredPort});
 
       notify('Server started.');
       console.log(`App service started.`);
@@ -107,7 +111,7 @@
 
     installCleanupHandlers({ui: UI, bg: service});
 
-    notify && notify('App started.');
+    notify && notify(`App started. ${service.port}`);
     process.disconnect && process.disconnect();
   }
 
@@ -118,21 +122,34 @@
     let port = desiredPort;
     addHandlers(app);
 
-    const service = app.listen(Number(port), err => {
-      if ( err ) { 
-        reject(err);
+    const service = app.listen(Number(port), async err => {
+      console.log({DEBUG});
+      if ( DEBUG || err ) { 
+        await sleep(10);
+        if ( retryCount++ < MAX_COUNT ) {
+          console.log({retryOpen:{retryCount, DEBUG, err}});
+          const subsequentTry = start({app, desiredPort: randomPort()});
+          subsequentTry.then(resolve).catch(reject);
+        } else {
+          reject({err, message: `Retries exceeded and: ${err}`});
+        }
+        return;
       } 
       upAt = new Date;
       say({serviceUp:{upAt,port}});
       resolve({service, upAt, port});
+      console.log(`Ready`);
     });
-
-    console.log(`Ready`);
 
     return pr;
   }
 
 // helper functions
+  function randomPort() {
+    // choose a port form the dynamic/private range: 49152 - 65535
+    return 49152+Math.round(Math.random()*(65535-49152))
+  }
+
   function notify(msg) {
     if ( process.send ) {
       process.send(msg);
