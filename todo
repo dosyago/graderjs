@@ -1,5 +1,3 @@
-- write config (grader.config.js) spec to set your app name, etc etc
-- handle cleanup (delete temp dir, etc)
 - handle picking a random port that's available
 - put archivist in this framework.
 - write documentation about how to use grader to build cross-platform apps (grader-create-app ?)

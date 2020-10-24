@@ -1,3 +1,5 @@
+Icons
+- add ability to create dmg and add icon, add ability to create windows icon, and mac icon.
 
 differentiate from pkg and nexe via:
 - support .node imports (binaries natives)
