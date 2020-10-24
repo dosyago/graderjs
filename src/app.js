@@ -48,6 +48,7 @@ async function launchApp() {
   try {
     // create the app directory
       console.log('Preparing app data directory.');
+      DEBUG && console.log({DEBUG});
       const name = DEBUG ? 
         path.resolve(__dirname, '..', 'dev')
         :
@@ -55,6 +56,9 @@ async function launchApp() {
       const zipName = path.resolve(name, 'app.zip');
       if ( ! fs.existsSync(name) ) {
         fs.mkdirSync(name, {recursive:true});
+      }
+      if ( fs.existsSync(zipName) ) {
+        fs.unlinkSync(zipName);
       }
 
     // unzip a fresh copy of app from binary every time
@@ -85,6 +89,11 @@ async function launchApp() {
   }
 
   console.log('App process created.');
+
+  /*
+    await sleep(5000);
+    process.exit(0);
+  */
 
   // keep this process spinning while we track startup progress
     const progress = [];

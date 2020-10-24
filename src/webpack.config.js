@@ -3,6 +3,9 @@ const webpack = require('webpack');
 
 module.exports = {
   entry: "./service.js",
+  optimization: {
+    minimize: false
+  },
   output: {
     path: path.resolve(__dirname, 'build'),
     filename: "service.js"
