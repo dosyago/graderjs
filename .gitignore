@@ -1,5 +1,8 @@
 .*.swp
 
+#Dev
+dev/*
+
 # Bundling and packaging
 bin/*
 
