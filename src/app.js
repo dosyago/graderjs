@@ -21,7 +21,7 @@ async function launchApp() {
     const pr = new Promise((res, rej) => (resolve = res, reject = rej));
     pr.then(() => state = 'complete').catch(() => state = 'rejected');
 
-  let appBundle, subprocess, message = '';
+  let appBundle, subprocess, message;
 
   // cleanup
     const killService = (e) => {
@@ -80,7 +80,13 @@ async function launchApp() {
           {stdio:'inherit'}
       );
       subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
-      subprocess.on('message', msg => (message = msg, process.stdout.write('\n'+msg), resolve(args)));
+      subprocess.on('message', (...args) => {
+        if ( typeof args[0] == "string" ) {
+          message = args[0];
+        }
+        process.stdout.write('\n'+message);
+        resolve(args)
+      });
       subprocess.unref();
   } catch (e) { 
     console.log('fork err', e) 
@@ -98,7 +104,7 @@ async function launchApp() {
   // keep this process spinning while we track startup progress
     const progress = [];
 
-    while( subprocess.connected && !message.startsWith('App started.') ) {
+    while( subprocess.connected && !(typeof message == "string" && message.startsWith('App started.')) ) {
       if ( state == 'pending' ) {
         process.stdout.clearLine(0); // 0 is 'entire line'
         process.stdout.cursorTo(0);
@@ -113,8 +119,9 @@ async function launchApp() {
     console.log('');
 
   // report the outcome
-    if ( message.startsWith('App started.') ) {
+    if ( typeof message == "string" && message.startsWith('App started.') ) {
       const port = Number(message.split('.')[1].trim());
+      console
       console.log(`Service on port ${port}`);
       console.log('Launcher exiting successfully...');
       if ( DEBUG ) {

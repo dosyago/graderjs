@@ -19,32 +19,6 @@
   const temp_browser_cache = () => path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, `ui-cache`);
   console.log({SITE_PATH});
 
-  const {service_port, ui_port} = args;
-
-  const CHROME_OPTS = !NO_SANDBOX ? [
-    `--new-window`,
-    `--no-first-run`,
-    `--app=http://localhost:${service_port}`,
-    '--restore-last-session',
-    `--disk-cache-dir=${temp_browser_cache()}`,
-    `--aggressive-cache-discard`
-  ] : [
-    `--new-window`,
-    `--no-first-run`,
-    `--app=http://localhost:${service_port}`,
-    '--restore-last-session',
-    `--disk-cache-dir=${temp_browser_cache()}`,
-    `--aggressive-cache-discard`,
-    '--no-sandbox'
-  ];
-  const LAUNCH_OPTS = {
-    logLevel: 'verbose',
-    port: ui_port, 
-    chromeFlags:CHROME_OPTS, 
-    userDataDir:app_data_dir(), 
-    ignoreDefaultFlags: true
-  }
-
 // global variables 
   let retryCount = 0;
 
@@ -74,9 +48,9 @@
       console.log(`Start service...`);
       notify('Request service start.');
 
-      let service;
+      let service, ServicePort;
       try {
-        ({service} = await start({app, desiredPort:CONFIG.desiredPort}));
+        ({service, port:ServicePort} = await start({app, desiredPort:CONFIG.desiredPort}));
       } catch(e) {
         console.error(e);
         notify('Could not start background service. Because: ' + JSON.stringify(e));
@@ -103,6 +77,28 @@
     // launch UI
       notify('Request user interface.');
       console.log(`Launching UI...`);
+      const CHROME_OPTS = !NO_SANDBOX ? [
+        `--new-window`,
+        `--no-first-run`,
+        `--app=http://localhost:${ServicePort}`,
+        '--restore-last-session',
+        `--disk-cache-dir=${temp_browser_cache()}`,
+        `--aggressive-cache-discard`
+      ] : [
+        `--new-window`,
+        `--no-first-run`,
+        `--app=http://localhost:${ServicePort}`,
+        '--restore-last-session',
+        `--disk-cache-dir=${temp_browser_cache()}`,
+        `--aggressive-cache-discard`,
+        '--no-sandbox'
+      ];
+      const LAUNCH_OPTS = {
+        logLevel: 'verbose',
+        chromeFlags:CHROME_OPTS, 
+        userDataDir:app_data_dir(), 
+        ignoreDefaultFlags: true
+      }
       console.log({LAUNCH_OPTS});
       let browser;
       try {
@@ -120,13 +116,13 @@
     // connect to UI
       notify('Request interface connection.');
       console.log(`Connecting to UI...`);
-      const UI = await connect({port:ui_port, exposeSocket: true});
+      const UI = await connect({exposeSocket: true});
       console.log(`Connected.`);
       notify('User interface online.');
 
     installCleanupHandlers({ui: UI, bg: service});
 
-    notify && notify(`App started. ${service.port}`);
+    notify && notify(`App started. ${ServicePort}`);
     process.disconnect && process.disconnect();
   }
 
@@ -138,28 +134,18 @@
     addHandlers(app);
 
     console.log({DEBUG, port});
-    let service;
-    try {
-      service = app.listen(Number(port), async err => {
-        if ( PORT_DEBUG || err ) { 
-          await sleep(10);
-          if ( retryCount++ < MAX_RETRY ) {
-            console.log({retry:{retryCount, badPort: port, DEBUG, err}});
-            notify(`${port} taken. Trying new port...`);
-            const subsequentTry = start({app, desiredPort: randomPort()});
-            subsequentTry.then(resolve).catch(reject);
-          } else {
-            reject({err, message: `Retries exceeded and: ${err || 'no further information'}`});
-          }
-          return;
-        } 
-        upAt = new Date;
-        say({serviceUp:{upAt,port}});
-        resolve({service, upAt, port});
-        console.log(`Ready`);
-      });
-    } catch(e) {
-      console.log({err:e, retryCount});
+
+    const service = app.listen(Number(port), async err => {
+      if ( PORT_DEBUG || err ) { 
+        console.warn(err);
+        return reject(err);
+      } 
+      upAt = new Date;
+      say({serviceUp:{upAt,port}});
+      resolve({service, upAt, port});
+      console.log(`Ready`);
+    });
+    service.on('error', async err => {
       await sleep(10);
       if ( retryCount++ < MAX_RETRY ) {
         console.log({retry:{retryCount, badPort: port, DEBUG, err}});
@@ -170,7 +156,7 @@
         reject({err, message: `Retries exceeded and: ${err || 'no further information'}`});
       }
       return;
-    }
+    });
 
     return pr;
   }
@@ -199,7 +185,7 @@
 
     const killService = async () => {
       if ( bg.listening ) {
-        //await stop(bg);
+        await stop(bg);
       } else {
         say({killService: 'already closed'});
       }

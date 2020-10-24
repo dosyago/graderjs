@@ -3,14 +3,11 @@ import path from 'path';
 import fs from 'fs';
 
 const DSP = 22121;
-const DCP = 8222;
 
 export const service_port = process.env.PORT || process.argv[2] || DSP;
-export const ui_port = process.argv[3] || DCP;
 
 const Pref = {};
 const pref_file = path.resolve(os.homedir(), '.grader', 'config.js');
-const cacheId = Math.random().toString(36);
 
 loadPref();
 
@@ -20,7 +17,6 @@ updateBasePath(process.argv[5] || Pref.BasePath || os.homedir());
 
 const args = {
   service_port, 
-  ui_port,
   updateBasePath,
   getBasePath,
 };
