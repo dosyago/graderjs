@@ -66,7 +66,7 @@ async function launchApp() {
       fs.writeFileSync(zipName, appBundle);
       const file = new AdmZip(zipName);
       DEBUG && console.log({zipName, name, appPath});
-      file.extractAllTo(name);
+      file.extractAllTo(name, /*overwrite*/ true);
 
     // fork the app process
       console.log('App process requested.');

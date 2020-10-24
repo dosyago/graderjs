@@ -12,7 +12,7 @@
   import connect from './lib/protocol.js';
 
 // constants
-  const PORT_DEBUG = true;
+  const PORT_DEBUG = false;
   const MAX_RETRY = 10;
   const SITE_PATH = path.resolve(__dirname, 'public');
   const app_data_dir = () => path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, `ui-data`);
