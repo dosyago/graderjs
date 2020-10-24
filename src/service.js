@@ -116,7 +116,8 @@
     // connect to UI
       notify('Request interface connection.');
       console.log(`Connecting to UI...`);
-      const UI = await connect({exposeSocket: true});
+      console.log(browser);
+      const UI = await connect({port: browser.port, exposeSocket: true});
       console.log(`Connected.`);
       notify('User interface online.');
 
