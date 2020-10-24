@@ -9,18 +9,19 @@ import CONFIG from './config.js';
 import args from './lib/args.js';
 import {DEBUG, say, sleep} from './lib/common.js';
 
-start();
+launchApp();
 
-async function start() {
+async function launchApp() {
   console.log('App launcher started.');
 
-  let state = 'pending';
-  let resolve, reject;
+  // setup a promise to track a part of the setup
+    let state = 'pending';
+    let resolve, reject;
 
-  const pr = new Promise((res, rej) => (resolve = res, reject = rej));
-  pr.then(() => state = 'complete').catch(() => state = 'rejected');
+    const pr = new Promise((res, rej) => (resolve = res, reject = rej));
+    pr.then(() => state = 'complete').catch(() => state = 'rejected');
 
-  let srv, subprocess, message;
+  let appBundle, subprocess, message;
 
   // cleanup
     const killService = (e) => {
@@ -36,11 +37,13 @@ async function start() {
     process.on('SIGHUP', killService);
     process.on('error', killService);
 
-  try {
-    srv = fs.readFileSync(path.resolve(__dirname, '..', 'build', 'app.zip'));
-  } catch(e) {
-    console.log('src build service error', e);
-  }
+  // retrieve the app from the virtual filesystem in the build
+    try {
+      appBundle = fs.readFileSync(path.resolve(__dirname, '..', 'build', 'app.zip'));
+    } catch(e) {
+      console.log('src build service error', e);
+    }
+
   try {
     // create the app directory
       console.log('Preparing app data directory.');
@@ -52,7 +55,7 @@ async function start() {
 
     // unzip a fresh copy of app from binary every time
       console.log('Inflating app contents.');
-      fs.writeFileSync(zipName, srv);
+      fs.writeFileSync(zipName, appBundle);
       const file = new AdmZip(zipName);
       file.extractAllTo(name);
 
@@ -77,33 +80,33 @@ async function start() {
 
   console.log('App process created.');
 
-  // keep parent spinning 
+  // keep this process spinning while we track startup progress
+    const progress = [];
 
-  const progress = [];
+    while( subprocess.connected && message != 'App started.' ) {
+      if ( state == 'pending' ) {
+        process.stdout.clearLine(0); // 0 is 'entire line'
+        process.stdout.cursorTo(0);
+        process.stdout.write(`Waiting for your system security checks: ${progress.join('.')}`);
+      }
 
-  while( subprocess.connected && message != 'App started.' ) {
-    if ( state == 'pending' ) {
-      process.stdout.clearLine(0); // 0 is 'entire line'
-      process.stdout.cursorTo(0);
-      process.stdout.write(`Waiting for your system security checks: ${progress.join('.')}`);
+      await sleep(Math.round(Math.random()*370));
+
+      progress.push('');
     }
 
-    await sleep(Math.round(Math.random()*370));
+    console.log('');
 
-    progress.push('');
-  }
-
-  console.log('');
-
-  if ( message == 'App started.' ) {
-    console.log('Launcher exiting successfully...');
-    process.exit(0);
-  } else {
-    console.error('Error at', message);
-    console.info('Check state', state, 'subprocess.connected', subprocess.connected);
-    console.log('Launcher failed. Exiting in 5 seconds...');
-    await sleep(5000);
-    process.exit(1);
-  }
+  // report the outcome
+    if ( message == 'App started.' ) {
+      console.log('Launcher exiting successfully...');
+      process.exit(0);
+    } else {
+      console.error('Error at', message);
+      console.info('Check state', state, 'subprocess.connected', subprocess.connected);
+      console.log('Launcher failed. Exiting in 5 seconds...');
+      await sleep(5000);
+      process.exit(1);
+    }
 }
 
