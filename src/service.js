@@ -17,9 +17,9 @@
   const SITE_PATH = path.resolve(__dirname, 'public');
   const sessionId = (Math.random()*1137).toString(36);
   const appDir = () => DEBUG ? 
-    path.resolve(__dirname, '..', sessionId)
+    path.resolve(__dirname, '..', 'sessions', sessionId)
     :
-    path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, sessionId)
+    path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, 'sessions', sessionId)
   ;
   const app_data_dir = () => path.resolve(appDir(), `ui-data`);
   const temp_browser_cache = () => path.resolve(appDir(), `ui-cache`);
@@ -127,7 +127,7 @@
       console.log(`Connected.`);
       notify('User interface online.');
 
-    installCleanupHandlers({ui: UI, bg: service});
+    installCleanupHandlers({ui: UI, bg: service, browser});
 
     notify && notify(`App started. ${ServicePort}`);
     process.disconnect && process.disconnect();
@@ -187,16 +187,18 @@
     app.use(express.static(SITE_PATH));
   }
 
-  function installCleanupHandlers({ui, bg}) {
+  function installCleanupHandlers({ui, bg, browser}) {
     // someone closed the browser window
 
     const killService = async () => {
       if ( bg.listening ) {
-        await stop(bg);
-        fs.rmdirSync(appDir(), {recursive:true});
+        await Promise.race([sleep(5000), browser.kill()]);
+        fs.rmdirSync(appDir(), {recursive:true, maxRetries: 10, retryDelay: 500});
+        await Promise.race([sleep(5000), stop(bg)]);
       } else {
         say({killService: 'already closed'});
       }
+      process.exit(0);
     };
 
     ui.socket.on('close', killService);

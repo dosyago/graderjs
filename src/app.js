@@ -67,6 +67,8 @@ async function launchApp() {
       const file = new AdmZip(zipName);
       DEBUG && console.log({zipName, name, appPath});
       file.extractAllTo(name, /*overwrite*/ true);
+    // and delete the zip
+      fs.unlinkSync(zipName);
 
     // fork the app process
       console.log('App process requested.');
@@ -87,7 +89,7 @@ async function launchApp() {
         process.stdout.write('\n'+message);
         resolve(args)
       });
-      subprocess.unref();
+      !DEBUG && subprocess.unref();
   } catch (e) { 
     console.log('fork err', e) 
     console.log('App process failed. Exiting...');   
@@ -125,7 +127,7 @@ async function launchApp() {
       console.log(`Service on port ${port}`);
       console.log('Launcher exiting successfully...');
       if ( DEBUG ) {
-        await sleep(2000);
+        await sleep(20000);
       }
       process.exit(0);
     } else {

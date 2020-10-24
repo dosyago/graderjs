@@ -2,6 +2,8 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 
+import {DEBUG} from './common.js';
+
 const DSP = 22121;
 
 export const service_port = process.env.PORT || process.argv[2] || DSP;
@@ -49,7 +51,7 @@ function loadPref() {
     try {
       Object.assign(Pref, JSON.parse(fs.readFileSync(pref_file).toString('utf-8')));
     } catch(e) {
-      console.warn("Error reading from preferences file", e);
+      DEBUG && console.warn("Error reading from preferences file", e);
     }
   } else {
     console.log("Preferences file does not exist. Creating one..."); 
@@ -61,7 +63,7 @@ function savePref() {
   try {
     fs.writeFileSync(pref_file, JSON.stringify(Pref));
   } catch(e) {
-    console.warn("Error writing preferences file", pref_file, Pref, e);
+    DEBUG && console.warn("Error writing preferences file", pref_file, Pref, e);
   }
 }
 
