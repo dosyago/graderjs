@@ -9,6 +9,9 @@
 - Decide how to handle config, names, folders of different apps
 - perf: try keeping the chrome profile dir (per app), and experiment with cache dir as temp or persistent. Also try opening chrome earlier and using DevTools if needed as fallback to make it load the UI
 - global $HOME/.grader directory for all grader apps, installs and configs
+- handle picking a random port that's available
+
+I FUCKING ROCK
 
 FUCK YEAH I'M AWESOME
 

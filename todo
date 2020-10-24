@@ -1,4 +1,4 @@
-- handle picking a random port that's available
+- work out how to delete the session directories on windows
 - put archivist in this framework.
 - write documentation about how to use grader to build cross-platform apps (grader-create-app ?)
 
