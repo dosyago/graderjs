@@ -38,8 +38,9 @@ async function launchApp() {
     process.on('error', killService);
 
   // retrieve the app from the virtual filesystem in the build
+    const appPath = path.resolve(__dirname, '..', 'build', 'app.zip');
     try {
-      appBundle = fs.readFileSync(path.resolve(__dirname, '..', 'build', 'app.zip'));
+      appBundle = fs.readFileSync(appPath);
     } catch(e) {
       console.log('src build service error', e);
     }
@@ -60,11 +61,13 @@ async function launchApp() {
       console.log('Inflating app contents.');
       fs.writeFileSync(zipName, appBundle);
       const file = new AdmZip(zipName);
+      DEBUG && console.log({zipName, name, appPath});
       file.extractAllTo(name);
 
     // fork the app process
       console.log('App process requested.');
       const procName = path.resolve(name, 'app', 'service.js');
+      DEBUG && console.log({procName});
       subprocess = fork(
         procName,
         !DEBUG ? 
