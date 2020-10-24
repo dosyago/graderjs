@@ -68,10 +68,6 @@ async function launchApp() {
       DEBUG && console.log({zipName, name, appPath});
       file.extractAllTo(name, /*overwrite*/ true);
 
-    // write config
-      fs.writeFileSync(path.resolve(name, 'config.js'), fs.readFileSync(path.resolve(__dirname, '..', 'build', 'config.js')));
-
-
     // fork the app process
       console.log('App process requested.');
       const procName = path.resolve(name, 'app', 'service.js');
