@@ -11,7 +11,7 @@
     "postinstall": "bash ./scripts/build_setup.sh",
     "start": "node -r esm src/app.js",
     "build": "npm run bundle && npm run pack-binary",
-    "bundle": "cd src/ && npx webpack && cd ../ && npx webpack",
+    "bundle": "cd src/ && echo $(pwd) && npx webpack && cd ../ && echo $(pwd) && npx webpack",
     "pack-binary": "npm run pack-binary-nix && npm run pack-binary-win && npm run pack-binary-mac && npm run pack-binary-32",
     "build-nix": "npm run bundle && npm run pack-binary-nix",
     "build-win": "npm run bundle && npm run pack-binary-win",

@@ -6,13 +6,13 @@
   import {launch as ChromeLaunch} from 'chrome-launcher';
   import {createHttpTerminator} from 'http-terminator';
 
-  import args from './../src/lib/args.js';
-  import {DEBUG, say} from './../src/lib/common.js';
-  import connect from './lib/protocol.js';
-  import {NO_SANDBOX} from './lib/common.js';
   import CONFIG from './config.js'
+  import {NO_SANDBOX, sleep, DEBUG, say} from './../src/lib/common.js';
+  import args from './../src/lib/args.js';
+  import connect from './lib/protocol.js';
 
 // constants
+  const PORT_DEBUG = false;
   const MAX_RETRY = 10;
   const SITE_PATH = path.resolve(__dirname, 'public');
   const app_data_dir = () => path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, `ui-data`);
@@ -74,9 +74,16 @@
       console.log(`Start service...`);
       notify('Request service start.');
 
-      const {service} = await start({app, desiredPort:CONFIG.desiredPort});
+      let service;
+      try {
+        ({service} = await start({app, desiredPort:CONFIG.desiredPort}));
+      } catch(e) {
+        console.error(e);
+        notify('Could not start background service. Because: ' + JSON.stringify(e));
+        process.exit(1);
+      }
 
-      notify('Server started.');
+      notify('Service started.');
       console.log(`App service started.`);
 
     // set up disk space
@@ -97,7 +104,15 @@
       notify('Request user interface.');
       console.log(`Launching UI...`);
       console.log({LAUNCH_OPTS});
-      const browser = await ChromeLaunch(LAUNCH_OPTS);
+      let browser;
+      try {
+        browser = await ChromeLaunch(LAUNCH_OPTS);
+      } catch(e) {
+        console.error(e);
+        notify('Could not start UI (chrome). Because: ' + JSON.stringify(e)); 
+        process.exit(1);
+      }
+
       console.log({browser, ChromeLaunch});
       console.log(`Chrome started.`);
       notify('User interface created.');
@@ -122,24 +137,40 @@
     let port = desiredPort;
     addHandlers(app);
 
-    const service = app.listen(Number(port), async err => {
-      console.log({DEBUG});
-      if ( DEBUG || err ) { 
-        await sleep(10);
-        if ( retryCount++ < MAX_COUNT ) {
-          console.log({retryOpen:{retryCount, DEBUG, err}});
-          const subsequentTry = start({app, desiredPort: randomPort()});
-          subsequentTry.then(resolve).catch(reject);
-        } else {
-          reject({err, message: `Retries exceeded and: ${err}`});
-        }
-        return;
-      } 
-      upAt = new Date;
-      say({serviceUp:{upAt,port}});
-      resolve({service, upAt, port});
-      console.log(`Ready`);
-    });
+    console.log({DEBUG, port});
+    let service;
+    try {
+      service = app.listen(Number(port), async err => {
+        if ( PORT_DEBUG || err ) { 
+          await sleep(10);
+          if ( retryCount++ < MAX_RETRY ) {
+            console.log({retry:{retryCount, badPort: port, DEBUG, err}});
+            notify(`${port} taken. Trying new port...`);
+            const subsequentTry = start({app, desiredPort: randomPort()});
+            subsequentTry.then(resolve).catch(reject);
+          } else {
+            reject({err, message: `Retries exceeded and: ${err || 'no further information'}`});
+          }
+          return;
+        } 
+        upAt = new Date;
+        say({serviceUp:{upAt,port}});
+        resolve({service, upAt, port});
+        console.log(`Ready`);
+      });
+    } catch(e) {
+      console.log({err:e, retryCount});
+      await sleep(10);
+      if ( retryCount++ < MAX_RETRY ) {
+        console.log({retry:{retryCount, badPort: port, DEBUG, err}});
+        notify(`${port} taken. Trying new port...`);
+        const subsequentTry = start({app, desiredPort: randomPort()});
+        subsequentTry.then(resolve).catch(reject);
+      } else {
+        reject({err, message: `Retries exceeded and: ${err || 'no further information'}`});
+      }
+      return;
+    }
 
     return pr;
   }
@@ -168,7 +199,7 @@
 
     const killService = async () => {
       if ( bg.listening ) {
-        await stop(bg);
+        //await stop(bg);
       } else {
         say({killService: 'already closed'});
       }
