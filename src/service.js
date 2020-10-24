@@ -192,9 +192,18 @@
 
     const killService = async () => {
       if ( bg.listening ) {
-        await Promise.race([sleep(5000), browser.kill()]);
-        fs.rmdirSync(appDir(), {recursive:true, maxRetries: 10, retryDelay: 500});
-        await Promise.race([sleep(5000), stop(bg)]);
+        await sleep(2000);
+        try {
+          fs.rmdirSync(appDir(), {recursive:true, maxRetries: 10, retryDelay: 500});
+        } catch(e) {
+          await sleep(2000);
+          try {
+            fs.rmdirSync(appDir(), {recursive:true, maxRetries: 10, retryDelay: 500});
+          } catch(e2) {
+
+          }
+        }
+        await stop(bg);
       } else {
         say({killService: 'already closed'});
       }
