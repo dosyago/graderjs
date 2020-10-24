@@ -2,16 +2,11 @@
 
 mydir=$(pwd)
 
-echo "Installing nexe and upx..."
+echo "Installing upx and nexe..."
 
-isnexe=$(which nexe)
 isupx=$(which upx)
+isnexe=$(which nexe)
 
-if [ -z "$isnexe" ]; then
-  npm i -g nexe
-else
-  echo "Nexe installed already."
-fi
 if [ -z "$isupx" ]; then
   curl -L -o upx.tar.xz https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz
   tar -xJf upx.tar.xz
@@ -21,11 +16,15 @@ if [ -z "$isupx" ]; then
 else 
   echo "upx installed already."
 fi
+if [ -z "$isnexe" ]; then
+  npm i -g nexe
+  echo "Shrinking nexe binaries..." 
+  cd ~/.nexe/
+  chmod +x *
+  upx *
+else
+  echo "Nexe installed already."
+fi
 
-echo "Shrinking nexe binaries..."
-
-cd ~/.nexe/
-chmod +x *
-upx *
 
 cd $mydir

@@ -42,30 +42,33 @@ async function start() {
     console.log('src build service error', e);
   }
   try {
-    console.log('Preparing app data directory.');
-    const name = path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`);
-    const zipName = path.resolve(name, 'app.zip');
-    if ( ! fs.existsSync(name) ) {
-      fs.mkdirSync(name, {recursive:true});
-    }
-    fs.writeFileSync(zipName, srv);
+    // create the app directory
+      console.log('Preparing app data directory.');
+      const name = path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`);
+      const zipName = path.resolve(name, 'app.zip');
+      if ( ! fs.existsSync(name) ) {
+        fs.mkdirSync(name, {recursive:true});
+      }
 
-    console.log('Inflating app contents.');
-    const file = new AdmZip(zipName);
-    file.extractAllTo(name);
-    const procName = path.resolve(name, 'app', 'service.js');
+    // unzip a fresh copy of app from binary every time
+      console.log('Inflating app contents.');
+      fs.writeFileSync(zipName, srv);
+      const file = new AdmZip(zipName);
+      file.extractAllTo(name);
 
-    console.log('App process requested.');
-    subprocess = fork(
-      procName,
-      !DEBUG ? 
-        {stdio:[null, null, null, 'ipc'], detached: true}
-      :
-        {stdio:'inherit'}
-    );
-    subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
-    subprocess.on('message', msg => (message = msg, process.stdout.write('\n'+msg), resolve(args)));
-    subprocess.unref();
+    // fork the app process
+      console.log('App process requested.');
+      const procName = path.resolve(name, 'app', 'service.js');
+      subprocess = fork(
+        procName,
+        !DEBUG ? 
+          {stdio:[null, null, null, 'ipc'], detached: true}
+        :
+          {stdio:'inherit'}
+      );
+      subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
+      subprocess.on('message', msg => (message = msg, process.stdout.write('\n'+msg), resolve(args)));
+      subprocess.unref();
   } catch (e) { 
     console.log('fork err', e) 
     console.log('App process failed. Exiting...');   
