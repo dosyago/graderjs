@@ -60,13 +60,17 @@ async function launchApp() {
       if ( fs.existsSync(zipName) ) {
         fs.unlinkSync(zipName);
       }
-
+      
     // unzip a fresh copy of app from binary every time
       console.log('Inflating app contents.');
       fs.writeFileSync(zipName, appBundle);
       const file = new AdmZip(zipName);
       DEBUG && console.log({zipName, name, appPath});
       file.extractAllTo(name, /*overwrite*/ true);
+
+    // write config
+      fs.writeFileSync(path.resolve(name, 'config.js'), fs.readFileSync(path.resolve(__dirname, '..', 'build', 'config.js')));
+
 
     // fork the app process
       console.log('App process requested.');

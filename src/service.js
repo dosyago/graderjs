@@ -15,8 +15,14 @@
   const PORT_DEBUG = false;
   const MAX_RETRY = 10;
   const SITE_PATH = path.resolve(__dirname, 'public');
-  const app_data_dir = () => path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, `ui-data`);
-  const temp_browser_cache = () => path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, `ui-cache`);
+  const sessionId = (Math.random()*1137).toString(36);
+  const appDir = () => DEBUG ? 
+    path.resolve(__dirname, '..', sessionId)
+    :
+    path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, sessionId)
+  ;
+  const app_data_dir = () => path.resolve(appDir(), `ui-data`);
+  const temp_browser_cache = () => path.resolve(appDir(), `ui-cache`);
   console.log({SITE_PATH});
 
 // global variables 
@@ -187,6 +193,7 @@
     const killService = async () => {
       if ( bg.listening ) {
         await stop(bg);
+        fs.rmdirSync(appDir(), {recursive:true});
       } else {
         say({killService: 'already closed'});
       }
