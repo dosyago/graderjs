@@ -47,7 +47,10 @@ async function launchApp() {
   try {
     // create the app directory
       console.log('Preparing app data directory.');
-      const name = path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`);
+      const name = DEBUG ? 
+        path.resolve(__dirname, '..', 'dev')
+        :
+        path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`);
       const zipName = path.resolve(name, 'app.zip');
       if ( ! fs.existsSync(name) ) {
         fs.mkdirSync(name, {recursive:true});
