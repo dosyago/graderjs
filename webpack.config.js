@@ -2,7 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-  entry: "./src/app.js",
+  entry: "./src/launcher.js",
   output: {
     path: path.resolve(__dirname, 'build'),
     filename: "grader.js"

@@ -33,7 +33,7 @@
   let retryCount = 0;
 
 // main executable block
-  {
+  export function go() {
     const app = express();
 
     // debugging info
@@ -73,7 +73,7 @@
     // cleanup any old sessions
       const undeletedOldSessions = [];
       try {
-        const expiredSessions = JSON.parse(fs.readFileSync(expiredSessionFile()));
+        const expiredSessions = JSON.parse(fs.readFileSync(expiredSessionFile()).toString());
         expiredSessions.forEach(sessionId => {
           try {
             fs.rmdirSync(appDir(sessionId), {recursive:true, maxRetries:3, retryDelay: 700});
@@ -152,7 +152,7 @@
       console.log(`Connected.`);
       notify('User interface online.');
 
-    installCleanupHandlers({ui: UI, bg: service, browser});
+    installCleanupHandlers({ui: UI, bg: service});
 
     notify && notify(`App started. ${ServicePort}`);
     process.disconnect && process.disconnect();
@@ -229,7 +229,7 @@
             try {
               let expiredSessions = []
               try {
-                expiredSessions = JSON.parse(fs.readFileSync(expiredSessionFile()));
+                expiredSessions = JSON.parse(fs.readFileSync(expiredSessionFile()).toString());
               } catch(e) {
                 DEBUG && console.info(`Unable to read expired sessions file...`, e);
               }
@@ -264,7 +264,7 @@
   async function stop(bg) {
     const serviceTerminator = createHttpTerminator({
       server:bg,
-      gracefulTerminatorTimeout: 1000
+      gracefulTerminationTimeout: 1000
     });
 
     say({service:`Closing service...`});

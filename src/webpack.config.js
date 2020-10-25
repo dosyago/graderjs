@@ -1,7 +1,9 @@
 const path = require('path');
 
+const CONFIG = require('../config.js');
+
 module.exports = {
-  entry: "./service.js",
+  entry: CONFIG.entry || "./app.js",
   optimization: {
     minimize: false
   },

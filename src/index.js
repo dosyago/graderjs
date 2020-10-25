@@ -1,7 +1,9 @@
+import * as Service from './service.js';
+
 const API = {
-  go,                   // launch app (you can pass through args here)
-  stop,                 // kill app and exit (after async jobs parameter completes)
-  say,                  // say something to console (throws if console has closed)
+  go,                   // start app launch sequence
+  stop,                 // kill app, cleanup, and exit (after async jobs parameter completes)
+  say,                  // say something to console (throws if console closed)
 
   ui : {
     open,               // open UI window
@@ -16,9 +18,68 @@ const API = {
 
   control: {
     send,               // send a DevTools command (throws if ui not connected yet)
-    on,                 // start listening for a DevTools event
-    off,                // stop listening for a DevTools event
+    on,                 // start listening for a DevTools event (throws if ui not connected yet)
+    off,                // stop listening for a DevTools event (throws if ui not connected yet)
   }
 };
 
 export default API;
+
+let App;
+
+function go() {
+  App = Service.go();
+  return App;
+}
+
+function stop() {
+
+}
+
+function say() {
+
+}
+
+function open() {
+
+}
+
+function close() {
+
+}
+
+function move() {
+
+}
+
+function size() {
+
+}
+
+function minimize() {
+
+}
+
+function maximize() {
+
+}
+
+function fullscreen() {
+
+}
+
+function partscreen() {
+
+}
+
+function send() {
+
+}
+
+function on() {
+
+}
+
+function off() {
+
+}

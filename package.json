@@ -11,7 +11,7 @@
     "postinstall": "bash ./scripts/build_setup.sh",
     "start": "npm run bundle && node build/grader.js",
     "build": "npm run bundle && npm run pack-binary",
-    "bundle": "cd src/ && echo $(pwd) && npx webpack && cd ../ && ./scripts/webzip.js && echo $(pwd) && npx webpack", 
+    "bundle": "cd src/ && echo $(pwd) && npx webpack && cd ../ && ./scripts/webzip.js && echo $(pwd) && npx webpack",
     "pack-binary": "npm run pack-binary-nix && npm run pack-binary-win && npm run pack-binary-mac && npm run pack-binary-32",
     "build-nix": "npm run bundle && npm run pack-binary-nix",
     "build-win": "npm run bundle && npm run pack-binary-win",
@@ -26,7 +26,8 @@
     "test-svc": "node -r esm src/service.js",
     "test-app": "npm run bundle && node build/grader.js",
     "lint": "eslint 'src/**/*.js'",
-    "tsc": "tsc --types node --target ES2020 --checkJs --allowJs --outFile build/server-types.js  --module System src/app.js decs.d.ts"
+    "tsc": "tsc --types node --target ES2020 --checkJs --allowJs --outFile build/server-types.js  --module System src/launcher.js decs.d.ts",
+    "tsc-app": "tsc --types node --target ES2020 --checkJs --allowJs --outFile build/server-types.js  --module System src/app.js decs.d.ts"
   },
   "repository": {
     "type": "git",
@@ -64,8 +65,11 @@
   "devDependencies": {
     "@types/adm-zip": "^0.4.33",
     "@types/express": "^4.17.8",
+    "@types/form-data": "^2.5.0",
+    "@types/http-terminator": "^2.0.1",
     "@types/node-fetch": "^2.5.7",
     "@types/websocket": "^1.0.1",
+    "@types/ws": "^7.2.7",
     "eslint": "^7.11.0",
     "nexe": "latest",
     "node-dev": "latest",
