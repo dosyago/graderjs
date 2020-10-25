@@ -28,7 +28,7 @@
     "lint": "eslint 'src/**/*.js'",
     "tsc": "tsc --types node --target ES2020 --checkJs --allowJs --outFile build/launcher-types.js  --module System src/launcher.js decs.d.ts",
     "tsc-app": "tsc --types node --target ES2020 --checkJs --allowJs --outFile build/app-types.js  --module System src/app.js decs.d.ts",
-    "chk": "npm run lint && npm run tsc-app && npm run tsc"
+    "check": "npm run lint && npm run tsc-app && npm run tsc"
   },
   "repository": {
     "type": "git",

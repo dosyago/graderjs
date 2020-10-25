@@ -10,7 +10,7 @@ async function start() {
   await Grader.ui.close(UI2);
 
   await Grader.util.sleep(2000);
-  await Grader.ui.maximize();
+  await Grader.ui.minimize();
 
   await Grader.util.sleep(2000);
   await Grader.ui.maximize();
@@ -26,5 +26,8 @@ async function start() {
 
   await Grader.util.sleep(2000);
   await Grader.ui.move({x:300, y:200});
+
+  await Grader.util.sleep(2000);
+  await Grader.ui.size({width:500, height:400});
 }
 
