@@ -1,6 +1,6 @@
 // determine where this code is running 
 
-export const DEBUG = process.env.DEBUG_grader || false;
+export const DEBUG = process.env.DEBUG_grader || true;
 
 export const NO_SANDBOX = process.env.DEBUG_grader || false;
 

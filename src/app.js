@@ -6,8 +6,13 @@ import os from 'os';
 import AdmZip from 'adm-zip';
 
 import CONFIG from './config.js';
-import args from './lib/args.js';
 import {DEBUG, say, sleep} from './lib/common.js';
+
+const oldSessionsDir = () => DEBUG ?
+    path.resolve(__dirname, '..', 'old-sessions')
+    :
+    path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, 'old-sessions')
+  ;
 
 launchApp();
 
@@ -23,7 +28,14 @@ async function launchApp() {
 
   let appBundle, subprocess, message;
 
-  // cleanup
+  // cleanup any old sessions
+    try {
+      fs.rmdirSync(oldSessionsDir(), {recursive:true});
+    } catch(e) {
+      DEBUG && console.info(`Error removing old sessions directory...`, e);
+    }
+
+  // setup future cleanup
     const killService = (e) => {
       subprocess.kill();
       console.log();
@@ -128,8 +140,9 @@ async function launchApp() {
       console.log('Launcher exiting successfully...');
       if ( DEBUG ) {
         await sleep(20000);
+      } else {
+        process.exit(0);
       }
-      process.exit(0);
     } else {
       console.error('Error at', message);
       console.info('Check state', state, 'subprocess.connected', subprocess.connected);

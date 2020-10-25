@@ -8,7 +8,6 @@
 
   import CONFIG from './config.js'
   import {NO_SANDBOX, sleep, DEBUG, say} from './../src/lib/common.js';
-  import args from './../src/lib/args.js';
   import connect from './lib/protocol.js';
 
 // constants
@@ -20,6 +19,11 @@
     path.resolve(__dirname, '..', 'sessions', sessionId)
     :
     path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, 'sessions', sessionId)
+  ;
+  const expiredAppDir = () => DEBUG ?
+    path.resolve(__dirname, '..', 'old-sessions', sessionId)
+    :
+    path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, 'old-sessions', sessionId)
   ;
   const app_data_dir = () => path.resolve(appDir(), `ui-data`);
   const temp_browser_cache = () => path.resolve(appDir(), `ui-cache`);
@@ -84,6 +88,8 @@
       notify('Request user interface.');
       console.log(`Launching UI...`);
       const CHROME_OPTS = !NO_SANDBOX ? [
+        `--disable-breakpad`,
+        `--metrics-recording-only`,
         `--new-window`,
         `--no-first-run`,
         `--app=http://localhost:${ServicePort}`,
@@ -91,6 +97,8 @@
         `--disk-cache-dir=${temp_browser_cache()}`,
         `--aggressive-cache-discard`
       ] : [
+        `--disable-breakpad`,
+        `--metrics-recording-only`,
         `--new-window`,
         `--no-first-run`,
         `--app=http://localhost:${ServicePort}`,
@@ -187,21 +195,17 @@
     app.use(express.static(SITE_PATH));
   }
 
-  function installCleanupHandlers({ui, bg, browser}) {
+  function installCleanupHandlers({ui, bg}) {
     // someone closed the browser window
 
     const killService = async () => {
       if ( bg.listening ) {
         await sleep(2000);
         try {
-          fs.rmdirSync(appDir(), {recursive:true, maxRetries: 10, retryDelay: 500});
+          fs.renameSync(appDir(), expiredAppDir());
+          fs.rmdirSync(expiredAppDir(), {recursive:true, maxRetries: 3, retryDelay: 700});
         } catch(e) {
-          await sleep(2000);
-          try {
-            fs.rmdirSync(appDir(), {recursive:true, maxRetries: 10, retryDelay: 500});
-          } catch(e2) {
-
-          }
+          console.info(`Issue removing session directory`, e);
         }
         await stop(bg);
       } else {
