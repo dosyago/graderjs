@@ -1,4 +1,5 @@
 import * as Service from './service.js';
+import * as Common from './lib/common.js';
 
 const API = {
   go,                   // start app launch sequence
@@ -20,6 +21,10 @@ const API = {
     send,               // send a DevTools command (throws if ui not connected yet)
     on,                 // start listening for a DevTools event (throws if ui not connected yet)
     off,                // stop listening for a DevTools event (throws if ui not connected yet)
+  },
+
+  util: {
+    sleep: Common.sleep
   }
 };
 
@@ -30,6 +35,7 @@ let App;
 // basic functions
   async function go() {
     App = await Service.go();
+    //Common.DEBUG && console.log({App});
   }
 
   async function stop() {
@@ -44,17 +50,25 @@ let App;
     try {
       App.notify(msg); 
     } catch(e) {
-      DEBUG && console.info(e);
+      Common.DEBUG && console.info(e);
       throw new TypeError(`Cannot say a console message because App Console has already closed.`);
     }
   }
 
-function open() {
-
+async function open() {
+  const {ServicePort} = App;
+  const sessionId = App.newSessionId();
+  let browser, UI;
+  try {
+    ({UI,browser} = await Service.newBrowser({ServicePort, sessionId}));
+  } catch(e) {
+    console.log("open", e);
+  }
+  return {UI,browser};
 }
 
-function close() {
-
+async function close(UI) {
+  return await UI.send("Browser.close", {}); 
 }
 
 function move() {

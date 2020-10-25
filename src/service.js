@@ -14,7 +14,8 @@
   const PORT_DEBUG = false;
   const MAX_RETRY = 10;
   const SITE_PATH = path.resolve(__dirname, 'public');
-  const SessionId = (Math.random()*1137).toString(36);
+  export const newSessionId = () => (Math.random()*1137).toString(36);
+  const SessionId = newSessionId();
   const appDir = sessionId => DEBUG ? 
     path.resolve(__dirname, '..', 'sessions', sessionId)
     :
@@ -25,8 +26,8 @@
     :
     path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, 'old-sessions.json')
 
-  const app_data_dir = () => path.resolve(appDir(SessionId), `ui-data`);
-  const temp_browser_cache = () => path.resolve(appDir(SessionId), `ui-cache`);
+  const app_data_dir = sessionId => path.resolve(appDir(sessionId), `ui-data`);
+  const temp_browser_cache = sessionId => path.resolve(appDir(sessionId), `ui-cache`);
   console.log({SITE_PATH});
 
 // global variables 
@@ -87,77 +88,96 @@
       }
       fs.writeFileSync(expiredSessionFile(), JSON.stringify(undeletedOldSessions));
 
-    // set up disk space
-      notify('Request cache directory.');
-      if ( !fs.existsSync(temp_browser_cache()) ) {
-        console.log(`Temp browser cache directory does not exist. Creating...`);
-        fs.mkdirSync(temp_browser_cache(), {recursive:true});
-        console.log(`Deleted.`);
-      }
-      if ( !fs.existsSync(app_data_dir()) ) {
-        console.log(`App data dir does not exist. Creating...`);
-        fs.mkdirSync(app_data_dir(), {recursive:true});
-        console.log(`Created.`);
-      }
-      notify('Cache directory created.');
-
     // launch UI
       notify('Request user interface.');
       console.log(`Launching UI...`);
-      const CHROME_OPTS = !NO_SANDBOX ? [
-        `--disable-breakpad`,
-        `--metrics-recording-only`,
-        `--new-window`,
-        `--no-first-run`,
-        `--app=http://localhost:${ServicePort}`,
-        '--restore-last-session',
-        `--disk-cache-dir=${temp_browser_cache()}`,
-        `--aggressive-cache-discard`
-      ] : [
-        `--disable-breakpad`,
-        `--metrics-recording-only`,
-        `--new-window`,
-        `--no-first-run`,
-        `--app=http://localhost:${ServicePort}`,
-        '--restore-last-session',
-        `--disk-cache-dir=${temp_browser_cache()}`,
-        `--aggressive-cache-discard`,
-        '--no-sandbox'
-      ];
-      const LAUNCH_OPTS = {
-        logLevel: 'verbose',
-        chromeFlags:CHROME_OPTS, 
-        userDataDir:app_data_dir(), 
-        ignoreDefaultFlags: true
-      }
-      console.log({LAUNCH_OPTS});
-      let browser;
+      let UI, browser;
       try {
-        browser = await ChromeLaunch(LAUNCH_OPTS);
+        ({UI,browser} = await newBrowser({ServicePort, sessionId: SessionId}));
       } catch(e) {
         console.error(e);
         notify('Could not start UI (chrome). Because: ' + JSON.stringify(e)); 
         process.exit(1);
       }
 
-      console.log({browser, ChromeLaunch});
+      DEBUG && console.log({browser, ChromeLaunch});
       console.log(`Chrome started.`);
       notify('User interface created.');
-
-    // connect to UI
-      notify('Request interface connection.');
-      console.log(`Connecting to UI...`);
-      console.log(browser);
-      const UI = await connect({port: browser.port, exposeSocket: true});
-      console.log(`Connected.`);
-      notify('User interface online.');
 
     const killService = installCleanupHandlers({ui: UI, bg: service, browser});
 
     notify && notify(`App started. ${ServicePort}`);
     process.disconnect && process.disconnect();
 
-    return {app, killService, ServicePort, browser, service, UI, notify};
+    return {app, killService, ServicePort, browser, service, UI, notify, newSessionId};
+  }
+
+  export async function newBrowser({ServicePort, sessionId, path: path = '/'}) {
+    if ( ! sessionId || ! ServicePort) {
+      throw new TypeError(`newBrowser must be passed a unique sessionId and ServicePort`);
+    }
+
+    // set up disk space
+      safe_notify('Request UI directories.');
+      if ( !fs.existsSync(temp_browser_cache(sessionId)) ) {
+        console.log(`Temp browser cache directory does not exist. Creating...`);
+        fs.mkdirSync(temp_browser_cache(sessionId), {recursive:true});
+        console.log(`Created.`);
+      }
+      if ( !fs.existsSync(app_data_dir(sessionId)) ) {
+        console.log(`App data dir does not exist. Creating...`);
+        fs.mkdirSync(app_data_dir(sessionId), {recursive:true});
+        console.log(`Created.`);
+      }
+      safe_notify('UI data and cache directory created.');
+
+    // start browser
+      const CHROME_OPTS = !NO_SANDBOX ? [
+        `--disable-breakpad`,
+        `--metrics-recording-only`,
+        `--new-window`,
+        `--no-first-run`,
+        `--app=http://localhost:${ServicePort}${path}`,
+        '--restore-last-session',
+        `--disk-cache-dir=${temp_browser_cache(sessionId)}`,
+        `--aggressive-cache-discard`
+      ] : [
+        `--disable-breakpad`,
+        `--metrics-recording-only`,
+        `--new-window`,
+        `--no-first-run`,
+        `--app=http://localhost:${ServicePort}${path}`,
+        '--restore-last-session',
+        `--disk-cache-dir=${temp_browser_cache(sessionId)}`,
+        `--aggressive-cache-discard`,
+        '--no-sandbox'
+      ];
+      const LAUNCH_OPTS = {
+        logLevel: 'verbose',
+        chromeFlags:CHROME_OPTS, 
+        userDataDir:app_data_dir(sessionId), 
+        ignoreDefaultFlags: true
+      }
+      DEBUG && console.log({LAUNCH_OPTS});
+      let browser;
+      try {
+        browser = await ChromeLaunch(LAUNCH_OPTS);
+      } catch(e) {
+        DEBUG && console.error(e);
+        safe_notify('Could not start UI (chrome). Because: ' + JSON.stringify(e)); 
+      }
+
+    // connect to UI
+      safe_notify('Request interface connection.');
+      console.log(`Connecting to UI...`);
+      console.log(browser);
+      const UI = await connect({port: browser.port, exposeSocket: true});
+      console.log(`Connected.`);
+      safe_notify('User interface online.');
+
+    browser.sessionId = sessionId;
+
+    return {UI,browser};
   }
 
   async function start({app, desiredPort}) {
@@ -199,6 +219,20 @@
   function randomPort() {
     // choose a port form the dynamic/private range: 49152 - 65535
     return 49152+Math.round(Math.random()*(65535-49152))
+  }
+
+  // safe notify handles any IPC channel closed error and ensure it is not thrown 
+  function safe_notify(msg) {
+    if ( process.send ) {
+      return process.send(msg, null, {}, e => {
+        if ( e ) {
+          say({processSend:msg});
+        }
+      });
+    } else {
+      say({processSend:msg});
+      return false;
+    }
   }
 
   function notify(msg) {
