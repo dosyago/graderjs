@@ -152,14 +152,14 @@ async function partscreen(UI = App.UI) {
   return result;
 }
 
-function send() {
-
+async function send(command, params, UI = App.UI) {
+  return await UI.send(command, params);
 }
 
-function on() {
-
+async function on(eventName, handler, UI = App.UI) {
+  return await UI.on(eventName, handler);
 }
 
 function off() {
-
+  throw new TypeError(`off is not implemented yet...`);
 }
