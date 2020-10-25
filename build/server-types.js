@@ -170,7 +170,7 @@ System.register("service", ["fs", "os", "path", "express", "chrome-launcher", "h
     var fs_1, os_1, path_1, express_1, chrome_launcher_1, http_terminator_1, config_js_1, common_js_1, protocol_js_1, PORT_DEBUG, MAX_RETRY, SITE_PATH, SessionId, appDir, expiredSessionFile, app_data_dir, temp_browser_cache, retryCount;
     var __moduleName = context_4 && context_4.id;
     // main executable block
-    function go() {
+    async function go() {
         const app = express_1.default();
         // debugging info
         /**
@@ -183,7 +183,7 @@ System.register("service", ["fs", "os", "path", "express", "chrome-launcher", "h
         **/
         if (common_js_1.DEBUG || process.argv[1].includes(`service_${config_js_1.default.name}`)) { // our startup cue
             notify('Request app start.');
-            run(app);
+            return await run(app);
         }
     }
     exports_4("go", go);
@@ -283,9 +283,10 @@ System.register("service", ["fs", "os", "path", "express", "chrome-launcher", "h
         const UI = await protocol_js_1.default({ port: browser.port, exposeSocket: true });
         console.log(`Connected.`);
         notify('User interface online.');
-        installCleanupHandlers({ ui: UI, bg: service });
+        const killService = installCleanupHandlers({ ui: UI, bg: service, browser });
         notify && notify(`App started. ${ServicePort}`);
         process.disconnect && process.disconnect();
+        return { app, killService, ServicePort, browser, service, UI, notify };
     }
     async function start({ app, desiredPort }) {
         let upAt, resolve, reject;
@@ -335,9 +336,15 @@ System.register("service", ["fs", "os", "path", "express", "chrome-launcher", "h
         app.use(express_1.default.urlencoded({ extended: true }));
         app.use(express_1.default.static(SITE_PATH));
     }
-    function installCleanupHandlers({ ui, bg }) {
+    function installCleanupHandlers({ ui, bg, browser }) {
         // someone closed the browser window
         const killService = async () => {
+            try {
+                browser.kill();
+            }
+            catch (e) {
+                common_js_1.DEBUG && console.info(`Could not kill browser...`, e);
+            }
             if (bg.listening) {
                 // try to delete  
                 try {
@@ -381,6 +388,7 @@ System.register("service", ["fs", "os", "path", "express", "chrome-launcher", "h
             console.log("Process error ", args);
             await killService();
         });
+        return killService;
     }
     async function stop(bg) {
         const serviceTerminator = http_terminator_1.createHttpTerminator({
@@ -447,11 +455,14 @@ System.register("index", ["service"], function (exports_5, context_5) {
     "use strict";
     var Service, API, App;
     var __moduleName = context_5 && context_5.id;
-    function go() {
-        App = Service.go();
-        return App;
+    async function go() {
+        App = await Service.go();
     }
-    function stop() {
+    async function stop() {
+        if (!App) {
+            throw new TypeError(`stop can only be called if App has started and is not already stopped.`);
+        }
+        await App.killService();
     }
     function say() {
     }

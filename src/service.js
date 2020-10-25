@@ -33,7 +33,7 @@
   let retryCount = 0;
 
 // main executable block
-  export function go() {
+  export async function go() {
     const app = express();
 
     // debugging info
@@ -48,7 +48,7 @@
 
     if (DEBUG || process.argv[1].includes(`service_${CONFIG.name}`)) {     // our startup cue
       notify('Request app start.');
-      run(app);
+      return await run(app);
     }
   }
 
@@ -152,10 +152,12 @@
       console.log(`Connected.`);
       notify('User interface online.');
 
-    installCleanupHandlers({ui: UI, bg: service});
+    const killService = installCleanupHandlers({ui: UI, bg: service, browser});
 
     notify && notify(`App started. ${ServicePort}`);
     process.disconnect && process.disconnect();
+
+    return {app, killService, ServicePort, browser, service, UI, notify};
   }
 
   async function start({app, desiredPort}) {
@@ -212,10 +214,16 @@
     app.use(express.static(SITE_PATH));
   }
 
-  function installCleanupHandlers({ui, bg}) {
+  function installCleanupHandlers({ui, bg, browser}) {
     // someone closed the browser window
 
     const killService = async () => {
+      try {
+        browser.kill();
+      } catch(e) {
+        DEBUG && console.info(`Could not kill browser...`, e);
+      }
+
       if ( bg.listening ) {
         // try to delete  
           try {
@@ -259,6 +267,8 @@
         console.log("Process error ", args);
         await killService();
       });
+
+    return killService;
   }
 
   async function stop(bg) {

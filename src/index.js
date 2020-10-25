@@ -27,18 +27,27 @@ export default API;
 
 let App;
 
-function go() {
-  App = Service.go();
-  return App;
-}
+// basic functions
+  async function go() {
+    App = await Service.go();
+  }
 
-function stop() {
+  async function stop() {
+    if ( !App ) {
+      throw new TypeError(`stop can only be called if App has started and is not already stopped.`);
+    }
 
-}
+    await App.killService();
+  }
 
-function say() {
-
-}
+  function say(msg) {
+    try {
+      App.notify(msg); 
+    } catch(e) {
+      DEBUG && console.info(e);
+      throw new TypeError(`Cannot say a console message because App Console has already closed.`);
+    }
+  }
 
 function open() {
 
