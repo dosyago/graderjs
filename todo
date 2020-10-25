@@ -1,6 +1,7 @@
-- work out how to delete the session directories on windows
+- make it into a great API and clean the code
 - put archivist in this framework.
-- write documentation about how to use grader to build cross-platform apps (grader-create-app ?)
+- improve API based on what I learned from porting and 
+- write documentation about how to use grader to build cross-platform apps 
 
 
 

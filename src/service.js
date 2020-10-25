@@ -14,19 +14,19 @@
   const PORT_DEBUG = false;
   const MAX_RETRY = 10;
   const SITE_PATH = path.resolve(__dirname, 'public');
-  const sessionId = (Math.random()*1137).toString(36);
-  const appDir = () => DEBUG ? 
+  const SessionId = (Math.random()*1137).toString(36);
+  const appDir = sessionId => DEBUG ? 
     path.resolve(__dirname, '..', 'sessions', sessionId)
     :
     path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, 'sessions', sessionId)
   ;
-  const expiredAppDir = () => DEBUG ?
-    path.resolve(__dirname, '..', 'old-sessions', sessionId)
+  const expiredSessionFile = () => DEBUG ?
+    path.resolve(__dirname, '..', 'old-sessions.json')
     :
-    path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, 'old-sessions', sessionId)
-  ;
-  const app_data_dir = () => path.resolve(appDir(), `ui-data`);
-  const temp_browser_cache = () => path.resolve(appDir(), `ui-cache`);
+    path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, 'old-sessions.json')
+
+  const app_data_dir = () => path.resolve(appDir(SessionId), `ui-data`);
+  const temp_browser_cache = () => path.resolve(appDir(SessionId), `ui-cache`);
   console.log({SITE_PATH});
 
 // global variables 
@@ -69,6 +69,23 @@
 
       notify('Service started.');
       console.log(`App service started.`);
+
+    // cleanup any old sessions
+      const undeletedOldSessions = [];
+      try {
+        const expiredSessions = JSON.parse(fs.readFileSync(expiredSessionFile()));
+        expiredSessions.forEach(sessionId => {
+          try {
+            fs.rmdirSync(appDir(sessionId), {recursive:true, maxRetries:3, retryDelay: 700});
+          } catch(e) {
+            DEBUG && console.info(`Error deleting old sessions directory ${sessionId}...`, e);
+            undeletedOldSessions.push(sessionId);
+          }
+        });
+      } catch(e) {
+        DEBUG && console.info(`Error deleting sessions from expred sessions file...`, e);
+      }
+      fs.writeFileSync(expiredSessionFile(), JSON.stringify(undeletedOldSessions));
 
     // set up disk space
       notify('Request cache directory.');
@@ -200,13 +217,29 @@
 
     const killService = async () => {
       if ( bg.listening ) {
-        await sleep(2000);
-        try {
-          fs.renameSync(appDir(), expiredAppDir());
-          fs.rmdirSync(expiredAppDir(), {recursive:true, maxRetries: 3, retryDelay: 700});
-        } catch(e) {
-          console.info(`Issue removing session directory`, e);
-        }
+        // try to delete  
+          try {
+            fs.rmdirSync(appDir(SessionId), {recursive:true, maxRetries:3, retryDelay:700});
+          } catch(e) {
+            DEBUG && console.info(`Error deleting session folder...`, e);
+          }
+
+        // if it did not delete yet schedule for later
+          if ( fs.existsSync(appDir(SessionId)) ) {
+            try {
+              let expiredSessions = []
+              try {
+                expiredSessions = JSON.parse(fs.readFileSync(expiredSessionFile()));
+              } catch(e) {
+                DEBUG && console.info(`Unable to read expired sessions file...`, e);
+              }
+              expiredSessions.push(SessionId);
+              fs.writeFileSync(expiredSessionFile(), JSON.stringify(expiredSessions));
+            } catch(e) {
+              DEBUG && console.info(`Error scheduling session data for deletion...`, e);
+            }
+          }
+
         await stop(bg);
       } else {
         say({killService: 'already closed'});

@@ -10,6 +10,12 @@
 - perf: try keeping the chrome profile dir (per app), and experiment with cache dir as temp or persistent. Also try opening chrome earlier and using DevTools if needed as fallback to make it load the UI
 - global $HOME/.grader directory for all grader apps, installs and configs
 - handle picking a random port that's available
+- work out how to delete the session directories on windows
+
+I FUCKING ROCK I AM THE FUCKING BEST HUMAN EVER !! ROO RAAA FUCK YEAH
+
+:p ;) xxx CHAKKA
+
 
 I FUCKING ROCK
 

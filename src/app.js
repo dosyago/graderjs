@@ -8,11 +8,6 @@ import AdmZip from 'adm-zip';
 import CONFIG from './config.js';
 import {DEBUG, say, sleep} from './lib/common.js';
 
-const oldSessionsDir = () => DEBUG ?
-    path.resolve(__dirname, '..', 'old-sessions')
-    :
-    path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, 'old-sessions')
-  ;
 
 launchApp();
 
@@ -26,14 +21,7 @@ async function launchApp() {
     const pr = new Promise((res, rej) => (resolve = res, reject = rej));
     pr.then(() => state = 'complete').catch(() => state = 'rejected');
 
-  let appBundle, subprocess, message;
-
-  // cleanup any old sessions
-    try {
-      fs.rmdirSync(oldSessionsDir(), {recursive:true});
-    } catch(e) {
-      DEBUG && console.info(`Error removing old sessions directory...`, e);
-    }
+  let appBundle, subprocess, message = '';
 
   // setup future cleanup
     const killService = (e) => {
