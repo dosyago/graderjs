@@ -36,6 +36,7 @@ let App;
   async function go() {
     App = await Service.go();
     //Common.DEBUG && console.log({App});
+    return App;
   }
 
   async function stop() {
@@ -47,12 +48,10 @@ let App;
   }
 
   function say(msg) {
-    try {
-      App.notify(msg); 
-    } catch(e) {
-      Common.DEBUG && console.info(e);
+    return App.notify(msg, null, {}, e => {
+      Common.DEBUG && console.info("say.App.notify", e);
       throw new TypeError(`Cannot say a console message because App Console has already closed.`);
-    }
+    });
   }
 
 async function open() {
@@ -67,32 +66,64 @@ async function open() {
   return {UI,browser};
 }
 
-async function close(UI) {
+async function close(UI = App.UI) {
   return await UI.send("Browser.close", {}); 
 }
 
-function move() {
-
+async function move({x,y}, UI = App.UI) {
+  return await UI.send("Browser.setWindowBounds", {
+    windowId: UI.windowId,
+    bounds: {
+      left: x,
+      top: y
+    }
+  });
 }
 
-function size() {
-
+async function size({width,height}, UI = App.UI) {
+  return await UI.send("Browser.setWindowBounds", {
+    windowId: UI.windowId,
+    bounds: {
+      width,
+      height
+    }
+  });
 }
 
-function minimize() {
-
+async function minimize(UI = App.UI) {
+  return await UI.send("Browser.setWindowBounds", {
+    windowId: UI.windowId,
+    bounds: {
+      windowState: 'minimized'
+    }
+  });
 }
 
-function maximize() {
-
+async function maximize(UI = App.UI) {
+  return await UI.send("Browser.setWindowBounds", {
+    windowId: UI.windowId,
+    bounds: {
+      windowState: 'maximized'
+    }
+  });
 }
 
-function fullscreen() {
-
+async function fullscreen(UI = App.UI) {
+  return await UI.send("Browser.setWindowBounds", {
+    windowId: UI.windowId,
+    bounds: {
+      windowState: 'fullscreen'
+    }
+  });
 }
 
-function partscreen() {
-
+async function partscreen(UI = App.UI) {
+  return await UI.send("Browser.setWindowBounds", {
+    windowId: UI.windowId,
+    bounds: {
+      windowState: 'normal'
+    }
+  });
 }
 
 function send() {

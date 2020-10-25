@@ -26,8 +26,9 @@
     "test-svc": "node -r esm src/service.js",
     "test-app": "npm run bundle && node build/grader.js",
     "lint": "eslint 'src/**/*.js'",
-    "tsc": "tsc --types node --target ES2020 --checkJs --allowJs --outFile build/server-types.js  --module System src/launcher.js decs.d.ts",
-    "tsc-app": "tsc --types node --target ES2020 --checkJs --allowJs --outFile build/server-types.js  --module System src/app.js decs.d.ts"
+    "tsc": "tsc --types node --target ES2020 --checkJs --allowJs --outFile build/launcher-types.js  --module System src/launcher.js decs.d.ts",
+    "tsc-app": "tsc --types node --target ES2020 --checkJs --allowJs --outFile build/app-types.js  --module System src/app.js decs.d.ts",
+    "chk": "npm run lint && npm run tsc-app && npm run tsc"
   },
   "repository": {
     "type": "git",

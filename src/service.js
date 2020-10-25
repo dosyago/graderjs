@@ -137,7 +137,9 @@
         `--metrics-recording-only`,
         `--new-window`,
         `--no-first-run`,
+        /*
         `--app=http://localhost:${ServicePort}${path}`,
+        */
         '--restore-last-session',
         `--disk-cache-dir=${temp_browser_cache(sessionId)}`,
         `--aggressive-cache-discard`
@@ -146,7 +148,9 @@
         `--metrics-recording-only`,
         `--new-window`,
         `--no-first-run`,
+        /*
         `--app=http://localhost:${ServicePort}${path}`,
+        */
         '--restore-last-session',
         `--disk-cache-dir=${temp_browser_cache(sessionId)}`,
         `--aggressive-cache-discard`,
@@ -156,7 +160,8 @@
         logLevel: 'verbose',
         chromeFlags:CHROME_OPTS, 
         userDataDir:app_data_dir(sessionId), 
-        ignoreDefaultFlags: true
+        ignoreDefaultFlags: true,
+        startingUrl: `http://localhost:${ServicePort}${path}`
       }
       DEBUG && console.log({LAUNCH_OPTS});
       let browser;
@@ -175,6 +180,22 @@
       console.log(`Connected.`);
       safe_notify('User interface online.');
 
+    // get windowId
+      let windowId;
+
+      try {
+        const {targetInfos} = await UI.send("Target.getTargets", {});
+        const appTarget = targetInfos.find(({type, url}) => {
+          return type == 'page' && url.startsWith(`http://localhost:${ServicePort}`);
+        });
+        ({windowId} = await UI.send("Browser.getWindowForTarget", {
+          targetId: appTarget.targetId
+        }));
+      } catch(e) {
+        DEBUG && console.info(`Error getting window ID...`, e);
+      }
+
+    UI.windowId = windowId;
     browser.sessionId = sessionId;
 
     return {UI,browser};
