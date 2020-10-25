@@ -137,9 +137,7 @@
         `--metrics-recording-only`,
         `--new-window`,
         `--no-first-run`,
-        /*
         `--app=http://localhost:${ServicePort}${path}`,
-        */
         '--restore-last-session',
         `--disk-cache-dir=${temp_browser_cache(sessionId)}`,
         `--aggressive-cache-discard`
@@ -148,9 +146,7 @@
         `--metrics-recording-only`,
         `--new-window`,
         `--no-first-run`,
-        /*
         `--app=http://localhost:${ServicePort}${path}`,
-        */
         '--restore-last-session',
         `--disk-cache-dir=${temp_browser_cache(sessionId)}`,
         `--aggressive-cache-discard`,
@@ -161,7 +157,9 @@
         chromeFlags:CHROME_OPTS, 
         userDataDir:app_data_dir(sessionId), 
         ignoreDefaultFlags: true,
-        startingUrl: `http://localhost:${ServicePort}${path}`
+        /*
+        startingUrl: `http://localhost:${ServicePort}${path}`,
+        */
       }
       DEBUG && console.log({LAUNCH_OPTS});
       let browser;
