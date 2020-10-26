@@ -1,10 +1,14 @@
-import {fork} from 'child_process';
-import fs from 'fs';
-import path from 'path';
+// imports
+  // node built-in
+    import fs from 'fs';
+    import path from 'path';
+    import {fork} from 'child_process';
 
-import AdmZip from 'adm-zip';
+  // 3rd-party
+    import AdmZip from 'adm-zip';
 
-import {DEBUG, say, sleep, appDir, logFile} from './lib/common.js';
+  // internal
+    import {DEBUG, say, sleep, appDir, logFile} from './lib/common.js';
 
 launchApp();
 
@@ -25,7 +29,7 @@ async function launchApp() {
       subprocess.kill();
       console.log('');
       say({exitTrigger:e});
-      exit(1);
+      return process.exit(1);
     }
 
     process.on('SIGINT', killService);
@@ -40,11 +44,10 @@ async function launchApp() {
       appBundle = fs.readFileSync(appPath);
     } catch(e) {
       console.log('src build service error', e);
-      exit(1);
+      return exit(1);
     }
 
   try {
-
     // create the app directory
       console.log('Preparing app data directory.');
       const name = DEBUG ? path.resolve(appDir(), 'dev') : appDir();
@@ -65,77 +68,79 @@ async function launchApp() {
     // and delete the zip
       fs.unlinkSync(zipName);
 
+    // wait for log stream
+      let logResolve;
+      const logPr = new Promise(res => logResolve = res);
+      const log = fs.createWriteStream(logFile());
+      log.on('open', () => logResolve());
+      await logPr;
+
     // fork the app process
       console.log('App process requested.');
       const procName = path.resolve(name, 'app', 'service.js');
-      const log = fs.createWriteStream(logFile());
-      log.on('open', () => {
-        try {
-          subprocess = fork(
-            procName,
-            !DEBUG ? 
-              {stdio:[log, log, log, 'ipc'], detached: true}
-            :
-              {stdio:'inherit'}
-          );
-          subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
-          subprocess.on('message', (...args) => {
-            process.stdout.write('\n'+message);
-            if ( typeof args[0] == "string" ) {
-              message = args[0];
-              if ( message.startsWith('App started.') ) {
-                resolve(args)
-              }
-            }
-          });
-          !DEBUG && subprocess.unref();
-        } catch(e) {
-          console.log('fork err', e);
-          exit(1);
-        }
-      });
 
+      subprocess = fork(
+        procName,
+        !DEBUG ? 
+          {stdio:[log, log, log, 'ipc'], detached: true}
+        :
+          {stdio:'inherit'}
+      );
+      subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
+      subprocess.on('message', (...args) => {
+        if ( typeof args[0] == "string" ) {
+          message = args[0];
+        }
+        process.stdout.write('\n'+message);
+        resolve(args)
+      });
+      !DEBUG && subprocess.unref();
   } catch (e) { 
     console.log('launch err', e) 
-    exit(1);
-  }
+    return exit(1);
+  } 
 
   console.log('App process created.');
 
   // keep this process spinning while we track startup progress
     const progress = [];
 
-    while( subprocess.connected && state == 'pending' ) {
-      process.stdout.clearLine(0); // 0 is 'entire line'
-      process.stdout.cursorTo(0);
-      process.stdout.write(`Waiting for your system security checks: ${progress.join('.')}`);
+    while( subprocess.connected && !(
+      typeof message == "string" && message.startsWith('App started.')
+    )) {
+      if ( state == 'pending' ) {
+        progress.push('');
+        process.stdout.clearLine(0); // 0 is 'entire line'
+        process.stdout.cursorTo(0);
+        process.stdout.write(`Waiting for your system security checks: ${progress.join('.')}`);
+      }
 
       await sleep(Math.round(Math.random()*370));
-
-      progress.push('');
     }
 
     console.log('');
 
+    console.log({message, state});
+
   // report the outcome
-    if ( state == 'complete' ) {
+    if ( typeof message == "string" && message.startsWith('App started.') ) {
       const port = Number(message.split('.')[1].trim());
       console.log(`Service on port ${port}`);
       console.log(`Launcher completed successfully.`);
-      exit(0);
+      return exit(0);
     } else {
       console.error('Error at', message);
-      console.info({state, subprocessConnected:subprocess.connected});
-      console.log('Waiting 5 seconds...');
+      console.info('State', state, 'subprocess.connected', subprocess.connected);
+      console.log('Launcher failed. Exiting in 5 seconds...');
       await sleep(5000);
-      exit(1);
+      return exit(1);
     }
 }
 
-async function exit(code) {
+function exit(code) {
   console.log(`Exit status: ${code ? 'failure' : 'success'}`);
   if ( DEBUG ) {
-    console.log(`DEBUG on so not exiting.`);
+    console.log(`DEBUG is on. Not exiting.`);
     process.stdin.resume();
   } else {
     console.log('Exiting...');

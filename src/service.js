@@ -221,7 +221,6 @@
         }
     };
 
-
     return {UI,browser};
   }
 
@@ -321,7 +320,6 @@
       process.on('SIGINT', killService);
       process.on('SIGTERM', killService);
       process.on('SIGQUIT', killService);
-      process.on('SIGKILL', killService);
       process.on('error', async (...args) => {
         console.log("Process error ", args);
         await killService();

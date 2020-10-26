@@ -1,3 +1,4 @@
+- ensure all sessions are correctly accounted for (seems at least 1 window will not be saved in old session log, need to work out why)
 - put archivist in this framework.
 - improve API based on what I learned from porting and 
 - write documentation about how to use grader to build cross-platform apps 
