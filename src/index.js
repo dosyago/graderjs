@@ -90,6 +90,8 @@ async function close(UI = App.UI) {
 }
 
 async function move({x,y}, UI = App.UI) {
+  UI.x = x;
+  UI.y = y;
   return await UI.send("Browser.setWindowBounds", {
     windowId: UI.windowId,
     bounds: {
@@ -100,6 +102,8 @@ async function move({x,y}, UI = App.UI) {
 }
 
 async function size({width,height}, UI = App.UI) {
+  UI.width = width;
+  UI.height = height;
   await UI.send("Emulation.setDeviceMetricsOverride", {
 		mobile: false,
 		width,
@@ -120,42 +124,56 @@ async function size({width,height}, UI = App.UI) {
 }
 
 async function minimize(UI = App.UI) {
+  if ( UI.windowState == 'minimized' ) return;
   const result = await UI.send("Browser.setWindowBounds", {
     windowId: UI.windowId,
     bounds: {
       windowState: 'minimized'
     }
   });
+  UI.windowState = 'minimized';
   return result;
 }
 
 async function maximize(UI = App.UI) {
+  if ( UI.windowState == 'maximized' ) return;
+  if ( UI.windowState == 'minimized' ) {
+    await partscreen(UI);
+  }
   const result = await UI.send("Browser.setWindowBounds", {
     windowId: UI.windowId,
     bounds: {
       windowState: 'maximized'
     }
   });
+  UI.windowState = 'maximized';
   return result;
 }
 
 async function fullscreen(UI = App.UI) {
+  if ( UI.windowState == 'fullscreen' ) return;
+  if ( UI.windowState == 'minimized' ) {
+    await partscreen(UI);
+  }
   const result = await UI.send("Browser.setWindowBounds", {
     windowId: UI.windowId,
     bounds: {
       windowState: 'fullscreen'
     }
   });
+  UI.windowState = 'fullscreen';
   return result;
 }
 
 async function partscreen(UI = App.UI) {
+  if ( UI.windowState == 'normal' ) return;
   const result = await UI.send("Browser.setWindowBounds", {
     windowId: UI.windowId,
     bounds: {
       windowState: 'normal'
     }
   });
+  UI.windowState = 'normal';
   return result;
 }
 
