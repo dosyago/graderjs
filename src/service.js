@@ -7,7 +7,14 @@
   import {createHttpTerminator} from 'http-terminator';
 
   import CONFIG from './config.js'
-  import {NO_SANDBOX, sleep, DEBUG, say} from './../src/lib/common.js';
+  import {
+    NO_SANDBOX, sleep, DEBUG, say,
+    appDir,
+    expiredSessionFile,
+    sessionDir,
+    app_data_dir,
+    temp_browser_cache, 
+  } from './../src/lib/common.js';
   import connect from './lib/protocol.js';
 
 // constants
@@ -16,18 +23,6 @@
   const SITE_PATH = path.resolve(__dirname, 'public');
   export const newSessionId = () => (Math.random()*1137).toString(36);
   const SessionId = newSessionId();
-  const appDir = sessionId => DEBUG ? 
-    path.resolve(__dirname, '..', 'sessions', sessionId)
-    :
-    path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, 'sessions', sessionId)
-  ;
-  const expiredSessionFile = () => DEBUG ?
-    path.resolve(__dirname, '..', 'old-sessions.json')
-    :
-    path.resolve(os.homedir(), '.grader', 'appData', `${(CONFIG.organization || CONFIG.author).name}`, `service_${CONFIG.name}`, 'old-sessions.json')
-
-  const app_data_dir = sessionId => path.resolve(appDir(sessionId), `ui-data`);
-  const temp_browser_cache = sessionId => path.resolve(appDir(sessionId), `ui-cache`);
   console.log({SITE_PATH});
 
 // global variables 
@@ -77,7 +72,7 @@
         const expiredSessions = JSON.parse(fs.readFileSync(expiredSessionFile()).toString());
         expiredSessions.forEach(sessionId => {
           try {
-            fs.rmdirSync(appDir(sessionId), {recursive:true, maxRetries:3, retryDelay: 700});
+            fs.rmdirSync(sessionDir(sessionId), {recursive:true, maxRetries:3, retryDelay: 700});
           } catch(e) {
             DEBUG && console.info(`Error deleting old sessions directory ${sessionId}...`, e);
             undeletedOldSessions.push(sessionId);
@@ -206,13 +201,13 @@
 
       // try to delete  
         try {
-          fs.rmdirSync(appDir(sessionId), {recursive:true, maxRetries:3, retryDelay:700});
+          fs.rmdirSync(sessionDir(sessionId), {recursive:true, maxRetries:3, retryDelay:700});
         } catch(e) {
           DEBUG && console.info(`Error deleting session folder...`, e);
         }
 
       // if it did not delete yet schedule for later
-        if ( fs.existsSync(appDir(sessionId)) ) {
+        if ( fs.existsSync(sessionDir(sessionId)) ) {
           try {
             let expiredSessions = []
             try {
