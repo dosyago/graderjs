@@ -102,8 +102,6 @@ async function move({x,y}, UI = App.UI) {
 }
 
 async function size({width,height}, UI = App.UI) {
-  UI.width = width;
-  UI.height = height;
   await UI.send("Emulation.setDeviceMetricsOverride", {
 		mobile: false,
 		width,
@@ -114,13 +112,25 @@ async function size({width,height}, UI = App.UI) {
       type: 'portraitPrimary'
     },
   });
-  return await UI.send("Browser.setWindowBounds", {
+  await UI.send("Browser.setWindowBounds", {
     windowId: UI.windowId,
     bounds: {
-      width,
-      height: height+85
+      windowState: 'normal',
+      width:0,
+      height:0
     }
   });
+  const result = await UI.send("Browser.setWindowBounds", {
+    windowId: UI.windowId,
+    bounds: {
+      windowState: 'normal',
+      width,
+      height
+    }
+  });
+  UI.width = width;
+  UI.height = height;
+  return result;
 }
 
 async function minimize(UI = App.UI) {
