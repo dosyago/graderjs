@@ -67,7 +67,12 @@ async function open() {
 }
 
 async function close(UI = App.UI) {
-  return await UI.send("Browser.close", {}); 
+  try {
+    UI.send("Browser.close", {}); 
+    UI.disconnect()
+  } catch(e) {
+    console.info('Error closing browser', e);
+  }
 }
 
 async function move({x,y}, UI = App.UI) {

@@ -21,6 +21,10 @@ const ROOT_SESSION = "browser";
 
       socket.on('message', handle);
       socket.on('open', () => resolve());
+      socket.on('error', err => {
+        console.info('Socket error', err);
+        close();
+      });
 
       await promise;
       
@@ -37,7 +41,7 @@ const ROOT_SESSION = "browser";
       return retVal
     } catch(e) {
       console.log("Error communicating with browser", e);
-      process.exit(1);
+      return;
     }
 
     async function send(method, params = {}, sessionId) {
@@ -52,7 +56,14 @@ const ROOT_SESSION = "browser";
       let resolve;
       const promise = new Promise(res => resolve = res);
       Resolvers[key] = resolve;
-      socket.send(JSON.stringify(message));
+
+      try {
+        socket.send(JSON.stringify(message));
+      } catch(e) {
+        console.log('Error sending on socket', e);
+        resolve({err:e});
+      }
+
       return promise;
     }
 
@@ -112,7 +123,11 @@ const ROOT_SESSION = "browser";
     }
 
     function close() {
-      socket.close();
+      try {
+        socket.close();
+      } catch(e) {
+        console.info('Error closing socket...', e);
+      }
     }
 
     function wrap(fn) {

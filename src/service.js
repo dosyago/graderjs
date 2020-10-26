@@ -311,11 +311,15 @@
     ui.socket.on('close', killService);
 
     // process cleanliness 
+      const ignore = () => true;
       process.on('beforeExit', killService);
+      // do we need to ignore these?
       process.on('SIGBREAK', killService);
       process.on('SIGHUP', killService);
       process.on('SIGINT', killService);
       process.on('SIGTERM', killService);
+      process.on('SIGQUIT', killService);
+      process.on('SIGKILL', killService);
       process.on('error', async (...args) => {
         console.log("Process error ", args);
         await killService();

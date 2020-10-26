@@ -126,9 +126,10 @@ async function launchApp() {
       console.log(`Service on port ${port}`);
       console.log('Launcher exiting successfully...');
       if ( DEBUG ) {
-        console.log(`DEBUG on so Waiting 20 seconds.`);
-        await sleep(20000);
+        console.log(`DEBUG on so Waiting 60 seconds.`);
+        await sleep(60000);
       } else {
+        await sleep(500);
         process.exit(0);
       }
     } else {
