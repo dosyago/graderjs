@@ -8,6 +8,8 @@ async function start() {
   await Grader.util.sleep(3000);
   const {UI:UI2, browser} = await Grader.ui.open();
 
+  console.log({UI2, browser});
+
   /**
   await Grader.util.sleep(3000);
   await Grader.ui.close(UI2);

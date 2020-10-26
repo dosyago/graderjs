@@ -1,11 +1,9 @@
 import {fork} from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
 
 import AdmZip from 'adm-zip';
 
-import CONFIG from './config.js';
 import {DEBUG, say, sleep, appDir, logFile} from './lib/common.js';
 
 launchApp();
@@ -20,7 +18,7 @@ async function launchApp() {
     const pr = new Promise((res, rej) => (resolve = res, reject = rej));
     pr.then(() => state = 'complete').catch(() => state = 'rejected');
 
-  let appBundle, subprocess, message = '';
+  let appBundle, subprocess = {}, message = '';
 
   // setup future cleanup
     const killService = (e) => {
@@ -46,6 +44,7 @@ async function launchApp() {
     }
 
   try {
+
     // create the app directory
       console.log('Preparing app data directory.');
       const name = DEBUG ? path.resolve(appDir(), 'dev') : appDir();
@@ -69,13 +68,13 @@ async function launchApp() {
     // fork the app process
       console.log('App process requested.');
       const procName = path.resolve(name, 'app', 'service.js');
-      const logFile = fs.createWriteStream(logFile(sessionId));
-      logFile.on('open', () => {
+      const log = fs.createWriteStream(logFile());
+      log.on('open', () => {
         try {
           subprocess = fork(
             procName,
             !DEBUG ? 
-              {stdio:[logFile, logFile, logFile, 'ipc'], detached: true}
+              {stdio:[log, log, log, 'ipc'], detached: true}
             :
               {stdio:'inherit'}
           );
@@ -95,6 +94,7 @@ async function launchApp() {
           exit(1);
         }
       });
+
   } catch (e) { 
     console.log('launch err', e) 
     exit(1);
@@ -132,15 +132,14 @@ async function launchApp() {
     }
 }
 
-function exit(code) {
+async function exit(code) {
   console.log(`Exit status: ${code ? 'failure' : 'success'}`);
   if ( DEBUG ) {
     console.log(`DEBUG on so not exiting.`);
     process.stdin.resume();
   } else {
     console.log('Exiting...');
-    await sleep(500);
-    process.exit(code);
+    sleep(500).then(() => process.exit(code));
   }
 }
 

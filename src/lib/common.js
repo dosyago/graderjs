@@ -1,3 +1,8 @@
+import os from 'os';
+import path from 'path';
+
+import CONFIG from '../config.js';
+
 // determine where this code is running 
 
 export const DEBUG = process.env.DEBUG_grader || false;
@@ -13,7 +18,7 @@ export const expiredSessionFile = () => path.resolve(appDir(), 'old-sessions.jso
 export const sessionDir = sessionId => path.resolve(appDir(), 'sessions', sessionId)
 export const app_data_dir = sessionId => path.resolve(sessionDir(sessionId), `ui-data`);
 export const temp_browser_cache = sessionId => path.resolve(sessionDir(sessionId), `ui-cache`);
-export const logFile = sessionId => path.resolve(sessionDir(sessionId), 'session.log');
+export const logFile = () => path.resolve(appDir(), 'launcher.log');
 
 export const sleep = ms => new Promise(res => setTimeout(res, ms));
 

@@ -1,6 +1,5 @@
 // imports
   import fs from 'fs';
-  import os from 'os';
   import path from 'path';
   import express from 'express';
   import {launch as ChromeLaunch} from 'chrome-launcher';
@@ -9,7 +8,6 @@
   import CONFIG from './config.js'
   import {
     NO_SANDBOX, sleep, DEBUG, say,
-    appDir,
     expiredSessionFile,
     sessionDir,
     app_data_dir,
