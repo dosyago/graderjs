@@ -102,6 +102,7 @@ async function move({x,y}, UI = App.UI) {
 }
 
 async function size({width,height}, UI = App.UI) {
+  /*
   await UI.send("Emulation.setDeviceMetricsOverride", {
 		mobile: false,
 		width,
@@ -112,6 +113,7 @@ async function size({width,height}, UI = App.UI) {
       type: 'portraitPrimary'
     },
   });
+  */
   await UI.send("Browser.setWindowBounds", {
     windowId: UI.windowId,
     bounds: {
