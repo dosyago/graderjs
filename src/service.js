@@ -105,7 +105,7 @@
     return {app, killService, ServicePort, browser, service, UI, notify, newSessionId};
   }
 
-  export async function newBrowser({ServicePort, sessionId, path: path = '/'}) {
+  export async function newBrowser({ServicePort, sessionId, uriPath: uriPath = '/'}) {
     if ( ! sessionId || ! ServicePort) {
       throw new TypeError(`newBrowser must be passed a unique sessionId and ServicePort`);
     }
@@ -130,7 +130,7 @@
         `--metrics-recording-only`,
         `--new-window`,
         `--no-first-run`,
-        `--app=http://localhost:${ServicePort}${path}`,
+        `--app=http://localhost:${ServicePort}${uriPath}`,
         '--restore-last-session',
         `--disk-cache-dir=${temp_browser_cache(sessionId)}`,
         `--aggressive-cache-discard`
@@ -139,7 +139,7 @@
         `--metrics-recording-only`,
         `--new-window`,
         `--no-first-run`,
-        `--app=http://localhost:${ServicePort}${path}`,
+        `--app=http://localhost:${ServicePort}${uriPath}`,
         '--restore-last-session',
         `--disk-cache-dir=${temp_browser_cache(sessionId)}`,
         `--aggressive-cache-discard`,
@@ -151,7 +151,7 @@
         userDataDir:app_data_dir(sessionId), 
         ignoreDefaultFlags: true,
         /*
-        startingUrl: `http://localhost:${ServicePort}${path}`,
+        startingUrl: `http://localhost:${ServicePort}${uriPath}`,
         */
       }
       DEBUG && console.log({LAUNCH_OPTS});
@@ -190,6 +190,8 @@
     UI.windowId = windowId;
     browser.sessionId = sessionId;
     UI.shutdown = async () => {
+      if ( UI.alreadyShutdown ) return;
+
       // try to kill browser
         try {
           await browser.kill();
@@ -205,21 +207,24 @@
         }
 
       // if it did not delete yet schedule for later
-        if ( fs.existsSync(sessionDir(sessionId)) ) {
+        try {
+          let expiredSessions = []
           try {
-            let expiredSessions = []
-            try {
-              expiredSessions = JSON.parse(fs.readFileSync(expiredSessionFile()).toString());
-            } catch(e) {
-              DEBUG && console.info(`Unable to read expired sessions file...`, e);
-            }
-            expiredSessions.push(sessionId);
-            fs.writeFileSync(expiredSessionFile(), JSON.stringify(expiredSessions));
+            expiredSessions = JSON.parse(fs.readFileSync(expiredSessionFile()).toString());
           } catch(e) {
-            DEBUG && console.info(`Error scheduling session data for deletion...`, e);
+            DEBUG && console.info(`Unable to read expired sessions file...`, e);
           }
+          expiredSessions.push(sessionId);
+          const tmp = '.new'+Math.random();
+          fs.writeFileSync(path.resolve(expiredSessionFile() + tmp), JSON.stringify(expiredSessions));
+          fs.renameSync(path.resolve(expiredSessioNFile() + tmp), expiredSessionFile());
+        } catch(e) {
+          DEBUG && console.info(`Error scheduling session data for deletion...`, e);
         }
+
+      UI.alreadyShutdown = true;
     };
+    UI.socket.on('close', () => UI.shutdown());
 
     return {UI,browser};
   }

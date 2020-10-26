@@ -21,10 +21,13 @@ const ROOT_SESSION = "browser";
 
       socket.on('message', handle);
       socket.on('open', () => resolve());
+
+      /*
       socket.on('error', err => {
         console.info('Socket error', err);
         close();
       });
+      */
 
       await promise;
       

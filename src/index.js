@@ -70,6 +70,7 @@ async function open() {
 }
 
 async function close(UI = App.UI) {
+  /*
   try {
     await UI.send("Browser.close", {}); 
   } catch(e) {
@@ -81,9 +82,10 @@ async function close(UI = App.UI) {
   } catch(e) {
     console.info(`Error disconnecting socket`, e);
   }
+  */
 
   try {
-    UI.shutdown();
+    await UI.shutdown();
   } catch(e) {
     console.info(`Error shut down browser.`, e);
   }
