@@ -5,10 +5,12 @@ start();
 async function start() {
   await Grader.go();
 
+  /**
   const {UI:UI2} = await Grader.ui.open();
 
   await Grader.util.sleep(3000);
   await Grader.ui.close(UI2);
+  **/
 
   await Grader.util.sleep(2000);
   await Grader.ui.minimize();
