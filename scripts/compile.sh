@@ -25,7 +25,7 @@ cd ../
 
 cp src/config.js build/
 
-npm run build
+npm run build-win
 
 chmod +x build/grader.js
 

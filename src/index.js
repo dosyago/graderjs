@@ -1,3 +1,4 @@
+import fs from 'fs';
 import * as Service from './service.js';
 import * as Common from './lib/common.js';
 
@@ -57,21 +58,34 @@ let App;
 async function open() {
   const {ServicePort} = App;
   const sessionId = App.newSessionId();
+  fs.writeFileSync('grader.open', JSON.stringify({ServicePort, sessionId}));
   let browser, UI;
   try {
     ({UI,browser} = await Service.newBrowser({ServicePort, sessionId}));
   } catch(e) {
     console.log("open", e);
+    fs.writeFileSync('grader.error', JSON.stringify({err:e, msg:e+''}));
   }
   return {UI,browser};
 }
 
 async function close(UI = App.UI) {
   try {
-    UI.send("Browser.close", {}); 
-    UI.disconnect()
+    await UI.send("Browser.close", {}); 
   } catch(e) {
     console.info('Error closing browser', e);
+  }
+
+  try {
+    UI.disconnect()
+  } catch(e) {
+    console.info(`Error disconnecting socket`, e);
+  }
+
+  try {
+    UI.shutdown();
+  } catch(e) {
+    console.info(`Error shut down browser.`, e);
   }
 }
 

@@ -104,7 +104,7 @@
       console.log(`Chrome started.`);
       notify('User interface created.');
 
-    const killService = installCleanupHandlers({ui: UI, bg: service, browser});
+    const killService = installCleanupHandlers({ui: UI, bg: service});
 
     notify && notify(`App started. ${ServicePort}`);
     process.disconnect && process.disconnect();
@@ -167,6 +167,7 @@
         browser = await ChromeLaunch(LAUNCH_OPTS);
       } catch(e) {
         DEBUG && console.error(e);
+        fs.writeFileSync('browser.error', JSON.stringify({err:e, msg:e+'', stack:e.stack}));
         safe_notify('Could not start UI (chrome). Because: ' + JSON.stringify(e)); 
       }
 
@@ -195,6 +196,38 @@
 
     UI.windowId = windowId;
     browser.sessionId = sessionId;
+    UI.shutdown = async () => {
+      // try to kill browser
+        try {
+          await browser.kill();
+        } catch(e) {
+          console.log(`Browser already dead...`, e);
+        }
+
+      // try to delete  
+        try {
+          fs.rmdirSync(appDir(sessionId), {recursive:true, maxRetries:3, retryDelay:700});
+        } catch(e) {
+          DEBUG && console.info(`Error deleting session folder...`, e);
+        }
+
+      // if it did not delete yet schedule for later
+        if ( fs.existsSync(appDir(sessionId)) ) {
+          try {
+            let expiredSessions = []
+            try {
+              expiredSessions = JSON.parse(fs.readFileSync(expiredSessionFile()).toString());
+            } catch(e) {
+              DEBUG && console.info(`Unable to read expired sessions file...`, e);
+            }
+            expiredSessions.push(sessionId);
+            fs.writeFileSync(expiredSessionFile(), JSON.stringify(expiredSessions));
+          } catch(e) {
+            DEBUG && console.info(`Error scheduling session data for deletion...`, e);
+          }
+        }
+    };
+
 
     return {UI,browser};
   }
@@ -267,40 +300,17 @@
     app.use(express.static(SITE_PATH));
   }
 
-  function installCleanupHandlers({ui, bg, browser}) {
+  function installCleanupHandlers({ui, bg}) {
     // someone closed the browser window
 
     const killService = async () => {
       try {
-        browser.kill();
+        await ui.shutdown();
       } catch(e) {
-        DEBUG && console.info(`Could not kill browser...`, e);
+        DEBUG && console.info(`Error shutting down the browser...`, e);
       }
 
       if ( bg.listening ) {
-        // try to delete  
-          try {
-            fs.rmdirSync(appDir(SessionId), {recursive:true, maxRetries:3, retryDelay:700});
-          } catch(e) {
-            DEBUG && console.info(`Error deleting session folder...`, e);
-          }
-
-        // if it did not delete yet schedule for later
-          if ( fs.existsSync(appDir(SessionId)) ) {
-            try {
-              let expiredSessions = []
-              try {
-                expiredSessions = JSON.parse(fs.readFileSync(expiredSessionFile()).toString());
-              } catch(e) {
-                DEBUG && console.info(`Unable to read expired sessions file...`, e);
-              }
-              expiredSessions.push(SessionId);
-              fs.writeFileSync(expiredSessionFile(), JSON.stringify(expiredSessions));
-            } catch(e) {
-              DEBUG && console.info(`Error scheduling session data for deletion...`, e);
-            }
-          }
-
         await stop(bg);
       } else {
         say({killService: 'already closed'});
@@ -311,7 +321,6 @@
     ui.socket.on('close', killService);
 
     // process cleanliness 
-      const ignore = () => true;
       process.on('beforeExit', killService);
       // do we need to ignore these?
       process.on('SIGBREAK', killService);

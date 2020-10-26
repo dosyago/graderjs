@@ -73,24 +73,38 @@ async function launchApp() {
       console.log('App process requested.');
       const procName = path.resolve(name, 'app', 'service.js');
       DEBUG && console.log({procName});
-      subprocess = fork(
-        procName,
-        !DEBUG ? 
-          {stdio:[null, null, null, 'ipc'], detached: true}
-        :
-          {stdio:'inherit'}
-      );
-      subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
-      subprocess.on('message', (...args) => {
-        if ( typeof args[0] == "string" ) {
-          message = args[0];
+      const logFile = fs.createWriteStream('launcher.log');
+      let resolve2;
+      //const pr2 = new Promise(res => resolve = res);
+      const pr2 = new Promise(res => resolve2 = res);
+      logFile.on('open', fd => {
+        try {
+          subprocess = fork(
+            procName,
+            !DEBUG ? 
+              {stdio:[logFile, logFile, logFile, 'ipc'], detached: true}
+            :
+              {stdio:'inherit'}
+          );
+          subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
+          subprocess.on('message', (...args) => {
+            if ( typeof args[0] == "string" ) {
+              message = args[0];
+            }
+            process.stdout.write('\n'+message);
+            resolve2(args)
+          });
+          !DEBUG && subprocess.unref();
+          resolve();
+        } catch(e) {
+          console.log('fork err', e);
+          process.exit(1);
         }
-        process.stdout.write('\n'+message);
-        resolve(args)
       });
-      !DEBUG && subprocess.unref();
+      //await pr;
+      await pr2;
   } catch (e) { 
-    console.log('fork err', e) 
+    console.log('launch err', e) 
     console.log('App process failed. Exiting...');   
     process.exit(1);
   }
@@ -122,13 +136,13 @@ async function launchApp() {
   // report the outcome
     if ( typeof message == "string" && message.startsWith('App started.') ) {
       const port = Number(message.split('.')[1].trim());
-      console
       console.log(`Service on port ${port}`);
-      console.log('Launcher exiting successfully...');
+      console.log(`Launcher completed successfully.`);
       if ( DEBUG ) {
-        console.log(`DEBUG on so Waiting 60 seconds.`);
-        await sleep(60000);
+        console.log(`DEBUG on so not exiting.`);
+        process.stdin.resume();
       } else {
+        console.log('Launcher exiting...');
         await sleep(500);
         process.exit(0);
       }
