@@ -217,7 +217,7 @@
           expiredSessions.push(sessionId);
           const tmp = '.new'+Math.random();
           fs.writeFileSync(path.resolve(expiredSessionFile() + tmp), JSON.stringify(expiredSessions));
-          fs.renameSync(path.resolve(expiredSessioNFile() + tmp), expiredSessionFile());
+          fs.renameSync(path.resolve(expiredSessionFile() + tmp), expiredSessionFile());
         } catch(e) {
           DEBUG && console.info(`Error scheduling session data for deletion...`, e);
         }
