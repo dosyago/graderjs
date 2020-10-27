@@ -19,9 +19,17 @@
   const PORT_DEBUG = false;
   const MAX_RETRY = 10;
   export const SITE_PATH = path.resolve(__dirname, 'public');
+  console.log({SITE_PATH});
   export const newSessionId = () => (Math.random()*1137).toString(36);
   const SessionId = newSessionId();
-  console.log({SITE_PATH});
+  const BINDING_NAME = "_graderServer";
+  const JS_CONTEXT_NAME = "GraderWorld";
+  const API_BINDING_SCRIPT = fs.readFileSync(
+    DEBUG ? 
+      path.resolve(appDir(), 'dev', 'src', 'lib', 'inject', 'proxy.js')
+      :
+      path.resolve(appDir(), 'src', 'lib', 'inject', 'proxy.js')
+  ).toString();
 
 // global variables 
   let retryCount = 0;
@@ -165,6 +173,7 @@
       }
 
     // connect to UI
+      let appTarget;
       safe_notify('Request interface connection.');
       console.log(`Connecting to UI...`);
       console.log(browser);
@@ -177,7 +186,7 @@
 
       try {
         const {targetInfos} = await UI.send("Target.getTargets", {});
-        const appTarget = targetInfos.find(({type, url}) => {
+        appTarget = targetInfos.find(({type, url}) => {
           return type == 'page' && url.startsWith(`http://localhost:${ServicePort}`);
         });
         ({windowId} = await UI.send("Browser.getWindowForTarget", {
@@ -225,6 +234,79 @@
       UI.alreadyShutdown = true;
     };
     UI.socket.on('close', () => UI.shutdown());
+
+    // install binding and script and reload
+      /**
+        note that doing it like this
+        where we add the binding only to the one isolate JS context
+        where our grader API global is
+        means that no JS scripts on any page 
+        can access either the binding or the global
+        the only way we can access those scripts is 
+        to add a config.js property that whitelists those scripts
+        and import them here using add script (in the same call we already use)
+        or eval them in the isolated world directly
+        this means that to actually talk to the window APIs
+        from a regular script loaded staticly by the browser
+        we need to use postMessage I think
+        this is more work for the dev but ultimately i think
+        a better solution since it's more secure than just with one flag
+        (apiInUI) exposing the service APIs to any script that gets loaded
+        by the UI
+      **/
+    try {
+      let attachResolve, attachPr = new Promise(res => attachResolve = res);
+      let contextResolve, contextPr = new Promise(res => contextResolve = res);
+      await ons("Target.attachedToTarget", p => attachResolve(p));
+      await send("Target.attachToTarget", {
+        targetId: appTarget.targetId
+      });
+      const {sessionId} = await attachResolve;
+      await send("Runtime.enable", {}, sessionId);
+      await send("Page.addScriptToEvaluateOnNewDocument", {
+        worldName: JS_CONTEXT_NAME,
+        source: API_BINDING_SCRIPT,
+      }, sessionId);
+      // catch the isolated world creation to add the binding to 
+      // one place only (so no other scripts can access it)
+      await ons("Runtime.executionContextCreated", p => {
+        if ( p.context.name == JS_CONTEXT_NAME ) {
+          const {context: {id: executionContextId }} = p;
+          await send("Runtime.addBinding", {
+            name: BINDING_NAME,
+            executionContextId
+          }, sessionId);
+        }
+      });
+      // creat a new document to ensure we add the script
+      await send("Page.reload", {}, sessionId);
+      // how to rewrite the above with a promise that keeps resolving?
+        // maybe
+        /**
+          let next, nextPr = new Promise(res => next = res);
+          await ons("Runtime.executionContextCreated", p => next(p));
+          while(true) {
+            const val = await nextPr;    
+            // do something with val;
+            nextPr = new Promise(res => next = res);
+          }
+        **/
+        // good but how to run this and not get stuck in it?
+        /**
+          // i think the only way would be to create a trampoline / task scheduler
+          // using coroutines / yield
+          let next, nextPr = new Promise(res => next = res);
+          await ons("Runtime.executionContextCreated", p => next(p));
+          while(true) {
+            const val = await nextPr;    
+            // do something with val;
+            nextPr = new Promise(res => next = res);
+            yield;
+          }
+        **/
+    } catch(e) {
+      DEBUG && console.info(`Error getting window ID...`, e);
+    }
 
     return {UI,browser};
   }
