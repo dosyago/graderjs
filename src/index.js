@@ -21,6 +21,10 @@
       partscreen,         // UI window to part of screen
     },
 
+    meta: {
+      publishAPI          // publish an API into the UI context (requires apiInUI: true)
+    },
+
     control: {
       send,               // send a DevTools command (throws if ui not connected yet)
       on,                 // start listening for a DevTools event (throws if ui not connected yet)
@@ -29,7 +33,7 @@
 
     util: {
       sleep: Common.sleep
-    }
+    },
   };
 
 // constants
@@ -46,12 +50,15 @@ export default API;
 
 // basic functions
   async function go({
-    windowControls = DEFAULT_WC,             // set properties of window control bar
-    addHandlers,                             // callback to add the route handlers to an express app
-    server,                                  // used to replace default server if you need more control 
-                                             //   (such as websockets, or TLS)
-                                             // we call listen automatically
-    keepConsoleOpen,                         // keeps the console open in case you need it
+    apiInUI:                              // enable grader API available in UI context
+      apiInUI = false,
+    windowControls:                       // set properties of window control bar
+      windowControls = DEFAULT_WC,        
+    addHandlers,                          // callback to add the route handlers to an express app
+    server,                               // used to replace default server if you need more control 
+                                            //   (such as websockets, or TLS)
+                                            // we call listen automatically
+    keepConsoleOpen,                      // keeps the console open in case you need it
   }) {
     // default parameters
       if ( windowControls === false ) {
