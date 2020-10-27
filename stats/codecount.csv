@@ -1,16 +1,24 @@
-language,filename,blank,comment,code,"github.com/AlDanial/cloc v 1.81  T=0.02 s (923.4 files/s, 41883.7 lines/s)"
-JavaScript,./src/server.js,37,33,113
-JavaScript,./src/lib/protocol.js,15,1,97
-JavaScript,./src/app.js,20,1,69
-JavaScript,./src/lib/args.js,17,1,59
+language,filename,blank,comment,code,"github.com/AlDanial/cloc v 1.82  T=0.04 s (575.8 files/s, 39235.8 lines/s)"
+JavaScript,./src/service.js,47,33,268
+Bourne Shell,./.work/win_link.sh,48,35,160
+JavaScript,./src/index.js,23,28,159
+JavaScript,./src/lib/protocol.js,19,9,113
+JavaScript,./src/launcher.js,25,14,111
+JavaScript,./src/lib/args.js,17,0,52
+JavaScript,./src/app.js,15,0,29
+Markdown,./.work/icons.md,19,0,26
 HTML,./src/public/index.html,0,0,24
-Bourne Shell,./scripts/build_setup.sh,4,0,18
+Bourne Shell,./scripts/build_setup.sh,6,0,24
+JavaScript,./src/lib/common.js,7,1,19
 JavaScript,./webpack.config.js,1,0,16
-JavaScript,./src/webpack.config.js,1,0,16
+JavaScript,./src/config.js,0,0,15
+Bourne Shell,./scripts/compile.sh,14,7,14
 JavaScript,./.eslintrc.js,0,0,13
-Bourne Shell,./scripts/compile.sh,13,7,13
+JavaScript,./src/webpack.config.js,2,5,13
+Bourne Shell,./scripts/test.sh,9,1,10
 Bourne Shell,./scripts/upload.sh,4,0,10
-JavaScript,./scripts/webzip.js,7,0,8
-JavaScript,./src/lib/common.js,5,1,7
+JavaScript,./scripts/webzip.js,7,0,9
+Markdown,./notes/caveats.md,5,0,6
+TypeScript,./decs.d.ts,1,0,2
 YAML,./.github/FUNDING.yml,1,1,2
-SUM,,125,45,465
+SUM,,270,134,1095
