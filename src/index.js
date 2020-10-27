@@ -92,6 +92,13 @@ export default API;
     });
   }
 
+// meta functions
+  async function publishAPI(apiRoot) {
+    // apiRoot is an object with properties that enumerate all the functions of that API
+    // e.g. if your API is "sendEmail", "checkReplies", your apiRoot is
+    // {sendEmail, checkReplies}
+  }
+
 // window functions
   async function open() {
     const {ServicePort} = App;
