@@ -18,7 +18,7 @@
 // constants
   const PORT_DEBUG = false;
   const MAX_RETRY = 10;
-  const SITE_PATH = path.resolve(__dirname, 'public');
+  export const SITE_PATH = path.resolve(__dirname, 'public');
   export const newSessionId = () => (Math.random()*1137).toString(36);
   const SessionId = newSessionId();
   console.log({SITE_PATH});
