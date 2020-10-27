@@ -34,7 +34,13 @@ export default API;
 let App;
 
 // basic functions
-  async function go() {
+  async function go({
+    addHandlers,                           // callback to add the route handlers to an express app
+    server,                                // used to replace default server if you need more control 
+                                           //   (such as websockets, or TLS)
+                                           // we call listen automatically
+    keepConsoleOpen,                       // keeps the console open in case you need it for some reason
+  }) {
     App = await Service.go();
     //Common.DEBUG && console.log({App});
     return App;
