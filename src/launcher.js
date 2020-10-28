@@ -81,11 +81,9 @@ async function launchApp() {
 
       subprocess = fork(
         procName,
-        /*
         !DEBUG ? 
           {stdio:[log, log, log, 'ipc'], detached: true}
         :
-        */
           {stdio:'inherit'}
       );
       subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
@@ -122,7 +120,7 @@ async function launchApp() {
 
     console.log('');
 
-    console.log({message, state});
+    DEBUG && console.log({message, state});
 
   // report the outcome
     if ( typeof message == "string" && message.startsWith('App started.') ) {

@@ -122,6 +122,9 @@
       throw new TypeError(`newBrowser must be passed a unique sessionId and ServicePort`);
     }
 
+    // state variable
+      let bindingInstallationStarted = false;
+
     // set up disk space
       safe_notify('Request UI directories.');
       if ( !fs.existsSync(temp_browser_cache(sessionId)) ) {
@@ -265,7 +268,7 @@
 
     try {
       // attach to target
-        console.log({installingAPIProxy:true});
+        DEBUG && console.log({installingAPIProxy:true});
 
         const {sessionId} = await send("Target.attachToTarget", {
           targetId: appTarget.targetId,
@@ -274,17 +277,20 @@
         await send("Runtime.enable", {}, sessionId);
         await send("Page.enable", {}, sessionId);
 
-        console.log({attached:{sessionId}});
+        DEBUG && console.log({attached:{sessionId}});
 
       // add the proxy script to all frames in this target
-        console.log({script:await send("Page.addScriptToEvaluateOnNewDocument", {
+        const script = await send("Page.addScriptToEvaluateOnNewDocument", {
           source: API_PROXY_SCRIPT,
-        }, sessionId)});
+        }, sessionId);
+
+        DEBUG && console.log({script});
 
       // listen for binding request
         on("Runtime.consoleAPICalled", async ({args, executionContextId}) => {
           try {
             if ( args.length == 0 ) return;
+            if ( bindingInstallationStarted ) return;
 
             const [{value:string}] = args;
 
@@ -302,6 +308,8 @@
             }
 
             if ( installBinding ) {
+              bindingInstallationStarted = true;
+
               // get top frame
                 const {frameTree: {frame: {id: frameId}}} = await send(
                   "Page.getFrameTree", {}, sessionId
@@ -315,10 +323,10 @@
 
               // add a binding to it
                 if ( bindingRetryCount == 0 ) {
-                  console.log(`Add service binding to ec ${executionContextId}`);
+                  DEBUG && console.log(`Add service binding to ec ${executionContextId}`);
                   await on("Runtime.bindingCalled", async ({name, payload, executionContextId}) => {
-                    console.log("Service side received call from UI binding");
-                    console.info({name, payload, executionContextId});
+                    DEBUG && console.log("Service side received call from UI binding");
+                    DEBUG && console.info({name, payload, executionContextId});
                     await bridge({name, payload, executionContextId});
                   });
                   await send("Runtime.addBinding", {
@@ -329,20 +337,21 @@
 
               // add the service binding script 
                 // (to receive messages from API proxy and dispatch them to the binding)
-                console.log(`Add service binding script to ec ${executionContextId}`);
+                DEBUG && console.log(`Add service binding script to ec ${executionContextId}`);
                 const {result, exceptionDetails} = await send("Runtime.evaluate", {
                   expression: SERVICE_BINDING_SCRIPT,
                   returnByValue: true,
                   executionContextId
                 }, sessionId);
 
-                console.log({result, exceptionDetails});
+                DEBUG && console.log({result, exceptionDetails});
 
               // reload if needed
                 if ( exceptionDetails ) {
                   if ( bindingRetryCount++ < MAX_BINDING_RETRY ) {
                     // reload the page 
                     // (binding does not seem to be available to isolated script unless page is reloaded)
+                    bindingInstallationStarted = false;
                     await send("Page.reload", {}, sessionId);
                   } else {
                     throw new Error(`Retries exceeded to add the binding to the page`); 
@@ -350,6 +359,7 @@
                 }
             }
           } catch(e) {
+            bindingInstallationStarted = false;
             DEBUG && console.info(`Error installing binding...`, e);
           }
         });

@@ -13,6 +13,9 @@
 - work out how to delete the session directories on windows
 - make it into a great API and clean the code
 - ensure all sessions are correctly accounted for (seems at least 1 window will not be saved in old session log, need to work out why)
+- create API bridge plumbing!
+
+FUCK YEAH I AM THE FUCKING BEST
 
 YEAH I ROCK
 
