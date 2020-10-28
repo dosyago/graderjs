@@ -313,6 +313,10 @@
                 }, sessionId);
 
               // add a binding to it
+                await on("Runtime.bindingCalled", async ({name, payload, executionContextId}) => {
+                  console.log("Service side received call from UI binding");
+                  console.info({name, payload, executionContextId});
+                });
                 await send("Runtime.addBinding", {
                   name: BINDING_NAME,
                   executionContextId
