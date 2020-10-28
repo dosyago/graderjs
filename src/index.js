@@ -59,7 +59,7 @@ export default API;
                                             //   (such as websockets, or TLS)
                                             // we call listen automatically
     keepConsoleOpen,                      // keeps the console open in case you need it
-  }) {
+  } = {}) {
     // default parameters
       if ( windowControls === false ) {
         windowControls = {

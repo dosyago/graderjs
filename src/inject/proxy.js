@@ -7,6 +7,15 @@
 
   let GraderProxy, HandlerInstance, revoke; 
 
+  self.helloWorld = true;
+  alert("API Proxy Installed");
+
+  if ( self == top ) {
+    console.log(JSON.stringify({
+      graderRequestInstallBinding: true
+    }));
+  }
+
   class Handler {
     constructor() {
       const Privates = Object.create(null);
@@ -85,14 +94,16 @@
       }
   }
 
-  handlerInstance = new Handler;
+  HandlerInstance = new Handler;
 
-  ({proxy: GraderProxy, revoke} = Proxy.revocable(Target, handlerInstance));
+  ({proxy: GraderProxy, revoke} = Proxy.revocable(Target, HandlerInstance));
 
   SLOT_DESCRIPTOR.get = () => GraderProxy;
 
   Object.freeze(SLOT_DESCRIPTOR);
   Object.defineProperty(globalThis, GRADER_API_SLOT, SLOT_DESCRIPTOR);
+
+  /* eslint-disable no-inner-declarations */
 
   function guard(source, handler, targ, recv) {
     if ( handler !== HandlerInstance ) {
@@ -112,4 +123,6 @@
   function send(data) {
     console.log("Will send", data);
   }
+
+  /* eslint-enable no-inner-declarations */
 }

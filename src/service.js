@@ -9,6 +9,7 @@
   import {
     NO_SANDBOX, sleep, DEBUG, say,
     expiredSessionFile,
+    appDir,
     sessionDir,
     app_data_dir,
     temp_browser_cache, 
@@ -19,16 +20,13 @@
   const PORT_DEBUG = false;
   const MAX_RETRY = 10;
   export const SITE_PATH = path.resolve(__dirname, 'public');
-  console.log({SITE_PATH});
+  DEBUG && console.log({SITE_PATH});
   export const newSessionId = () => (Math.random()*1137).toString(36);
   const SessionId = newSessionId();
   const BINDING_NAME = "_graderServer";
   const JS_CONTEXT_NAME = "GraderWorld";
-  const API_BINDING_SCRIPT = fs.readFileSync(
-    DEBUG ? 
-      path.resolve(appDir(), 'dev', 'src', 'lib', 'inject', 'proxy.js')
-      :
-      path.resolve(appDir(), 'src', 'lib', 'inject', 'proxy.js')
+  const API_PROXY_SCRIPT = fs.readFileSync(
+    path.resolve(appDir(), 'app', 'inject', 'proxy.js')
   ).toString();
 
 // global variables 
@@ -101,7 +99,7 @@
         process.exit(1);
       }
 
-      DEBUG && console.log({browser, ChromeLaunch});
+      //DEBUG && console.log({browser, ChromeLaunch});
       console.log(`Chrome started.`);
       notify('User interface created.');
 
@@ -134,6 +132,7 @@
 
     // start browser
       const CHROME_OPTS = !NO_SANDBOX ? [
+        `--disable-extensions`,
         `--disable-breakpad`,
         `--metrics-recording-only`,
         `--new-window`,
@@ -143,6 +142,7 @@
         `--disk-cache-dir=${temp_browser_cache(sessionId)}`,
         `--aggressive-cache-discard`
       ] : [
+        `--disable-extensions`,
         `--disable-breakpad`,
         `--metrics-recording-only`,
         `--new-window`,
@@ -254,58 +254,77 @@
         (apiInUI) exposing the service APIs to any script that gets loaded
         by the UI
       **/
+
+    const {ons, on, send} = UI;
+
     try {
-      let attachResolve, attachPr = new Promise(res => attachResolve = res);
-      let contextResolve, contextPr = new Promise(res => contextResolve = res);
-      await ons("Target.attachedToTarget", p => attachResolve(p));
-      await send("Target.attachToTarget", {
-        targetId: appTarget.targetId
-      });
-      const {sessionId} = await attachResolve;
-      await send("Runtime.enable", {}, sessionId);
-      await send("Page.addScriptToEvaluateOnNewDocument", {
-        worldName: JS_CONTEXT_NAME,
-        source: API_BINDING_SCRIPT,
-      }, sessionId);
-      // catch the isolated world creation to add the binding to 
-      // one place only (so no other scripts can access it)
-      await ons("Runtime.executionContextCreated", p => {
-        if ( p.context.name == JS_CONTEXT_NAME ) {
-          const {context: {id: executionContextId }} = p;
-          await send("Runtime.addBinding", {
-            name: BINDING_NAME,
-            executionContextId
-          }, sessionId);
-        }
-      });
-      // creat a new document to ensure we add the script
-      await send("Page.reload", {}, sessionId);
-      // how to rewrite the above with a promise that keeps resolving?
-        // maybe
-        /**
-          let next, nextPr = new Promise(res => next = res);
-          await ons("Runtime.executionContextCreated", p => next(p));
-          while(true) {
-            const val = await nextPr;    
-            // do something with val;
-            nextPr = new Promise(res => next = res);
+      // attach to target
+        let attachResolve, attachPr = new Promise(res => attachResolve = res);
+
+        console.log({installingAPIProxy:true});
+
+        const {sessionId} = await send("Target.attachToTarget", {
+          targetId: appTarget.targetId,
+          flatten: true
+        });
+        await send("Runtime.enable", {}, sessionId);
+        await send("Page.enable", {}, sessionId);
+
+        console.log({attached:{sessionId}});
+
+      // add the proxy script to all frames in this target
+        console.log({script:await send("Page.addScriptToEvaluateOnNewDocument", {
+          source: API_PROXY_SCRIPT,
+        }, sessionId)});
+
+      // listen for binding request
+        on("Runtime.consoleAPICalled", async ({args, executionContextId}) => {
+          try {
+            if ( args.length == 0 ) return;
+
+            const [{value:string}] = args;
+
+            let installBinding = false;
+
+            if ( typeof string == "string" ) {
+              try {
+                const obj = JSON.parse(string)
+                if ( obj.graderRequestInstallBinding ) {
+                  installBinding = true;
+                }
+              } catch(e) {
+                // not our message 
+              }
+            }
+
+            if ( installBinding ) {
+              // get top frame
+                const {frameTree: {frame: {id: frameId}}} = await send(
+                  "Page.getFrameTree", {}, sessionId
+                );
+
+              // create an isolate
+                const {executionContextId} = await send("Page.createIsolatedWorld", {
+                  frameId,
+                  worldName: JS_CONTEXT_NAME,
+                }, sessionId);
+
+              // add a binding to it
+                await send("Runtime.addBinding", {
+                  name: BINDING_NAME,
+                  executionContextId
+                }, sessionId);
+            }
+          } catch(e) {
+            DEBUG && console.info(`Error installing binding...`, e);
           }
-        **/
-        // good but how to run this and not get stuck in it?
-        /**
-          // i think the only way would be to create a trampoline / task scheduler
-          // using coroutines / yield
-          let next, nextPr = new Promise(res => next = res);
-          await ons("Runtime.executionContextCreated", p => next(p));
-          while(true) {
-            const val = await nextPr;    
-            // do something with val;
-            nextPr = new Promise(res => next = res);
-            yield;
-          }
-        **/
+        });
+
+      // reload to create a new document to 
+        // ensure we add the script and request binding installation
+        await send("Page.reload", {}, sessionId);
     } catch(e) {
-      DEBUG && console.info(`Error getting window ID...`, e);
+      DEBUG && console.info(`Error install API proxy...`, e);
     }
 
     return {UI,browser};
