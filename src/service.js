@@ -265,8 +265,6 @@
 
     try {
       // attach to target
-        let attachResolve, attachPr = new Promise(res => attachResolve = res);
-
         console.log({installingAPIProxy:true});
 
         const {sessionId} = await send("Target.attachToTarget", {
