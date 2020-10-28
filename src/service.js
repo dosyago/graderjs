@@ -291,6 +291,7 @@
           DEBUG && console.info({name, payload, executionContextId});
           await bridge({name, payload, executionContextId});
         });
+
         await on("Runtime.consoleAPICalled", async ({args, executionContextId}) => {
           try {
             if ( args.length == 0 ) return;
