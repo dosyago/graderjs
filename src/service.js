@@ -23,10 +23,13 @@
   DEBUG && console.log({SITE_PATH});
   export const newSessionId = () => (Math.random()*1137).toString(36);
   const SessionId = newSessionId();
-  const BINDING_NAME = "_graderServer";
+  const BINDING_NAME = "_graderService";
   const JS_CONTEXT_NAME = "GraderWorld";
   const API_PROXY_SCRIPT = fs.readFileSync(
     path.resolve(appDir(), 'app', 'inject', 'proxy.js')
+  ).toString();
+  const SERVICE_BINDING_SCRIPT = fs.readFileSync(
+    path.resolve(appDir(), 'app', 'inject', 'binding.js')
   ).toString();
 
 // global variables 
@@ -312,6 +315,13 @@
               // add a binding to it
                 await send("Runtime.addBinding", {
                   name: BINDING_NAME,
+                  executionContextId
+                }, sessionId);
+
+              // add the service binding script 
+                // (to receive messages from API proxy and dispatch them to the binding)
+                await send("Runtime.evaluate", {
+                  expression: SERVICE_BINDING_SCRIPT,
                   executionContextId
                 }, sessionId);
             }

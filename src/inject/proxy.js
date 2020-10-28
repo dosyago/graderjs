@@ -6,11 +6,15 @@
   const Target = async () => await void 0;
 
   let GraderProxy, HandlerInstance, revoke; 
-
-  self.helloWorld = true;
-  alert("API Proxy Installed");
+  let ready = false;
 
   if ( self == top ) {
+    top.addEventListener('message', ({origin,data}) => {
+      if ( data == "binding ready" ) {
+        ready = true;
+        console.log("API Proxy notified that service binding is ready");
+      }
+    });
     console.log(JSON.stringify({
       graderRequestInstallBinding: true
     }));
@@ -122,6 +126,7 @@
   // send using binding added with Runtime.addBinding
   function send(data) {
     console.log("Will send", data);
+    top.postMessage({apiProxy:data}, "*");
   }
 
   /* eslint-enable no-inner-declarations */
