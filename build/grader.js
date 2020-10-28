@@ -2489,7 +2489,7 @@ var config_default = /*#__PURE__*/__webpack_require__.n(config);
 
 // determine where this code is running 
 
-const DEBUG = process.env.DEBUG_grader || false;
+const DEBUG = process.env.DEBUG_grader || true;
 
 const NO_SANDBOX = process.env.DEBUG_grader || false;
 
@@ -2633,7 +2633,7 @@ async function launchApp() {
 
     console.log('');
 
-    console.log({message, state});
+    DEBUG && console.log({message, state});
 
   // report the outcome
     if ( typeof message == "string" && message.startsWith('App started.') ) {
