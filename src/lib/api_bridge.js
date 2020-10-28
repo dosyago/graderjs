@@ -1,3 +1,4 @@
+import {DEBUG} from './common.js';
 import API from '../index.js';
 import CONFIG from '../config.js';
 
@@ -7,12 +8,15 @@ const ALLOWED_ORIGINS = () => {
     `http://localhost:${API.ServicePort}`,
     `https://localhost:${API.ServicePort}` 
   ]);
-  console.log({OK});
   return OK;
 }
 
+let counter = 0;
+
 export default async function bridge(...requestArgs) {
-  console.log('Bridge called', args, API);
+  counter++;
+  console.log('Bridge called', requestArgs);
+  DEBUG && console.info('Bridge called', requestArgs, API);
 
   const [{name, payload: stringPayload, executionContextId}] = requestArgs;
 
@@ -42,9 +46,13 @@ export default async function bridge(...requestArgs) {
   try {
     const apiCall = resolvePathToFunction(API, path);
 
-    const apiResult = await apiCall(...args);
+    const revivedArgs = JSON.parse(args);
 
-    console.log({apiResult});
+    const apiResult = await apiCall(...revivedArgs);
+
+    counter += 1;
+
+    console.log({counter, apiResult, time: Date.now()});
     
     return apiResult;
   } catch(e) {
@@ -54,19 +62,17 @@ export default async function bridge(...requestArgs) {
 }
 
 function resolvePathToFunction(root, steps) {
-  let lastLink = root, link = root, index = 0, nextStep = steps[index];
-  while(nextStep !== undefined && link[nextStep] !== undefined) {
-    // get next step slot name
-    index += 1;
+  let link = root;
+  let lastLink;
+  let index = 0;
+  let nextStep = steps[index];
+
+  while(link[nextStep] !== undefined) {
+    lastLink = link;
+    link = link[nextStep];
+
+    index+=1;
     nextStep = steps[index];
-
-    if ( link[nextStep] !== undefined) {
-      // save current link
-      lastLink = link;
-
-      // move link forward to next
-      link = link[nextStep];
-    }
   }
 
   if ( index < steps.length ) {

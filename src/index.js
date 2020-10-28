@@ -130,12 +130,14 @@ export default API;
       await UI.send("Browser.close", {}); 
     } catch(e) {
       console.info('Error closing browser', e);
+      return false;
     }
 
     try {
       UI.disconnect()
     } catch(e) {
       console.info(`Error disconnecting socket`, e);
+      return false;
     }
     */
 
@@ -143,7 +145,10 @@ export default API;
       await UI.shutdown();
     } catch(e) {
       console.info(`Error shut down browser.`, e);
+      return false;
     }
+
+    return true;
   }
 
   async function move({x,y}, UI = App.UI) {

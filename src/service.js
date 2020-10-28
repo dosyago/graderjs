@@ -314,16 +314,18 @@
                 }, sessionId);
 
               // add a binding to it
-                console.log(`Add service binding to ec ${executionContextId}`);
-                await on("Runtime.bindingCalled", async ({name, payload, executionContextId}) => {
-                  console.log("Service side received call from UI binding");
-                  console.info({name, payload, executionContextId});
-                  await bridge({name, payload, executionContextId});
-                });
-                await send("Runtime.addBinding", {
-                  name: BINDING_NAME,
-                  executionContextId
-                }, sessionId);
+                if ( bindingRetryCount == 0 ) {
+                  console.log(`Add service binding to ec ${executionContextId}`);
+                  await on("Runtime.bindingCalled", async ({name, payload, executionContextId}) => {
+                    console.log("Service side received call from UI binding");
+                    console.info({name, payload, executionContextId});
+                    await bridge({name, payload, executionContextId});
+                  });
+                  await send("Runtime.addBinding", {
+                    name: BINDING_NAME,
+                    executionContextId
+                  }, sessionId);
+                }
 
               // add the service binding script 
                 // (to receive messages from API proxy and dispatch them to the binding)

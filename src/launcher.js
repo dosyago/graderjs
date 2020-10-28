@@ -81,9 +81,11 @@ async function launchApp() {
 
       subprocess = fork(
         procName,
+        /*
         !DEBUG ? 
           {stdio:[log, log, log, 'ipc'], detached: true}
         :
+        */
           {stdio:'inherit'}
       );
       subprocess.on('error', (...args) => (console.log('err', args), reject(args)));

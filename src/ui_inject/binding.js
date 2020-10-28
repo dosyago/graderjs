@@ -7,9 +7,9 @@
     } 
   });
 
+  const result = {bindingAttached: !!_graderService};
+
   top.postMessage("binding ready", "*");
 
-  console.log({bindingSide: _graderService});
-
-  return {bindingAttached: !!_graderService};
+  return result;
 }());

@@ -15,6 +15,7 @@
         console.log("API Proxy notified that service binding is ready");
       }
     });
+
     console.log(JSON.stringify({
       graderRequestInstallBinding: true
     }));
