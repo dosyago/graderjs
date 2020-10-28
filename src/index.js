@@ -73,6 +73,8 @@ export default API;
       } 
 
     App = await Service.go();
+
+    API.ServicePort = App.ServicePort;
     //Common.DEBUG && console.log({App});
     return App;
   }
@@ -93,10 +95,18 @@ export default API;
   }
 
 // meta functions
-  async function publishAPI(apiRoot) {
+  async function publishAPI(apiRoot, slotName) {
     // apiRoot is an object with properties that enumerate all the functions of that API
     // e.g. if your API is "sendEmail", "checkReplies", your apiRoot is
     // {sendEmail, checkReplies}
+    // you can overwrite built-in APIs (like uitl, ui, control and window)
+    // but we throw if you try to overwrite those APIs you publish
+    Object.defineProperty(API, slotName, {
+      get: () => apiRoot,
+      set() {
+        throw new TypeError(`API slot ${slotName} is already present and cannot be overwritten.`);
+      }
+    });
   }
 
 // window functions

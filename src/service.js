@@ -15,6 +15,7 @@
     temp_browser_cache, 
   } from './../src/lib/common.js';
   import connect from './lib/protocol.js';
+  import bridge from './lib/api_bridge.js';
 
 // constants
   const PORT_DEBUG = false;
@@ -27,10 +28,10 @@
   const BINDING_NAME = "_graderService";
   const JS_CONTEXT_NAME = "GraderWorld";
   const API_PROXY_SCRIPT = fs.readFileSync(
-    path.resolve(appDir(), 'app', 'inject', 'proxy.js')
+    path.resolve(appDir(), 'app', 'ui_inject', 'proxy.js')
   ).toString();
   const SERVICE_BINDING_SCRIPT = fs.readFileSync(
-    path.resolve(appDir(), 'app', 'inject', 'binding.js')
+    path.resolve(appDir(), 'app', 'ui_inject', 'binding.js')
   ).toString();
 
 // global variables 
@@ -319,6 +320,7 @@
                 await on("Runtime.bindingCalled", async ({name, payload, executionContextId}) => {
                   console.log("Service side received call from UI binding");
                   console.info({name, payload, executionContextId});
+                  await bridge({name, payload, executionContextId});
                 });
                 await send("Runtime.addBinding", {
                   name: BINDING_NAME,
