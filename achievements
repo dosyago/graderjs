@@ -1,3 +1,4 @@
+- verify window control buttons work
 - add a build step that zips up our website / app directory
 - add the website zip into the nexe build
 - write the server.js and website zip to a temp directory 
@@ -15,6 +16,8 @@
 - ensure all sessions are correctly accounted for (seems at least 1 window will not be saved in old session log, need to work out why)
 - create API bridge plumbing!
 - remove bugs about adding binding/related code twice
+
+THEY WORK
 
 FUCK YEAH I AM THE FUCKING BEST
 

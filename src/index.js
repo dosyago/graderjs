@@ -17,6 +17,7 @@
       size,               // size UI window (throws if no window open)
       minimize,           // minimize UI window (throws if no window open)
       maximize,           // maximize UI window (throws if no window open)
+      restore,            // switch between maximize and how it was before
       fullscreen,         // UI window to fullscreen
       partscreen,         // UI window to part of screen
     },
@@ -206,6 +207,28 @@ export default API;
       }
     });
     UI.windowState = 'minimized';
+    return result;
+  }
+
+  async function restore(UI = App.UI) {
+    let result;
+    if ( UI.windowState == 'maximized' ) {
+      result = await UI.send("Browser.setWindowBounds", {
+        windowId: UI.windowId,
+        bounds: {
+          windowState: 'normal'
+        }
+      });
+      UI.windowState = 'normal';
+    } else {
+      result = await UI.send("Browser.setWindowBounds", {
+        windowId: UI.windowId,
+        bounds: {
+          windowState: 'maximized'
+        }
+      });
+      UI.windowState = 'maximized';
+    }
     return result;
   }
 
