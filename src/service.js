@@ -19,6 +19,7 @@
 // constants
   const PORT_DEBUG = false;
   const MAX_RETRY = 10;
+  const MAX_BINDING_RETRY = 10;
   export const SITE_PATH = path.resolve(__dirname, 'public');
   DEBUG && console.log({SITE_PATH});
   export const newSessionId = () => (Math.random()*1137).toString(36);
@@ -33,6 +34,7 @@
   ).toString();
 
 // global variables 
+  let bindingRetryCount = 0;
   let retryCount = 0;
 
 // main executable block
@@ -313,6 +315,7 @@
                 }, sessionId);
 
               // add a binding to it
+                console.log(`Add service binding to ec ${executionContextId}`);
                 await on("Runtime.bindingCalled", async ({name, payload, executionContextId}) => {
                   console.log("Service side received call from UI binding");
                   console.info({name, payload, executionContextId});
@@ -324,10 +327,25 @@
 
               // add the service binding script 
                 // (to receive messages from API proxy and dispatch them to the binding)
-                await send("Runtime.evaluate", {
+                console.log(`Add service binding script to ec ${executionContextId}`);
+                const {result, exceptionDetails} = await send("Runtime.evaluate", {
                   expression: SERVICE_BINDING_SCRIPT,
+                  returnByValue: true,
                   executionContextId
                 }, sessionId);
+
+                console.log({result, exceptionDetails});
+
+              // reload if needed
+                if ( exceptionDetails ) {
+                  if ( bindingRetryCount++ < MAX_BINDING_RETRY ) {
+                    // reload the page 
+                    // (binding does not seem to be available to isolated script unless page is reloaded)
+                    await send("Page.reload", {}, sessionId);
+                  } else {
+                    throw new Error(`Retries exceeded to add the binding to the page`); 
+                  }
+                }
             }
           } catch(e) {
             DEBUG && console.info(`Error installing binding...`, e);

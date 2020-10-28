@@ -1,4 +1,4 @@
-{
+(function () {
   top.addEventListener('message', async ({origin, data}) => {
     console.log(`Binding context received...`, origin, data);
     const {apiProxy} = data;
@@ -10,4 +10,6 @@
   top.postMessage("binding ready", "*");
 
   console.log({bindingSide: _graderService});
-}
+
+  return {bindingAttached: !!_graderService};
+}());
