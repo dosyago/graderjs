@@ -210,6 +210,7 @@
     UI.shutdown = async () => {
       if ( UI.alreadyShutdown ) return;
 
+      UI.alreadyShutdown = true;
       // try to kill browser
         try {
           await browser.kill();
@@ -239,8 +240,6 @@
         } catch(e) {
           DEBUG && console.info(`Error scheduling session data for deletion...`, e);
         }
-
-      UI.alreadyShutdown = true;
     };
     UI.socket.on('close', () => UI.shutdown());
 
@@ -287,10 +286,15 @@
         DEBUG && console.log({script});
 
       // listen for binding request
-        on("Runtime.consoleAPICalled", async ({args, executionContextId}) => {
+        await on("Runtime.bindingCalled", async ({name, payload, executionContextId}) => {
+          DEBUG && console.log("Service side received call from UI binding");
+          DEBUG && console.info({name, payload, executionContextId});
+          await bridge({name, payload, executionContextId});
+        });
+        await on("Runtime.consoleAPICalled", async ({args, executionContextId}) => {
           try {
             if ( args.length == 0 ) return;
-            if ( bindingInstallationStarted ) return;
+            //if ( bindingInstallationStarted ) return;
 
             const [{value:string}] = args;
 
@@ -310,6 +314,8 @@
             if ( installBinding ) {
               bindingInstallationStarted = true;
 
+              console.log({installBindingCalled:true});
+
               // get top frame
                 const {frameTree: {frame: {id: frameId}}} = await send(
                   "Page.getFrameTree", {}, sessionId
@@ -324,11 +330,6 @@
               // add a binding to it
                 if ( bindingRetryCount == 0 ) {
                   DEBUG && console.log(`Add service binding to ec ${executionContextId}`);
-                  await on("Runtime.bindingCalled", async ({name, payload, executionContextId}) => {
-                    DEBUG && console.log("Service side received call from UI binding");
-                    DEBUG && console.info({name, payload, executionContextId});
-                    await bridge({name, payload, executionContextId});
-                  });
                   await send("Runtime.addBinding", {
                     name: BINDING_NAME,
                     executionContextId
