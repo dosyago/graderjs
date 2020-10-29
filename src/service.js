@@ -141,10 +141,12 @@
 
           // write document
             const html = fs.readFileSync(windowBoxPath).toString();
-            await UI.send("Page.setDocumentContent", {
+            console.log({html, frameId});
+            const result = await UI.send("Page.setDocumentContent", {
               frameId,
               html
             }, UI.sessionId);
+            console.log({result});
         } else {
           ({UI,browser} = await newBrowser({ServicePort, sessionId: SessionId}));
         }
@@ -198,7 +200,7 @@
       let startUrl;
 
       if ( blank ) {
-        startUrl = 'data:text/html,<!DOCTYPE html>';
+        startUrl = 'data:text/html,<!DOCTYPE html><script>document.title = "Made with Grader"</script>';
       } else {
         startUrl = `http://localhost:${ServicePort}${uriPath}`;
       }

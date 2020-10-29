@@ -4,8 +4,8 @@ import {windowDemo} from './demos.js';
 start();
 
 async function start() {
-  //await Grader.go();
-  await windowDemo();
+  await Grader.go();
+  //await windowDemo();
 }
 
 

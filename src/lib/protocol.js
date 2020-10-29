@@ -1,6 +1,8 @@
 import Fetch from 'node-fetch';
 import Ws from 'ws';
 
+import {DEBUG} from '/common.js';
+
 const ROOT_SESSION = "browser";
 
   export default async function connect({
@@ -76,7 +78,7 @@ const ROOT_SESSION = "browser";
       const stringMessage = message;
       message = JSON.parse(message);
       if ( message.error ) {
-        //console.warn(message);
+        DEBUG && console.warn(message);
       }
       const {sessionId} = message;
       const {method} = message;
