@@ -2489,7 +2489,7 @@ var config_default = /*#__PURE__*/__webpack_require__.n(config);
 
 // determine where this code is running 
 
-const DEBUG = process.env.DEBUG_grader || false;
+const DEBUG = process.env.DEBUG_grader || true;
 
 const NO_SANDBOX = process.env.DEBUG_grader || false;
 

@@ -172,7 +172,7 @@
     ServicePort: ServicePort = undefined,
     uriPath: uriPath = '/'
   } = { sessionId: undefined }) {
-    if ( !(sessionId && (ServicePort.toString() || blank)) ) {
+    if ( !(sessionId && ((ServicePort||'').toString() || blank)) ) {
       throw new TypeError(`newBrowser must be passed a unique sessionId and either the 'blank' flag or a ServicePort`);
     }
 
@@ -194,7 +194,7 @@
       let startUrl;
 
       if ( blank ) {
-        startUrl = 'about:blank';
+        startUrl = 'data:text/html,<!DOCTYPE html>';
       } else {
         startUrl = `http://localhost:${ServicePort}${uriPath}`;
       }
@@ -255,8 +255,9 @@
 
       try {
         const {targetInfos} = await UI.send("Target.getTargets", {});
+        DEBUG && console.info({targetInfos, url});
         appTarget = targetInfos.find(({type, url}) => {
-          return type == 'page' && url.startsWith(`http://localhost:${ServicePort}`);
+          return type == 'page' && url.startsWith(startUrl);
         });
         ({windowId} = await UI.send("Browser.getWindowForTarget", {
           targetId: appTarget.targetId
