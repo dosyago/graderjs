@@ -68,7 +68,7 @@
 
       // true specifies the default
       if ( windowBox === true ) {
-        windowBoxPath = path.resolve(SITE_PATH, '_winctrlbox', `${platform}_winctrl.html');  
+        windowBoxPath = path.resolve(SITE_PATH, '_winctrlbox', `${platform}_winctrl.html`);  
       } 
 
       // a string sets a (possibly relative) path
@@ -135,8 +135,8 @@
           // and use our UI connection to write the correct window box as the page
 
           // get top frame
-            const {frameTree: {frame: {id: frameId}}} = await send(
-              "Page.getFrameTree", {}, sessionId
+            const {frameTree: {frame: {id: frameId}}} = await UI.send(
+              "Page.getFrameTree", {}, UI.sessionId
             );
 
           // write document
@@ -144,7 +144,7 @@
             await UI.send("Page.setDocumentContent", {
               frameId,
               html
-            }, sessionId);
+            }, UI.sessionId);
         } else {
           ({UI,browser} = await newBrowser({ServicePort, sessionId: SessionId}));
         }
@@ -267,7 +267,7 @@
         },
         startUrl: {
           value: startUrl
-        }
+        },
         shutdown: {
           value: shutdownFunc 
         }

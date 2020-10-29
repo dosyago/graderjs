@@ -3,6 +3,7 @@
   import fs from 'fs';
   import * as Service from './service.js';
   import * as Common from './lib/common.js';
+  import CONFIG from './config.js';
 
 // constants
   const DEFAULT_WC = {
@@ -35,6 +36,7 @@
       getStartURL,        // gets the start URL for the app (useful to set the iframe src
                           // when using a custom window control box)
       getFavicon,         // gets a (or an optionally named) favicon as a data URL
+      getAppTitle,        // gets the app title
     },
 
     meta: {
@@ -293,12 +295,19 @@ export default API;
 
   }
 
-  async function getStartURL() {
-
+  async function getStartURL(UI = App.UI) {
+    return UI.startUrl;
   }
 
   async function getFavicon() {
+    const iconPath = path.resolve(Service.SITE_PATH, '_icons', 'favicon.ico');  
+    const base64Icon = fs.readFileSync(iconPath, {encoding:'base64'});
+    const dataURL = `data:image/ico;base64,${base64Icon}`;
+    return dataURL;
+  }
 
+  async function getAppTitle() {
+    return CONFIG.name;
   }
 
 // control functions
