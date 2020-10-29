@@ -7,7 +7,7 @@
 // constants
   const DEFAULT_WC = {
     win: false,
-    nix: path.resolve(Service.SITE_PATH, '_windows', 'nix_window.html'),
+    nix: path.resolve(Service.SITE_PATH, '_winctrlbox', 'nix_winctrl.html'),
     osx: false
   }
 
@@ -81,7 +81,9 @@ export default API;
         windowControls = DEFAULT_WC;
       } 
 
-    App = await Service.go();
+    App = await Service.go({
+      apiInUI, windowControls, addHandlers, server, keepConsoleOpen
+    });
 
     API.ServicePort = App.ServicePort;
     //Common.DEBUG && console.log({App});

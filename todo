@@ -1,6 +1,6 @@
 - make window controls top bar available (for systems that don't use them, like ubuntu)
 - add download_chrome script to pull it in if system doesn't have it
-- implement addHandlers, server and keepConsoleOpen settings
+- implement addHandlers, server and keepConsoleOpen settings (as well as other sketched and unimplemented settings)
 - put archivist in this framework.
 - improve API based on what I learned from porting and 
 - write documentation about how to use grader to build cross-platform apps 

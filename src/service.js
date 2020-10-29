@@ -39,7 +39,7 @@
   let retryCount = 0;
 
 // main executable block
-  export async function go() {
+  export async function go(settings) {
     const app = express();
 
     // debugging info
@@ -54,12 +54,40 @@
 
     if (DEBUG || process.argv[1].includes(`service_${CONFIG.name}`)) {     // our startup cue
       notify('Request app start.');
-      return await run(app);
+      return await run(app, settings);
     }
   }
 
 // main functions
-  async function run(app) {
+  async function run(app, settings) {
+    // get platform specific window box (if any)
+      const platform = getPlatform();
+      const windowBox = settings.windowControls[platform];
+
+      let windowBoxPath = null;
+
+      // true specifies the default
+      if ( windowBox === true ) {
+        windowBoxPath = path.resolve(SITE_PATH, '_winctrlbox', `${platform}_winctrl.html');  
+      } 
+
+      // a string sets a (possibly relative) path
+      else if ( typeof windowBox == "string" ) {
+        windowBoxPath = path.resolve(windowBox);
+      }
+
+      // false means no window control box
+      else if ( windowBox === false ) {
+        windowBoxPath = null;
+      }
+
+      // otherwise we have an error
+      else {
+        throw new TypeError(
+          `Settings windowControl[platform], if set, can only be a string or a boolean`
+        );
+      }
+
     // start background service
       console.log(`Start service...`);
       notify('Request service start.');
@@ -98,7 +126,16 @@
       console.log(`Launching UI...`);
       let UI, browser;
       try {
-        ({UI,browser} = await newBrowser({ServicePort, sessionId: SessionId}));
+        if ( windowBoxPath ) {
+          // open a blank window 
+          ({UI,browser} = await newBrowser({blank: true, sessionId: SessionId}));
+
+          // and use our UI connection to write the correct window box as the page
+
+          await UI.send("
+        } else {
+          ({UI,browser} = await newBrowser({ServicePort, sessionId: SessionId}));
+        }
       } catch(e) {
         console.error(e);
         notify('Could not start UI (chrome). Because: ' + JSON.stringify(e)); 
@@ -117,13 +154,10 @@
     return {app, killService, ServicePort, browser, service, UI, notify, newSessionId};
   }
 
-  export async function newBrowser({ServicePort, sessionId, uriPath: uriPath = '/'}) {
-    if ( ! sessionId || ! ServicePort) {
-      throw new TypeError(`newBrowser must be passed a unique sessionId and ServicePort`);
+  export async function newBrowser({ServicePort, blank, sessionId, uriPath: uriPath = '/'}) {
+    if ( !(sessionId && (ServicePort.toString() || blank)) ) {
+      throw new TypeError(`newBrowser must be passed a unique sessionId and either the 'blank' flag or a ServicePort`);
     }
-
-    // state variable
-      let bindingInstallationStarted = false;
 
     // set up disk space
       safe_notify('Request UI directories.');
@@ -139,6 +173,15 @@
       }
       safe_notify('UI data and cache directory created.');
 
+    // construct start URL
+      let startUrl;
+
+      if ( blank ) {
+        startUrl = 'about:blank';
+      } else {
+        startUrl = `http://localhost:${ServicePort}${uriPath}`;
+      }
+
     // start browser
       const CHROME_OPTS = !NO_SANDBOX ? [
         `--disable-extensions`,
@@ -146,7 +189,7 @@
         `--metrics-recording-only`,
         `--new-window`,
         `--no-first-run`,
-        `--app=http://localhost:${ServicePort}${uriPath}`,
+        `--app=${startUrl}`,
         '--restore-last-session',
         `--disk-cache-dir=${temp_browser_cache(sessionId)}`,
         `--aggressive-cache-discard`
@@ -156,7 +199,7 @@
         `--metrics-recording-only`,
         `--new-window`,
         `--no-first-run`,
-        `--app=http://localhost:${ServicePort}${uriPath}`,
+        `--app=${startUrl}`,
         '--restore-last-session',
         `--disk-cache-dir=${temp_browser_cache(sessionId)}`,
         `--aggressive-cache-discard`,
@@ -295,7 +338,6 @@
         await on("Runtime.consoleAPICalled", async ({args, executionContextId}) => {
           try {
             if ( args.length == 0 ) return;
-            //if ( bindingInstallationStarted ) return;
 
             const [{value:string}] = args;
 
@@ -313,8 +355,6 @@
             }
 
             if ( installBinding ) {
-              bindingInstallationStarted = true;
-
               console.log({installBindingCalled:true});
 
               // get top frame
@@ -352,8 +392,8 @@
                 if ( exceptionDetails ) {
                   if ( bindingRetryCount++ < MAX_BINDING_RETRY ) {
                     // reload the page 
-                    // (binding does not seem to be available to isolated script unless page is reloaded)
-                    bindingInstallationStarted = false;
+                      // (binding does not seem to be available to 
+                      // isolated script unless page is reloaded)
                     await send("Page.reload", {}, sessionId);
                   } else {
                     throw new Error(`Retries exceeded to add the binding to the page`); 
@@ -361,7 +401,6 @@
                 }
             }
           } catch(e) {
-            bindingInstallationStarted = false;
             DEBUG && console.info(`Error installing binding...`, e);
           }
         });
@@ -412,6 +451,26 @@
   }
 
 // helper functions
+  function getPlatform() {
+    const {platform: raw} = process;
+
+    switch(raw) {
+      case "aix":
+      case "freebsd":
+      case "linux":
+      case "openbsd":
+      case "sunos":
+        return "nix";
+      case "win32":
+        return "win";
+      case "darwin":
+        return "osx";
+      default: 
+        // don't go crazy throwing errors here
+        return "win";
+    }
+  }
+
   function randomPort() {
     // choose a port form the dynamic/private range: 49152 - 65535
     return 49152+Math.round(Math.random()*(65535-49152))
