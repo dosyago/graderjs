@@ -132,7 +132,8 @@
           // open a blank window 
           ({UI,browser} = await newBrowser({blank: true, sessionId: SessionId}));
 
-          // and use our UI connection to write the correct window box as the page
+          // and after the page is ready,
+          // use our UI connection to write the correct window box as the page
 
           // get top frame
             const {frameTree: {frame: {id: frameId}}} = await UI.send(
@@ -181,6 +182,10 @@
     if ( !(sessionId && ((ServicePort||'').toString() || blank)) ) {
       throw new TypeError(`newBrowser must be passed a unique sessionId and either the 'blank' flag or a ServicePort`);
     }
+    
+
+    // set up a promise to track progress
+      let reject, resolve, pr = new Promise((res, rej) => (resolve = res, reject = rej));
 
     // set up disk space
       safe_notify('Request UI directories.');
@@ -405,8 +410,10 @@
                         // isolated script unless page is reloaded)
                       await send("Page.reload", {}, sessionId);
                     } else {
-                      throw new Error(`Retries exceeded to add the binding to the page`); 
+                      reject(new Error(`Retries exceeded to add the binding to the page`)); 
                     }
+                  } else {
+                    resolve({browser, UI});
                   }
               }
             } catch(e) {
@@ -421,7 +428,7 @@
         DEBUG && console.info(`Error install API proxy...`, e);
       }
 
-    return {UI,browser};
+    return pr;
 
     // helper (in scope) functions
       async function shutdownFunc() {
