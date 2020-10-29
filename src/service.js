@@ -158,7 +158,11 @@
       console.log(`Chrome started.`);
       notify('User interface created.');
 
-    const killService = installCleanupHandlers({ui: UI, bg: service});
+    // setup future cleanup
+      const killService = installCleanupHandlers({ui: UI, bg: service});
+
+    // don't keep the socket exposed
+      UI.socket = null;
 
     notify && notify(`App started. ${ServicePort}`);
     process.disconnect && process.disconnect();
@@ -285,9 +289,6 @@
 
     // shutdown everything if we detect the UI connection closes
       UI.socket.on('close', () => UI.shutdown());
-
-    // don't keep the socket exposed
-      UI.socket = null;
 
     // install binding and script and reload
       /**

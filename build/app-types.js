@@ -36,7 +36,7 @@ System.register("lib/common", ["os", "path", "config"], function (exports_1, con
         ],
         execute: function () {
             // determine where this code is running 
-            exports_1("DEBUG", DEBUG = process.env.DEBUG_grader || false);
+            exports_1("DEBUG", DEBUG = process.env.DEBUG_grader || true);
             exports_1("NO_SANDBOX", NO_SANDBOX = process.env.DEBUG_grader || false);
             exports_1("APP_ROOT", APP_ROOT = __dirname);
             exports_1("appDir", appDir = () => DEBUG ?
@@ -314,7 +314,7 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
         let windowBoxPath = null;
         // true specifies the default
         if (windowBox === true) {
-            windowBoxPath = path_2.default.resolve(SITE_PATH, '_winctrlbox', `${platform}_winctrl.html`);
+            windowBoxPath = path_2.default.resolve(SITE_PATH, '_winctrlbar', `${platform}_winctrl.html`);
         }
         // a string sets a (possibly relative) path
         else if (typeof windowBox == "string") {
@@ -391,13 +391,16 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
         //DEBUG && console.log({browser, ChromeLaunch});
         console.log(`Chrome started.`);
         notify('User interface created.');
+        // setup future cleanup
         const killService = installCleanupHandlers({ ui: UI, bg: service });
+        // don't keep the socket exposed
+        UI.socket = null;
         notify && notify(`App started. ${ServicePort}`);
         process.disconnect && process.disconnect();
         return { app, killService, ServicePort, browser, service, UI, notify, newSessionId };
     }
     async function newBrowser({ sessionId, blank: blank = false, ServicePort: ServicePort = undefined, uriPath: uriPath = '/' } = { sessionId: undefined }) {
-        if (!(sessionId && (ServicePort.toString() || blank))) {
+        if (!(sessionId && ((ServicePort || '').toString() || blank))) {
             throw new TypeError(`newBrowser must be passed a unique sessionId and either the 'blank' flag or a ServicePort`);
         }
         // set up disk space
@@ -416,7 +419,7 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
         // construct start URL
         let startUrl;
         if (blank) {
-            startUrl = 'about:blank';
+            startUrl = 'data:text/html,<!DOCTYPE html>';
         }
         else {
             startUrl = `http://localhost:${ServicePort}${uriPath}`;
@@ -472,8 +475,9 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
         let windowId;
         try {
             const { targetInfos } = await UI.send("Target.getTargets", {});
+            common_js_2.DEBUG && console.info({ targetInfos, startUrl });
             appTarget = targetInfos.find(({ type, url }) => {
-                return type == 'page' && url.startsWith(`http://localhost:${ServicePort}`);
+                return type == 'page' && url.startsWith(startUrl);
             });
             ({ windowId } = await UI.send("Browser.getWindowForTarget", {
                 targetId: appTarget.targetId
@@ -499,8 +503,6 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
         });
         // shutdown everything if we detect the UI connection closes
         UI.socket.on('close', () => UI.shutdown());
-        // don't keep the socket exposed
-        UI.socket = null;
         // install binding and script and reload
         /**
           note that doing it like this
@@ -910,6 +912,8 @@ System.register("index", ["path", "fs", "service", "lib/common", "config"], func
             console.log("open", e);
             fs_2.default.writeFileSync('grader.error', JSON.stringify({ err: e, msg: e + '' }));
         }
+        // don't expose socket
+        UI.socket = null;
         return { UI, browser };
     }
     async function close(UI = App.UI) {
@@ -1106,7 +1110,7 @@ System.register("index", ["path", "fs", "service", "lib/common", "config"], func
             // constants
             DEFAULT_WC = {
                 win: false,
-                nix: path_3.default.resolve(Service.SITE_PATH, '_winctrlbox', 'nix_winctrl.html'),
+                nix: path_3.default.resolve(Service.SITE_PATH, '_winctrlbar', 'nix_winctrl.html'),
                 osx: false
             };
             // main export

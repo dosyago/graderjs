@@ -163,6 +163,10 @@ export default API;
       console.log("open", e);
       fs.writeFileSync('grader.error', JSON.stringify({err:e, msg:e+''}));
     }
+
+    // don't expose socket
+    UI.socket = null;
+
     return {UI,browser};
   }
 

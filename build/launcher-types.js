@@ -36,7 +36,7 @@ System.register("lib/common", ["os", "path", "config"], function (exports_1, con
         ],
         execute: function () {
             // determine where this code is running 
-            exports_1("DEBUG", DEBUG = process.env.DEBUG_grader || false);
+            exports_1("DEBUG", DEBUG = process.env.DEBUG_grader || true);
             exports_1("NO_SANDBOX", NO_SANDBOX = process.env.DEBUG_grader || false);
             exports_1("APP_ROOT", APP_ROOT = __dirname);
             exports_1("appDir", appDir = () => DEBUG ?
