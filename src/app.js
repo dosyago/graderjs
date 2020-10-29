@@ -3,9 +3,7 @@ import Grader from './index.js';
 start();
 
 async function start() {
-  await Grader.go({
-    
-  });
+  await Grader.go();
 }
 
 // demos

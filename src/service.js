@@ -88,6 +88,8 @@
         );
       }
 
+      DEBUG && console.log({windowBoxPath});
+
     // start background service
       console.log(`Start service...`);
       notify('Request service start.');
