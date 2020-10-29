@@ -68,7 +68,7 @@
 
       // true specifies the default
       if ( windowBox === true ) {
-        windowBoxPath = path.resolve(SITE_PATH, '_winctrlbox', `${platform}_winctrl.html`);  
+        windowBoxPath = path.resolve(SITE_PATH, '_winctrlbar', `${platform}_winctrl.html`);  
       } 
 
       // a string sets a (possibly relative) path
@@ -255,7 +255,7 @@
 
       try {
         const {targetInfos} = await UI.send("Target.getTargets", {});
-        DEBUG && console.info({targetInfos, url});
+        DEBUG && console.info({targetInfos, startUrl});
         appTarget = targetInfos.find(({type, url}) => {
           return type == 'page' && url.startsWith(startUrl);
         });
