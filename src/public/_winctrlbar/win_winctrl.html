@@ -2,6 +2,7 @@
 <html>
   <meta charset=utf-8>
   <meta name=viewport content=width=device-width,initial-scale=1>
+  <!-- probably have to inline these to account for server:false option -->
   <link rel=stylesheet href=style/bar_layout.css>
   <link rel=stylesheet href=style/win_bar.css>
   <body>
@@ -15,9 +16,9 @@
         </span>
       </div>
       <div class="control-buttons">
-        <button class=minimize></button>
-        <button class=maximize-restore></button>
-        <button class=close></button>
+        <button onclick="grader.ui.minimize();">_</button>
+        <button onclick="grader.ui.restore();">&#11036;</button>
+        <button onclick="grader.ui.close();">x</button>
       </div>
     </section>
     <iframe name=main id=main class=app-window></iframe>
