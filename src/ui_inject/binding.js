@@ -1,16 +1,19 @@
 (function () {
-  // if binding not present yet following line will throw
+  /* eslint-disable no-undef */
+  // if binding not present yet following line will throw 
+  // (which we want as it lets us know if binding is present!)
   const result = {bindingAttached: !!_graderService};
+  /* eslint-enable no-undef */
 
-  top.addEventListener('message', async ({origin, data}) => {
+  globalThis.top.addEventListener('message', async ({origin, data}) => {
     console.log(`Binding context received...`, origin, data);
     const {apiProxy} = data;
     if ( apiProxy ) {
-      top._graderService(JSON.stringify({origin,apiProxy}));
+      globalThis.top._graderService(JSON.stringify({origin,apiProxy}));
     } 
   });
 
-  top.postMessage("binding ready", "*");
+  globalThis.top.postMessage("binding ready", "*");
 
   return result;
 }());

@@ -8,11 +8,15 @@
   let GraderProxy, HandlerInstance, revoke; 
   let ready = false;
 
-  if ( self == top ) {
-    top.addEventListener('message', ({origin,data}) => {
+  if ( globalThis.self == globalThis.top ) {
+    // we should probably do security checks on origin
+    globalThis.top.addEventListener('message', ({origin,data}) => {
       if ( data == "binding ready" ) {
         ready = true;
-        console.log("API Proxy notified that service binding is ready");
+        console.log("API Proxy notified that service binding is ready", origin);
+      } else if ( data == "turnOff" ) {
+        ready = false;
+        turnOff();
       }
     });
 
@@ -127,7 +131,16 @@
   // send using binding added with Runtime.addBinding
   function send(data) {
     console.log("Will send", data);
-    top.postMessage({apiProxy:data}, "*");
+    if ( ! ready ) {
+      throw new TypeError(`Binding is not ready yet.`);
+    } else {
+      globalThis.top.postMessage({apiProxy:data}, "*");
+    }
+  }
+
+  // disable the binding
+  function turnOff() {
+    revoke();
   }
 
   /* eslint-enable no-inner-declarations */

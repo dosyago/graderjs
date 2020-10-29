@@ -64,24 +64,49 @@ export default API;
     apiInUI:                              // enable grader API available in UI context
       apiInUI = false,
     windowControls:                       // set properties of window control bar
-      windowControls = DEFAULT_WC,        
-    addHandlers,                          // callback to add the route handlers to an express app
-    server,                               // used to replace default server if you need more control 
-                                            //   (such as websockets, or TLS)
+      windowControls = undefined,        
+    addHandlers:
+      addHandlers = undefined,            // callback to add the route handlers to an express app
+    server:
+      server = true,                      // used to disable or replace default server 
+                                            // if you don't want a server or if you need 
+                                            // more control (such as websockets, or TLS)
                                             // we call listen automatically
-    keepConsoleOpen,                      // keeps the console open in case you need it
+    keepConsoleOpen:
+      keepConsoleOpen = false,            // keeps the console open in case you need it
   } = {}) {
     // default parameters
-      if ( windowControls === false ) {
-        windowControls = {
-          win: false,
-          nix: false,
-          osx: false
-        };
-      } else if ( windowControls === true) {
-        // win and osx are both false because they provide window controls by default
-        windowControls = DEFAULT_WC;
-      } 
+      // window controls
+        if ( windowControls === undefined ) {
+          windowControls = DEFAULT_WC;
+        } else {
+          if ( windowControls === false ) {
+            windowControls = {
+              win: false,
+              nix: false,
+              osx: false
+            };
+          } else if ( windowControls === true) {
+            // win and osx are both false because they provide window controls by default
+            windowControls = DEFAULT_WC;
+          } else {
+            // check if it's an object 
+
+            let typeFailure = false;
+            try {
+              JSON.stringify(windowControls);
+            } catch(e) {
+              Common.DEBUG && console.info(e, {windowControls});
+              typeFailure = true;
+            }
+
+            if ( typeFailure || typeof windowControls !== "object" ) {
+              throw new TypeError(
+                `API.go: windowControls if set needs to be a boolean, or an object.`
+              );
+            }
+          }
+        }
 
     App = await Service.go({
       apiInUI, windowControls, addHandlers, server, keepConsoleOpen
@@ -94,7 +119,9 @@ export default API;
 
   async function stop() {
     if ( !App ) {
-      throw new TypeError(`stop can only be called if App has started and is not already stopped.`);
+      throw new TypeError(
+        `API.stop can only be called if App has started and is not already stopped.`
+      );
     }
 
     await App.killService();
@@ -103,7 +130,9 @@ export default API;
   function say(msg) {
     return App.notify(msg, null, {}, e => {
       Common.DEBUG && console.info("say.App.notify", e);
-      throw new TypeError(`Cannot say a console message because App Console has already closed.`);
+      throw new TypeError(
+        `Cannot API.say a console message because App Console has already closed.`
+      );
     });
   }
 

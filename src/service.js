@@ -166,7 +166,12 @@
     return {app, killService, ServicePort, browser, service, UI, notify, newSessionId};
   }
 
-  export async function newBrowser({ServicePort, blank, sessionId, uriPath: uriPath = '/'}) {
+  export async function newBrowser({
+    sessionId, 
+    blank: blank = false,
+    ServicePort: ServicePort = undefined,
+    uriPath: uriPath = '/'
+  } = { sessionId: undefined }) {
     if ( !(sessionId && (ServicePort.toString() || blank)) ) {
       throw new TypeError(`newBrowser must be passed a unique sessionId and either the 'blank' flag or a ServicePort`);
     }
@@ -303,7 +308,7 @@
         by the UI
       **/
 
-      const {ons, on, send} = UI;
+      const {on, send} = UI;
 
       try {
         // attach to target
@@ -335,7 +340,7 @@
             await bridge({name, payload, executionContextId});
           });
 
-          await on("Runtime.consoleAPICalled", async ({args, executionContextId}) => {
+          await on("Runtime.consoleAPICalled", async ({args}) => {
             try {
               if ( args.length == 0 ) return;
 

@@ -17,6 +17,7 @@ body {
 }
 
 section.window-control-bar {
+  -webkit-app-region: drag;
   grid-area: winctrl-bar;
   display: flex;
   flex-direction: row;
