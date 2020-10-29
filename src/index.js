@@ -4,6 +4,13 @@
   import * as Service from './service.js';
   import * as Common from './lib/common.js';
 
+// constants
+  const DEFAULT_WC = {
+    win: false,
+    nix: path.resolve(Service.SITE_PATH, '_windows', 'nix_window.html'),
+    osx: false
+  }
+
 // main export
   const API = {
     go,                   // start app launch sequence
@@ -20,6 +27,14 @@
       restore,            // switch between maximize and how it was before
       fullscreen,         // UI window to fullscreen
       partscreen,         // UI window to part of screen
+
+      openBlank,          // open a UI window to about:blank
+      writePage,          // like document.write if using a custom window control box, writes to the
+                          // iframe document inside that
+
+      getStartURL,        // gets the start URL for the app (useful to set the iframe src
+                          // when using a custom window control box)
+      getFavicon,         // gets a (or an optionally named) favicon as a data URL
     },
 
     meta: {
@@ -36,13 +51,6 @@
       sleep: Common.sleep
     },
   };
-
-// constants
-  const DEFAULT_WC = {
-    win: false,
-    nix: path.resolve(Service.SITE_PATH, '_windows', 'nix_window.html'),
-    osx: false
-  }
 
 export default API;
 
@@ -272,6 +280,23 @@ export default API;
     });
     UI.windowState = 'normal';
     return result;
+  }
+
+// window functions part ii
+  async function openBlank() {
+
+  }
+
+  async function writePage() {
+
+  }
+
+  async function getStartURL() {
+
+  }
+
+  async function getFavicon() {
+
   }
 
 // control functions
