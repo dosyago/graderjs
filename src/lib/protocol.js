@@ -1,7 +1,7 @@
 import Fetch from 'node-fetch';
 import Ws from 'ws';
 
-import {DEBUG} from '/common.js';
+import {DEBUG} from './common.js';
 
 const ROOT_SESSION = "browser";
 
