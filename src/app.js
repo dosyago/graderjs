@@ -1,5 +1,5 @@
 import Grader from './index.js'; 
-import {windowDemo} from './demos.js';
+//import {windowDemo} from './demos.js';
 
 start();
 

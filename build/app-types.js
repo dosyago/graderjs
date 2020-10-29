@@ -52,9 +52,9 @@ System.register("lib/common", ["os", "path", "config"], function (exports_1, con
         }
     };
 });
-System.register("lib/protocol", ["node-fetch", "ws"], function (exports_2, context_2) {
+System.register("lib/protocol", ["node-fetch", "ws", "lib/common"], function (exports_2, context_2) {
     "use strict";
-    var node_fetch_1, ws_1, ROOT_SESSION;
+    var node_fetch_1, ws_1, common_js_1, ROOT_SESSION;
     var __moduleName = context_2 && context_2.id;
     async function connect({ port: port = 9222, exposeSocket: exposeSocket = false } = {}) {
         const Resolvers = {};
@@ -116,7 +116,7 @@ System.register("lib/protocol", ["node-fetch", "ws"], function (exports_2, conte
             const stringMessage = message;
             message = JSON.parse(message);
             if (message.error) {
-                //console.warn(message);
+                common_js_1.DEBUG && console.warn(message);
             }
             const { sessionId } = message;
             const { method } = message;
@@ -188,6 +188,9 @@ System.register("lib/protocol", ["node-fetch", "ws"], function (exports_2, conte
             },
             function (ws_1_1) {
                 ws_1 = ws_1_1;
+            },
+            function (common_js_1_1) {
+                common_js_1 = common_js_1_1;
             }
         ],
         execute: function () {
@@ -197,11 +200,11 @@ System.register("lib/protocol", ["node-fetch", "ws"], function (exports_2, conte
 });
 System.register("lib/api_bridge", ["lib/common", "index", "config"], function (exports_3, context_3) {
     "use strict";
-    var common_js_1, index_js_1, config_js_2, ALLOWED_ORIGINS, counter;
+    var common_js_2, index_js_1, config_js_2, ALLOWED_ORIGINS, counter;
     var __moduleName = context_3 && context_3.id;
     async function bridge(...requestArgs) {
         counter++;
-        common_js_1.DEBUG && console.info('Bridge called', requestArgs, index_js_1.default);
+        common_js_2.DEBUG && console.info('Bridge called', requestArgs, index_js_1.default);
         const [{ name, payload: stringPayload, executionContextId }] = requestArgs;
         let payload;
         try {
@@ -261,8 +264,8 @@ System.register("lib/api_bridge", ["lib/common", "index", "config"], function (e
     }
     return {
         setters: [
-            function (common_js_1_1) {
-                common_js_1 = common_js_1_1;
+            function (common_js_2_1) {
+                common_js_2 = common_js_2_1;
             },
             function (index_js_1_1) {
                 index_js_1 = index_js_1_1;
@@ -286,7 +289,7 @@ System.register("lib/api_bridge", ["lib/common", "index", "config"], function (e
 });
 System.register("service", ["fs", "path", "express", "chrome-launcher", "http-terminator", "config", "lib/common", "lib/protocol", "lib/api_bridge"], function (exports_4, context_4) {
     "use strict";
-    var fs_1, path_2, express_1, chrome_launcher_1, http_terminator_1, config_js_3, common_js_2, protocol_js_1, api_bridge_js_1, PORT_DEBUG, MAX_RETRY, MAX_BINDING_RETRY, SITE_PATH, newSessionId, SessionId, BINDING_NAME, JS_CONTEXT_NAME, API_PROXY_SCRIPT, SERVICE_BINDING_SCRIPT, bindingRetryCount, retryCount;
+    var fs_1, path_2, express_1, chrome_launcher_1, http_terminator_1, config_js_3, common_js_3, protocol_js_1, api_bridge_js_1, PORT_DEBUG, MAX_RETRY, MAX_BINDING_RETRY, SITE_PATH, newSessionId, SessionId, BINDING_NAME, JS_CONTEXT_NAME, API_PROXY_SCRIPT, SERVICE_BINDING_SCRIPT, bindingRetryCount, retryCount;
     var __moduleName = context_4 && context_4.id;
     // main executable block
     async function go(settings) {
@@ -300,7 +303,7 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
           importMetaURL: import.meta.url
         });
         **/
-        if (common_js_2.DEBUG || process.argv[1].includes(`service_${config_js_3.default.name}`)) { // our startup cue
+        if (common_js_3.DEBUG || process.argv[1].includes(`service_${config_js_3.default.name}`)) { // our startup cue
             notify('Request app start.');
             return await run(app, settings);
         }
@@ -328,7 +331,7 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
         else {
             throw new TypeError(`Settings windowControl[platform], if set, can only be a string or a boolean`);
         }
-        common_js_2.DEBUG && console.log({ windowBoxPath });
+        common_js_3.DEBUG && console.log({ windowBoxPath });
         // start background service
         console.log(`Start service...`);
         notify('Request service start.');
@@ -346,21 +349,21 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
         // cleanup any old sessions
         const undeletedOldSessions = [];
         try {
-            const expiredSessions = JSON.parse(fs_1.default.readFileSync(common_js_2.expiredSessionFile()).toString());
+            const expiredSessions = JSON.parse(fs_1.default.readFileSync(common_js_3.expiredSessionFile()).toString());
             expiredSessions.forEach(sessionId => {
                 try {
-                    fs_1.default.rmdirSync(common_js_2.sessionDir(sessionId), { recursive: true, maxRetries: 3, retryDelay: 700 });
+                    fs_1.default.rmdirSync(common_js_3.sessionDir(sessionId), { recursive: true, maxRetries: 3, retryDelay: 700 });
                 }
                 catch (e) {
-                    common_js_2.DEBUG && console.info(`Error deleting old sessions directory ${sessionId}...`, e);
+                    common_js_3.DEBUG && console.info(`Error deleting old sessions directory ${sessionId}...`, e);
                     undeletedOldSessions.push(sessionId);
                 }
             });
         }
         catch (e) {
-            common_js_2.DEBUG && console.info(`Error deleting sessions from expred sessions file...`, e);
+            common_js_3.DEBUG && console.info(`Error deleting sessions from expred sessions file...`, e);
         }
-        fs_1.default.writeFileSync(common_js_2.expiredSessionFile(), JSON.stringify(undeletedOldSessions));
+        fs_1.default.writeFileSync(common_js_3.expiredSessionFile(), JSON.stringify(undeletedOldSessions));
         // launch UI
         notify('Request user interface.');
         console.log(`Launching UI...`);
@@ -369,15 +372,18 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
             if (windowBoxPath) {
                 // open a blank window 
                 ({ UI, browser } = await newBrowser({ blank: true, sessionId: SessionId }));
-                // and use our UI connection to write the correct window box as the page
+                // and after the page is ready,
+                // use our UI connection to write the correct window box as the page
                 // get top frame
                 const { frameTree: { frame: { id: frameId } } } = await UI.send("Page.getFrameTree", {}, UI.sessionId);
                 // write document
                 const html = fs_1.default.readFileSync(windowBoxPath).toString();
-                await UI.send("Page.setDocumentContent", {
+                console.log({ html, frameId });
+                const result = await UI.send("Page.setDocumentContent", {
                     frameId,
                     html
                 }, UI.sessionId);
+                console.log({ result });
             }
             else {
                 ({ UI, browser } = await newBrowser({ ServicePort, sessionId: SessionId }));
@@ -403,29 +409,31 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
         if (!(sessionId && ((ServicePort || '').toString() || blank))) {
             throw new TypeError(`newBrowser must be passed a unique sessionId and either the 'blank' flag or a ServicePort`);
         }
+        // set up a promise to track progress
+        let reject, resolve, pr = new Promise((res, rej) => (resolve = res, reject = rej));
         // set up disk space
         safe_notify('Request UI directories.');
-        if (!fs_1.default.existsSync(common_js_2.temp_browser_cache(sessionId))) {
+        if (!fs_1.default.existsSync(common_js_3.temp_browser_cache(sessionId))) {
             console.log(`Temp browser cache directory does not exist. Creating...`);
-            fs_1.default.mkdirSync(common_js_2.temp_browser_cache(sessionId), { recursive: true });
+            fs_1.default.mkdirSync(common_js_3.temp_browser_cache(sessionId), { recursive: true });
             console.log(`Created.`);
         }
-        if (!fs_1.default.existsSync(common_js_2.app_data_dir(sessionId))) {
+        if (!fs_1.default.existsSync(common_js_3.app_data_dir(sessionId))) {
             console.log(`App data dir does not exist. Creating...`);
-            fs_1.default.mkdirSync(common_js_2.app_data_dir(sessionId), { recursive: true });
+            fs_1.default.mkdirSync(common_js_3.app_data_dir(sessionId), { recursive: true });
             console.log(`Created.`);
         }
         safe_notify('UI data and cache directory created.');
         // construct start URL
         let startUrl;
         if (blank) {
-            startUrl = 'data:text/html,<!DOCTYPE html>';
+            startUrl = 'data:text/html,<!DOCTYPE html><script>document.title = "Made with Grader"</script>';
         }
         else {
             startUrl = `http://localhost:${ServicePort}${uriPath}`;
         }
         // start browser
-        const CHROME_OPTS = !common_js_2.NO_SANDBOX ? [
+        const CHROME_OPTS = !common_js_3.NO_SANDBOX ? [
             `--disable-extensions`,
             `--disable-breakpad`,
             `--metrics-recording-only`,
@@ -433,7 +441,7 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
             `--no-first-run`,
             `--app=${startUrl}`,
             '--restore-last-session',
-            `--disk-cache-dir=${common_js_2.temp_browser_cache(sessionId)}`,
+            `--disk-cache-dir=${common_js_3.temp_browser_cache(sessionId)}`,
             `--aggressive-cache-discard`
         ] : [
             `--disable-extensions`,
@@ -443,23 +451,23 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
             `--no-first-run`,
             `--app=${startUrl}`,
             '--restore-last-session',
-            `--disk-cache-dir=${common_js_2.temp_browser_cache(sessionId)}`,
+            `--disk-cache-dir=${common_js_3.temp_browser_cache(sessionId)}`,
             `--aggressive-cache-discard`,
             '--no-sandbox'
         ];
         const LAUNCH_OPTS = {
             logLevel: 'verbose',
             chromeFlags: CHROME_OPTS,
-            userDataDir: common_js_2.app_data_dir(sessionId),
+            userDataDir: common_js_3.app_data_dir(sessionId),
             ignoreDefaultFlags: true,
         };
-        common_js_2.DEBUG && console.log({ LAUNCH_OPTS });
+        common_js_3.DEBUG && console.log({ LAUNCH_OPTS });
         let browser;
         try {
             browser = await chrome_launcher_1.launch(LAUNCH_OPTS);
         }
         catch (e) {
-            common_js_2.DEBUG && console.error(e);
+            common_js_3.DEBUG && console.error(e);
             fs_1.default.writeFileSync('browser.error', JSON.stringify({ err: e, msg: e + '', stack: e.stack }));
             safe_notify('Could not start UI (chrome). Because: ' + JSON.stringify(e));
         }
@@ -475,7 +483,7 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
         let windowId;
         try {
             const { targetInfos } = await UI.send("Target.getTargets", {});
-            common_js_2.DEBUG && console.info({ targetInfos, startUrl });
+            common_js_3.DEBUG && console.info({ targetInfos, startUrl });
             appTarget = targetInfos.find(({ type, url }) => {
                 return type == 'page' && url.startsWith(startUrl);
             });
@@ -484,7 +492,7 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
             }));
         }
         catch (e) {
-            common_js_2.DEBUG && console.info(`Error getting window ID...`, e);
+            common_js_3.DEBUG && console.info(`Error getting window ID...`, e);
         }
         // expose some useful properties 
         Object.defineProperties(UI, {
@@ -525,7 +533,7 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
         const { on, send } = UI;
         try {
             // attach to target
-            common_js_2.DEBUG && console.log({ installingAPIProxy: true });
+            common_js_3.DEBUG && console.log({ installingAPIProxy: true });
             const { sessionId } = await send("Target.attachToTarget", {
                 targetId: appTarget.targetId,
                 flatten: true
@@ -533,16 +541,16 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
             UI.sessionId = sessionId;
             await send("Runtime.enable", {}, sessionId);
             await send("Page.enable", {}, sessionId);
-            common_js_2.DEBUG && console.log({ attached: { sessionId } });
+            common_js_3.DEBUG && console.log({ attached: { sessionId } });
             // add the proxy script to all frames in this target
             const script = await send("Page.addScriptToEvaluateOnNewDocument", {
                 source: API_PROXY_SCRIPT,
             }, sessionId);
-            common_js_2.DEBUG && console.log({ script });
+            common_js_3.DEBUG && console.log({ script });
             // listen for binding request
             await on("Runtime.bindingCalled", async ({ name, payload, executionContextId }) => {
-                common_js_2.DEBUG && console.log("Service side received call from UI binding");
-                common_js_2.DEBUG && console.info({ name, payload, executionContextId });
+                common_js_3.DEBUG && console.log("Service side received call from UI binding");
+                common_js_3.DEBUG && console.info({ name, payload, executionContextId });
                 await api_bridge_js_1.default({ name, payload, executionContextId });
             });
             await on("Runtime.consoleAPICalled", async ({ args }) => {
@@ -573,7 +581,7 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
                         }, sessionId);
                         // add a binding to it
                         if (bindingRetryCount == 0) {
-                            common_js_2.DEBUG && console.log(`Add service binding to ec ${executionContextId}`);
+                            common_js_3.DEBUG && console.log(`Add service binding to ec ${executionContextId}`);
                             await send("Runtime.addBinding", {
                                 name: BINDING_NAME,
                                 executionContextId
@@ -581,13 +589,13 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
                         }
                         // add the service binding script 
                         // (to receive messages from API proxy and dispatch them to the binding)
-                        common_js_2.DEBUG && console.log(`Add service binding script to ec ${executionContextId}`);
+                        common_js_3.DEBUG && console.log(`Add service binding script to ec ${executionContextId}`);
                         const { result, exceptionDetails } = await send("Runtime.evaluate", {
                             expression: SERVICE_BINDING_SCRIPT,
                             returnByValue: true,
                             executionContextId
                         }, sessionId);
-                        common_js_2.DEBUG && console.log({ result, exceptionDetails });
+                        common_js_3.DEBUG && console.log({ result, exceptionDetails });
                         // reload if needed
                         if (exceptionDetails) {
                             if (bindingRetryCount++ < MAX_BINDING_RETRY) {
@@ -597,13 +605,16 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
                                 await send("Page.reload", {}, sessionId);
                             }
                             else {
-                                throw new Error(`Retries exceeded to add the binding to the page`);
+                                reject(new Error(`Retries exceeded to add the binding to the page`));
                             }
+                        }
+                        else {
+                            resolve({ browser, UI });
                         }
                     }
                 }
                 catch (e) {
-                    common_js_2.DEBUG && console.info(`Error installing binding...`, e);
+                    common_js_3.DEBUG && console.info(`Error installing binding...`, e);
                 }
             });
             // reload to create a new document to 
@@ -611,9 +622,9 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
             await send("Page.reload", {}, sessionId);
         }
         catch (e) {
-            common_js_2.DEBUG && console.info(`Error install API proxy...`, e);
+            common_js_3.DEBUG && console.info(`Error install API proxy...`, e);
         }
-        return { UI, browser };
+        return pr;
         // helper (in scope) functions
         async function shutdownFunc() {
             if (UI.alreadyShutdown)
@@ -628,27 +639,27 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
             }
             // try to delete  
             try {
-                fs_1.default.rmdirSync(common_js_2.sessionDir(sessionId), { recursive: true, maxRetries: 3, retryDelay: 700 });
+                fs_1.default.rmdirSync(common_js_3.sessionDir(sessionId), { recursive: true, maxRetries: 3, retryDelay: 700 });
             }
             catch (e) {
-                common_js_2.DEBUG && console.info(`Error deleting session folder...`, e);
+                common_js_3.DEBUG && console.info(`Error deleting session folder...`, e);
             }
             // if it did not delete yet schedule for later
             try {
                 let expiredSessions = [];
                 try {
-                    expiredSessions = JSON.parse(fs_1.default.readFileSync(common_js_2.expiredSessionFile()).toString());
+                    expiredSessions = JSON.parse(fs_1.default.readFileSync(common_js_3.expiredSessionFile()).toString());
                 }
                 catch (e) {
-                    common_js_2.DEBUG && console.info(`Unable to read expired sessions file...`, e);
+                    common_js_3.DEBUG && console.info(`Unable to read expired sessions file...`, e);
                 }
                 expiredSessions.push(sessionId);
                 const tmp = '.new' + Math.random();
-                fs_1.default.writeFileSync(path_2.default.resolve(common_js_2.expiredSessionFile() + tmp), JSON.stringify(expiredSessions));
-                fs_1.default.renameSync(path_2.default.resolve(common_js_2.expiredSessionFile() + tmp), common_js_2.expiredSessionFile());
+                fs_1.default.writeFileSync(path_2.default.resolve(common_js_3.expiredSessionFile() + tmp), JSON.stringify(expiredSessions));
+                fs_1.default.renameSync(path_2.default.resolve(common_js_3.expiredSessionFile() + tmp), common_js_3.expiredSessionFile());
             }
             catch (e) {
-                common_js_2.DEBUG && console.info(`Error scheduling session data for deletion...`, e);
+                common_js_3.DEBUG && console.info(`Error scheduling session data for deletion...`, e);
             }
         }
     }
@@ -658,21 +669,21 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
         const pr = new Promise((res, rej) => (resolve = res, reject = rej));
         let port = desiredPort;
         addHandlers(app);
-        console.log({ DEBUG: common_js_2.DEBUG, port });
+        console.log({ DEBUG: common_js_3.DEBUG, port });
         const service = app.listen(Number(port), async (err) => {
             if (PORT_DEBUG || err) {
                 console.warn(err);
                 return reject(err);
             }
             upAt = new Date;
-            common_js_2.say({ serviceUp: { upAt, port } });
+            common_js_3.say({ serviceUp: { upAt, port } });
             resolve({ service, upAt, port });
             console.log(`Ready`);
         });
         service.on('error', async (err) => {
-            await common_js_2.sleep(10);
+            await common_js_3.sleep(10);
             if (retryCount++ < MAX_RETRY) {
-                console.log({ retry: { retryCount, badPort: port, DEBUG: common_js_2.DEBUG, err } });
+                console.log({ retry: { retryCount, badPort: port, DEBUG: common_js_3.DEBUG, err } });
                 notify(`${port} taken. Trying new port...`);
                 const subsequentTry = start({ app, desiredPort: randomPort() });
                 subsequentTry.then(resolve).catch(reject);
@@ -712,12 +723,12 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
         if (process.send) {
             return process.send(msg, null, {}, e => {
                 if (e) {
-                    common_js_2.say({ processSend: msg });
+                    common_js_3.say({ processSend: msg });
                 }
             });
         }
         else {
-            common_js_2.say({ processSend: msg });
+            common_js_3.say({ processSend: msg });
             return false;
         }
     }
@@ -726,7 +737,7 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
             process.send(msg);
         }
         else {
-            common_js_2.say({ processSend: msg });
+            common_js_3.say({ processSend: msg });
         }
     }
     function addHandlers(app) {
@@ -740,13 +751,13 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
                 await ui.shutdown();
             }
             catch (e) {
-                common_js_2.DEBUG && console.info(`Error shutting down the browser...`, e);
+                common_js_3.DEBUG && console.info(`Error shutting down the browser...`, e);
             }
             if (bg.listening) {
                 await stop(bg);
             }
             else {
-                common_js_2.say({ killService: 'already closed' });
+                common_js_3.say({ killService: 'already closed' });
             }
             process.exit(0);
         };
@@ -770,9 +781,9 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
             server: bg,
             gracefulTerminationTimeout: 1000
         });
-        common_js_2.say({ service: `Closing service...` });
+        common_js_3.say({ service: `Closing service...` });
         await serviceTerminator.terminate();
-        common_js_2.say({ service: 'Closed' });
+        common_js_3.say({ service: 'Closed' });
     }
     return {
         setters: [
@@ -794,8 +805,8 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
             function (config_js_3_1) {
                 config_js_3 = config_js_3_1;
             },
-            function (common_js_2_1) {
-                common_js_2 = common_js_2_1;
+            function (common_js_3_1) {
+                common_js_3 = common_js_3_1;
             },
             function (protocol_js_1_1) {
                 protocol_js_1 = protocol_js_1_1;
@@ -810,13 +821,13 @@ System.register("service", ["fs", "path", "express", "chrome-launcher", "http-te
             MAX_RETRY = 10;
             MAX_BINDING_RETRY = 10;
             exports_4("SITE_PATH", SITE_PATH = path_2.default.resolve(__dirname, 'public'));
-            common_js_2.DEBUG && console.log({ SITE_PATH });
+            common_js_3.DEBUG && console.log({ SITE_PATH });
             exports_4("newSessionId", newSessionId = () => (Math.random() * 1137).toString(36));
             SessionId = newSessionId();
             BINDING_NAME = "_graderService";
             JS_CONTEXT_NAME = "GraderWorld";
-            API_PROXY_SCRIPT = fs_1.default.readFileSync(path_2.default.resolve(common_js_2.appDir(), 'app', 'ui_inject', 'proxy.js')).toString();
-            SERVICE_BINDING_SCRIPT = fs_1.default.readFileSync(path_2.default.resolve(common_js_2.appDir(), 'app', 'ui_inject', 'binding.js')).toString();
+            API_PROXY_SCRIPT = fs_1.default.readFileSync(path_2.default.resolve(common_js_3.appDir(), 'app', 'ui_inject', 'proxy.js')).toString();
+            SERVICE_BINDING_SCRIPT = fs_1.default.readFileSync(path_2.default.resolve(common_js_3.appDir(), 'app', 'ui_inject', 'binding.js')).toString();
             // global variables 
             bindingRetryCount = 0;
             retryCount = 0;
@@ -1158,6 +1169,7 @@ System.register("app", ["index"], function (exports_6, context_6) {
     var __moduleName = context_6 && context_6.id;
     async function start() {
         await index_js_2.default.go();
+        //await windowDemo();
     }
     return {
         setters: [
@@ -1166,7 +1178,7 @@ System.register("app", ["index"], function (exports_6, context_6) {
             }
         ],
         execute: function () {
-            // import {windowDemo} from './demos.js';
+            //import {windowDemo} from './demos.js';
             start();
         }
     };
