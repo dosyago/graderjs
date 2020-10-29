@@ -132,7 +132,17 @@
 
           // and use our UI connection to write the correct window box as the page
 
-          await UI.send("
+          // get top frame
+            const {frameTree: {frame: {id: frameId}}} = await send(
+              "Page.getFrameTree", {}, sessionId
+            );
+
+          // write document
+            const html = fs.readFileSync(windowBoxPath).toString();
+            await UI.send("Page.setDocumentContent", {
+              frameId,
+              html
+            }, sessionId);
         } else {
           ({UI,browser} = await newBrowser({ServicePort, sessionId: SessionId}));
         }
@@ -248,43 +258,28 @@
         DEBUG && console.info(`Error getting window ID...`, e);
       }
 
-    UI.windowId = windowId;
-    browser.sessionId = sessionId;
-    UI.shutdown = async () => {
-      if ( UI.alreadyShutdown ) return;
-
-      UI.alreadyShutdown = true;
-      // try to kill browser
-        try {
-          await browser.kill();
-        } catch(e) {
-          console.log(`Browser already dead...`, e);
+    // expose some useful properties 
+      Object.defineProperties(UI, {
+        windowId: {
+          value: windowId
+        },
+        startUrl: {
+          value: startUrl
         }
-
-      // try to delete  
-        try {
-          fs.rmdirSync(sessionDir(sessionId), {recursive:true, maxRetries:3, retryDelay:700});
-        } catch(e) {
-          DEBUG && console.info(`Error deleting session folder...`, e);
+        shutdown: {
+          value: shutdownFunc 
         }
+      });
 
-      // if it did not delete yet schedule for later
-        try {
-          let expiredSessions = []
-          try {
-            expiredSessions = JSON.parse(fs.readFileSync(expiredSessionFile()).toString());
-          } catch(e) {
-            DEBUG && console.info(`Unable to read expired sessions file...`, e);
-          }
-          expiredSessions.push(sessionId);
-          const tmp = '.new'+Math.random();
-          fs.writeFileSync(path.resolve(expiredSessionFile() + tmp), JSON.stringify(expiredSessions));
-          fs.renameSync(path.resolve(expiredSessionFile() + tmp), expiredSessionFile());
-        } catch(e) {
-          DEBUG && console.info(`Error scheduling session data for deletion...`, e);
-        }
-    };
-    UI.socket.on('close', () => UI.shutdown());
+      Object.defineProperty(browser, 'sessionId', {
+        value: sessionId
+      });
+
+    // shutdown everything if we detect the UI connection closes
+      UI.socket.on('close', () => UI.shutdown());
+
+    // don't keep the socket exposed
+      UI.socket = null;
 
     // install binding and script and reload
       /**
@@ -306,113 +301,152 @@
         by the UI
       **/
 
-    const {ons, on, send} = UI;
+      const {ons, on, send} = UI;
 
-    try {
-      // attach to target
-        DEBUG && console.log({installingAPIProxy:true});
+      try {
+        // attach to target
+          DEBUG && console.log({installingAPIProxy:true});
 
-        const {sessionId} = await send("Target.attachToTarget", {
-          targetId: appTarget.targetId,
-          flatten: true
-        });
-        await send("Runtime.enable", {}, sessionId);
-        await send("Page.enable", {}, sessionId);
+          const {sessionId} = await send("Target.attachToTarget", {
+            targetId: appTarget.targetId,
+            flatten: true
+          });
 
-        DEBUG && console.log({attached:{sessionId}});
+          UI.sessionId = sessionId;
 
-      // add the proxy script to all frames in this target
-        const script = await send("Page.addScriptToEvaluateOnNewDocument", {
-          source: API_PROXY_SCRIPT,
-        }, sessionId);
+          await send("Runtime.enable", {}, sessionId);
+          await send("Page.enable", {}, sessionId);
 
-        DEBUG && console.log({script});
+          DEBUG && console.log({attached:{sessionId}});
 
-      // listen for binding request
-        await on("Runtime.bindingCalled", async ({name, payload, executionContextId}) => {
-          DEBUG && console.log("Service side received call from UI binding");
-          DEBUG && console.info({name, payload, executionContextId});
-          await bridge({name, payload, executionContextId});
-        });
+        // add the proxy script to all frames in this target
+          const script = await send("Page.addScriptToEvaluateOnNewDocument", {
+            source: API_PROXY_SCRIPT,
+          }, sessionId);
 
-        await on("Runtime.consoleAPICalled", async ({args, executionContextId}) => {
-          try {
-            if ( args.length == 0 ) return;
+          DEBUG && console.log({script});
 
-            const [{value:string}] = args;
+        // listen for binding request
+          await on("Runtime.bindingCalled", async ({name, payload, executionContextId}) => {
+            DEBUG && console.log("Service side received call from UI binding");
+            DEBUG && console.info({name, payload, executionContextId});
+            await bridge({name, payload, executionContextId});
+          });
 
-            let installBinding = false;
+          await on("Runtime.consoleAPICalled", async ({args, executionContextId}) => {
+            try {
+              if ( args.length == 0 ) return;
 
-            if ( typeof string == "string" ) {
-              try {
-                const obj = JSON.parse(string)
-                if ( obj.graderRequestInstallBinding ) {
-                  installBinding = true;
+              const [{value:string}] = args;
+
+              let installBinding = false;
+
+              if ( typeof string == "string" ) {
+                try {
+                  const obj = JSON.parse(string)
+                  if ( obj.graderRequestInstallBinding ) {
+                    installBinding = true;
+                  }
+                } catch(e) {
+                  // not our message 
                 }
-              } catch(e) {
-                // not our message 
               }
-            }
 
-            if ( installBinding ) {
-              console.log({installBindingCalled:true});
+              if ( installBinding ) {
+                console.log({installBindingCalled:true});
 
-              // get top frame
-                const {frameTree: {frame: {id: frameId}}} = await send(
-                  "Page.getFrameTree", {}, sessionId
-                );
+                // get top frame
+                  const {frameTree: {frame: {id: frameId}}} = await send(
+                    "Page.getFrameTree", {}, sessionId
+                  );
 
-              // create an isolate
-                const {executionContextId} = await send("Page.createIsolatedWorld", {
-                  frameId,
-                  worldName: JS_CONTEXT_NAME,
-                }, sessionId);
+                // create an isolate
+                  const {executionContextId} = await send("Page.createIsolatedWorld", {
+                    frameId,
+                    worldName: JS_CONTEXT_NAME,
+                  }, sessionId);
 
-              // add a binding to it
-                if ( bindingRetryCount == 0 ) {
-                  DEBUG && console.log(`Add service binding to ec ${executionContextId}`);
-                  await send("Runtime.addBinding", {
-                    name: BINDING_NAME,
+                // add a binding to it
+                  if ( bindingRetryCount == 0 ) {
+                    DEBUG && console.log(`Add service binding to ec ${executionContextId}`);
+                    await send("Runtime.addBinding", {
+                      name: BINDING_NAME,
+                      executionContextId
+                    }, sessionId);
+                  }
+
+                // add the service binding script 
+                  // (to receive messages from API proxy and dispatch them to the binding)
+                  DEBUG && console.log(`Add service binding script to ec ${executionContextId}`);
+                  const {result, exceptionDetails} = await send("Runtime.evaluate", {
+                    expression: SERVICE_BINDING_SCRIPT,
+                    returnByValue: true,
                     executionContextId
                   }, sessionId);
-                }
 
-              // add the service binding script 
-                // (to receive messages from API proxy and dispatch them to the binding)
-                DEBUG && console.log(`Add service binding script to ec ${executionContextId}`);
-                const {result, exceptionDetails} = await send("Runtime.evaluate", {
-                  expression: SERVICE_BINDING_SCRIPT,
-                  returnByValue: true,
-                  executionContextId
-                }, sessionId);
+                  DEBUG && console.log({result, exceptionDetails});
 
-                DEBUG && console.log({result, exceptionDetails});
-
-              // reload if needed
-                if ( exceptionDetails ) {
-                  if ( bindingRetryCount++ < MAX_BINDING_RETRY ) {
-                    // reload the page 
-                      // (binding does not seem to be available to 
-                      // isolated script unless page is reloaded)
-                    await send("Page.reload", {}, sessionId);
-                  } else {
-                    throw new Error(`Retries exceeded to add the binding to the page`); 
+                // reload if needed
+                  if ( exceptionDetails ) {
+                    if ( bindingRetryCount++ < MAX_BINDING_RETRY ) {
+                      // reload the page 
+                        // (binding does not seem to be available to 
+                        // isolated script unless page is reloaded)
+                      await send("Page.reload", {}, sessionId);
+                    } else {
+                      throw new Error(`Retries exceeded to add the binding to the page`); 
+                    }
                   }
-                }
+              }
+            } catch(e) {
+              DEBUG && console.info(`Error installing binding...`, e);
             }
-          } catch(e) {
-            DEBUG && console.info(`Error installing binding...`, e);
-          }
-        });
+          });
 
-      // reload to create a new document to 
-        // ensure we add the script and request binding installation
-        await send("Page.reload", {}, sessionId);
-    } catch(e) {
-      DEBUG && console.info(`Error install API proxy...`, e);
-    }
+        // reload to create a new document to 
+          // ensure we add the script and request binding installation
+          await send("Page.reload", {}, sessionId);
+      } catch(e) {
+        DEBUG && console.info(`Error install API proxy...`, e);
+      }
 
     return {UI,browser};
+
+    // helper (in scope) functions
+      async function shutdownFunc() {
+        if ( UI.alreadyShutdown ) return;
+
+        UI.alreadyShutdown = true;
+        // try to kill browser
+          try {
+            await browser.kill();
+          } catch(e) {
+            console.log(`Browser already dead...`, e);
+          }
+
+        // try to delete  
+          try {
+            fs.rmdirSync(sessionDir(sessionId), {recursive:true, maxRetries:3, retryDelay:700});
+          } catch(e) {
+            DEBUG && console.info(`Error deleting session folder...`, e);
+          }
+
+        // if it did not delete yet schedule for later
+          try {
+            let expiredSessions = []
+            try {
+              expiredSessions = JSON.parse(fs.readFileSync(expiredSessionFile()).toString());
+            } catch(e) {
+              DEBUG && console.info(`Unable to read expired sessions file...`, e);
+            }
+            expiredSessions.push(sessionId);
+            const tmp = '.new'+Math.random();
+            fs.writeFileSync(path.resolve(expiredSessionFile() + tmp), JSON.stringify(expiredSessions));
+            fs.renameSync(path.resolve(expiredSessionFile() + tmp), expiredSessionFile());
+          } catch(e) {
+            DEBUG && console.info(`Error scheduling session data for deletion...`, e);
+          }
+      }
   }
 
   async function start({app, desiredPort}) {
