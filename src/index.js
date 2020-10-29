@@ -8,7 +8,7 @@
 // constants
   const DEFAULT_WC = {
     win: false,
-    nix: path.resolve(Service.SITE_PATH, '_winctrlbox', 'nix_winctrl.html'),
+    nix: path.resolve(Service.SITE_PATH, '_winctrlbar', 'nix_winctrl.html'),
     osx: false
   }
 
