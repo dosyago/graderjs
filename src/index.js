@@ -84,7 +84,6 @@ export default API;
       apiInUI, addHandlers, server, keepConsoleOpen, doLayout
     });
 
-    API.ServicePort = App.ServicePort;
     //Common.DEBUG && console.log({App});
     return App;
   }
@@ -365,6 +364,7 @@ export default API;
 
 // util part i: KV functions (keys are strings)
   function save(key, value) {
+    Common.DEBUG && console.log({save:{key,value}});
     key += '';
     if ( typeof value == "object" ) {
       // do a pseudo merge

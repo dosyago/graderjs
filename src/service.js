@@ -70,6 +70,7 @@
       let service, ServicePort;
       try {
         ({service, port:ServicePort} = await start({app, desiredPort:CONFIG.desiredPort}));
+        API.ServicePort = ServicePort;
       } catch(e) {
         console.error(e);
         notify('Could not start background service. Because: ' + JSON.stringify(e));
@@ -186,7 +187,6 @@
         `--metrics-recording-only`,
         `--new-window`,
         `--no-first-run`,
-        `--app=${startUrl}`,
         /*'--restore-last-session',*/
         `--disk-cache-dir=${temp_browser_cache(browserSessionId)}`,
         `--aggressive-cache-discard`
@@ -197,7 +197,6 @@
         `--metrics-recording-only`,
         `--new-window`,
         `--no-first-run`,
-        `--app=${startUrl}`,
         /*'--restore-last-session',*/
         `--disk-cache-dir=${temp_browser_cache(browserSessionId)}`,
         `--aggressive-cache-discard`,
@@ -206,6 +205,8 @@
 
       if ( headless ) {
         CHROME_OPTS.push('--headless');
+      } else {
+        CHROME_OPTS.push(`--app=${startUrl}`);
       }
 
       if ( layout ) {
@@ -236,11 +237,14 @@
         chromeFlags:CHROME_OPTS, 
         userDataDir:app_data_dir(browserSessionId), 
         ignoreDefaultFlags: true,
-        /*
-        startingUrl: `http://localhost:${ServicePort}${uriPath}`,
-        */
       }
+
+      if ( headless ) {
+        LAUNCH_OPTS.startingUrl = startUrl;
+      }
+
       DEBUG && console.log({LAUNCH_OPTS});
+
       let browser;
       try {
         browser = await ChromeLaunch(LAUNCH_OPTS);
@@ -294,6 +298,11 @@
 
     // shutdown everything if we detect the UI connection closes
       UI.socket.on('close', () => UI.shutdown());
+
+    // or if the process exits
+      process.on('beforeExit', () => UI.shutdown());
+      process.on('exit', () => UI.shutdown());
+      process.on('SIGINT', () => UI.shutdown());
 
     // install binding and script and reload
       /**

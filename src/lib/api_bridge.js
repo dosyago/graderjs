@@ -15,7 +15,7 @@ let counter = 0;
 
 export default async function bridge(...requestArgs) {
   counter++;
-  DEBUG && console.info('Bridge called', requestArgs);
+  DEBUG && console.info('Bridge called', requestArgs, API);
 
   const [{name, payload: stringPayload, executionContextId}] = requestArgs;
 
@@ -76,8 +76,8 @@ function resolvePathToFunction(root, steps) {
 
   if ( index < steps.length ) {
     console.info(`Path ended before last step reached`, {lastLink, link, nextStep, steps, root});
-    throw new TypeError(`Path was undefined (at ${
-        steps.slice(0,index).join('.')
+    throw new TypeError(`API method ${steps.join('.')} was not found. Reason: Path was undefined (at ${
+        steps.slice(0,index+1).join('.')
       }) before reaching end of: ${
         steps.join('.')
       }`
