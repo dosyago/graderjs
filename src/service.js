@@ -61,6 +61,7 @@
 
 // main functions
   async function run(app, settings) {
+    console.log("Settings", settings);
     // start background service
       console.log(`Start service...`);
       notify('Request service start.');

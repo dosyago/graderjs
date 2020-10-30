@@ -69,11 +69,16 @@ export default API;
       addHandlers = undefined,            // callback to add the route handlers to an express app
     server:
       server = true,                      // used to disable or replace default server 
-                                            // if you don't want a server or if you need 
-                                            // more control (such as websockets, or TLS)
-                                            // we call listen automatically
+        // if you don't want a server or if you need 
+        // more control (such as websockets, or TLS)
+        // we call listen automatically
     keepConsoleOpen:
       keepConsoleOpen = false,            // keeps the console open in case you need it
+    doLayout:                               
+      doLayout = false                    // control window layout on screen
+        // true for auto mode or a function 
+        // signature: ({screenWidth, screenHeight}) => 
+        // {screenWidth, screenHeight, x, y, width, height}
   } = {}) {
     App = await Service.go({
       apiInUI, addHandlers, server, keepConsoleOpen
@@ -314,6 +319,8 @@ export default API;
   async function getScreen() {
     let screen = load('screen');
 
+    console.log("GET SCREEN");
+
     if ( !screen ) {
       // open a headless browser to a page that sends us the screen details
         const {ServicePort} = App;
@@ -339,6 +346,8 @@ export default API;
       
       screen = load('screen');
     }
+
+    console.log({screen});
 
     return screen;
   }
