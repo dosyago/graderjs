@@ -60,36 +60,6 @@
 
 // main functions
   async function run(app, settings) {
-    // get platform specific window box (if any)
-      const platform = getPlatform();
-      const windowBox = settings.windowControls[platform];
-
-      let windowBoxPath = null;
-
-      // true specifies the default
-      if ( windowBox === true ) {
-        windowBoxPath = path.resolve(SITE_PATH, '_winctrlbar', `${platform}_winctrl.html`);  
-      } 
-
-      // a string sets a (possibly relative) path
-      else if ( typeof windowBox == "string" ) {
-        windowBoxPath = path.resolve(windowBox);
-      }
-
-      // false means no window control box
-      else if ( windowBox === false ) {
-        windowBoxPath = null;
-      }
-
-      // otherwise we have an error
-      else {
-        throw new TypeError(
-          `Settings windowControl[platform], if set, can only be a string or a boolean`
-        );
-      }
-
-      DEBUG && console.log({windowBoxPath});
-
     // start background service
       console.log(`Start service...`);
       notify('Request service start.');
@@ -129,25 +99,28 @@
       let UI, browser;
       try {
         if ( windowBoxPath ) {
-          // open a blank window 
-          ({UI,browser} = await newBrowser({blank: true, sessionId: SessionId}));
+          // open a window boxed window
+          ({UI,browser} = await newBrowser({ServicePort, uriPath: windowBoxPath, sessionId: SessionId}));
 
-          // and after the page is ready,
-          // use our UI connection to write the correct window box as the page
+          /**
+            // this doesn't work as expected
+            // and after the page is ready,
+            // use our UI connection to write the correct window box as the page
 
-          // get top frame
-            const {frameTree: {frame: {id: frameId}}} = await UI.send(
-              "Page.getFrameTree", {}, UI.sessionId
-            );
+              // get top frame
+                const {frameTree: {frame: {id: frameId}}} = await UI.send(
+                  "Page.getFrameTree", {}, UI.sessionId
+                );
 
-          // write document
-            const html = fs.readFileSync(windowBoxPath).toString();
-            console.log({html, frameId});
-            const result = await UI.send("Page.setDocumentContent", {
-              frameId,
-              html
-            }, UI.sessionId);
-            console.log({result});
+              // write document
+                const html = fs.readFileSync(windowBoxPath).toString();
+                console.log({html, frameId});
+                const result = await UI.send("Page.setDocumentContent", {
+                  frameId,
+                  html
+                }, UI.sessionId);
+                console.log({result});
+          **/
         } else {
           ({UI,browser} = await newBrowser({ServicePort, sessionId: SessionId}));
         }

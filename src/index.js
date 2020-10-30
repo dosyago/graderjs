@@ -8,7 +8,7 @@
 // constants
   const DEFAULT_WC = {
     win: false,
-    nix: path.resolve(Service.SITE_PATH, '_winctrlbar', 'nix_winctrl.html'),
+    nix: '/_winctrlbar/nix_winctrl.html',
     osx: false
   }
 
@@ -63,8 +63,8 @@ export default API;
   async function go({
     apiInUI:                              // enable grader API available in UI context
       apiInUI = false,
-    windowControls:                       // set properties of window control bar
-      windowControls = undefined,        
+    titleBar:                             // show the titlebar on desktop systems that support it
+      titleBar = true,                    // false  
     addHandlers:
       addHandlers = undefined,            // callback to add the route handlers to an express app
     server:
@@ -75,41 +75,8 @@ export default API;
     keepConsoleOpen:
       keepConsoleOpen = false,            // keeps the console open in case you need it
   } = {}) {
-    // default parameters
-      // window controls
-        if ( windowControls === undefined ) {
-          windowControls = DEFAULT_WC;
-        } else {
-          if ( windowControls === false ) {
-            windowControls = {
-              win: false,
-              nix: false,
-              osx: false
-            };
-          } else if ( windowControls === true) {
-            // win and osx are both false because they provide window controls by default
-            windowControls = DEFAULT_WC;
-          } else {
-            // check if it's an object 
-
-            let typeFailure = false;
-            try {
-              JSON.stringify(windowControls);
-            } catch(e) {
-              Common.DEBUG && console.info(e, {windowControls});
-              typeFailure = true;
-            }
-
-            if ( typeFailure || typeof windowControls !== "object" ) {
-              throw new TypeError(
-                `API.go: windowControls if set needs to be a boolean, or an object.`
-              );
-            }
-          }
-        }
-
     App = await Service.go({
-      apiInUI, windowControls, addHandlers, server, keepConsoleOpen
+      apiInUI, titleBar, addHandlers, server, keepConsoleOpen
     });
 
     API.ServicePort = App.ServicePort;
