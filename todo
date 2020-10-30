@@ -1,4 +1,3 @@
-- implement way to pass back info from service side to UI side (promise resolver account)
 - allow setting initial position and size (and get screen size by opening headless chrome window and evaluating screen.width, everytime. We can also use this headless vanguard to provide us other useful properties.)
 - add download_chrome script to pull it in if system doesn't have it
 - implement addHandlers, server and keepConsoleOpen settings (as well as other sketched and unimplemented settings)
