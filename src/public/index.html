@@ -26,3 +26,18 @@
   <button onclick="grader.ui.minimize();">_</button>
   <button onclick="grader.ui.restore();">&#11036;</button>
   <button onclick="grader.ui.close();">x</button>
+<script>
+  (async () => {
+    await graderReady();
+
+    const [title, favicon, startURL] = (await Promise.allSettled([
+      grader.meta.getTitle(),
+      grader.meta.getFavicon(),
+      grader.meta.getStartURL()
+    ])).map(({value, reason}) => value || reason && new Error(reason));
+
+    console.log({title, favicon, startURL});
+
+    document.title = title;
+  })();
+</script>

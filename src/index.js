@@ -12,6 +12,7 @@
     go,                   // start app launch sequence
     stop,                 // kill app, cleanup, and exit (after async jobs parameter completes)
     say,                  // say something to console (throws if console closed)
+    isReady,                // is service ready to accept API calls 
 
     ui : {
       open,               // open UI window
@@ -28,14 +29,14 @@
       writePage,          // like document.write if using a custom window control box, writes to the
                           // iframe document inside that
 
-      getStartURL,        // gets the start URL for the app (useful to set the iframe src
-                          // when using a custom window control box)
-      getFavicon,         // gets a (or an optionally named) favicon as a data URL
-      getAppTitle,        // gets the app title
     },
 
     meta: {
-      publishAPI          // publish an API into the UI context (requires apiInUI: true)
+      publishAPI,         // publish an API into the UI context (requires apiInUI: true)
+
+      getStartURL,        // gets the start URL for the app 
+      getFavicon,         // gets a (or an optionally named) favicon as a data URL
+      getTitle,        // gets the app title
     },
 
     control: {
@@ -55,6 +56,10 @@ export default API;
   let App;
 
 // basic functions
+  async function isReady() {
+    return await Service.isReady();
+  }
+
   async function go({
     apiInUI:                              // enable grader API available in UI context
       apiInUI = false,
@@ -299,7 +304,7 @@ export default API;
     return dataURL;
   }
 
-  async function getAppTitle() {
+  async function getTitle() {
     return CONFIG.name;
   }
 

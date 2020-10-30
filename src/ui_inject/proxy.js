@@ -5,6 +5,8 @@
 
   const Target = async () => await void 0;
 
+  let readyRes;
+  let ServiceIsReady = new Promise((res, rej) => readyRes = res);
   let GraderProxy, HandlerInstance, revoke; 
   let ready = false;
 
@@ -14,6 +16,7 @@
       if ( data == "binding ready" ) {
         ready = true;
         console.log("API Proxy notified that service binding is ready", origin);
+        readyRes(true);
       } else if ( data == "turnOff" ) {
         ready = false;
         turnOff();
@@ -111,6 +114,9 @@
 
   Object.freeze(SLOT_DESCRIPTOR);
   Object.defineProperty(globalThis, GRADER_API_SLOT, SLOT_DESCRIPTOR);
+  Object.defineProperty(globalThis, 'graderReady', {
+    value: async () => ServiceIsReady
+  });
 
   /* eslint-disable no-inner-declarations */
 
