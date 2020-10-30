@@ -205,7 +205,7 @@
       ];
 
       if ( headless ) {
-        CHROME_OPTS.push('--headless');
+        CHROME_OPTS.push('--silent-launch');
       } else {
         CHROME_OPTS.push(`--app=${startUrl}`);
       }
@@ -270,9 +270,15 @@
       try {
         const {targetInfos} = await UI.send("Target.getTargets", {});
         DEBUG && console.info({targetInfos, startUrl});
-        appTarget = targetInfos.find(({type, url}) => {
-          return type == 'page' && url.startsWith(startUrl);
-        });
+        if ( headless ) {
+          appTarget = targetInfos.find(({type}) => {
+            return type == 'background_page' 
+          });
+        } else {
+          appTarget = targetInfos.find(({type, url}) => {
+            return type == 'page' && url.startsWith(startUrl);
+          });
+        }
         ({windowId} = await UI.send("Browser.getWindowForTarget", {
           targetId: appTarget.targetId
         }));
@@ -306,159 +312,193 @@
       process.on('SIGINT', () => API.ui.close(UI));
 
     // install binding and script and reload
-      /**
-        note that doing it like this
-        where we add the binding only to the one isolate JS context
-        where our grader API global is
-        means that no JS scripts on any page 
-        can access either the binding or the global
-        the only way we can access those scripts is 
-        to add a config.js property that whitelists those scripts
-        and import them here using add script (in the same call we already use)
-        or eval them in the isolated world directly
-        this means that to actually talk to the window APIs
-        from a regular script loaded staticly by the browser
-        we need to use postMessage I think
-        this is more work for the dev but ultimately i think
-        a better solution since it's more secure than just with one flag
-        (apiInUI) exposing the service APIs to any script that gets loaded
-        by the UI
-      **/
+      if ( headless ) {
+        const {send} = UI;
 
-      const {on, send} = UI;
+        try {
+          // attach to target
+            DEBUG && console.log({installingAPIProxy:true});
 
-      try {
-        // attach to target
-          DEBUG && console.log({installingAPIProxy:true});
+            const {sessionId} = await send("Target.attachToTarget", {
+              targetId: appTarget.targetId,
+              flatten: true
+            });
 
-          const {sessionId} = await send("Target.attachToTarget", {
-            targetId: appTarget.targetId,
-            flatten: true
-          });
+            UI.sessionId = sessionId;
 
-          UI.sessionId = sessionId;
+            await send("Runtime.enable", {}, sessionId);
 
-          await send("Runtime.enable", {}, sessionId);
-          await send("Page.enable", {}, sessionId);
+            DEBUG && console.log({attached:{sessionId}});
 
-          DEBUG && console.log({attached:{sessionId}});
-
-        // add the proxy script to all frames in this target
-          const script = await send("Page.addScriptToEvaluateOnNewDocument", {
-            source: API_PROXY_SCRIPT,
-          }, sessionId);
-
-          DEBUG && console.log({script});
-
-        // listen for binding request
-          await on("Runtime.bindingCalled", async ({name, payload, executionContextId}) => {
-            DEBUG && console.log("Service side received call from UI binding");
-            let id;
-            try {
-              id = JSON.parse(payload).id;
-            } catch(e) {
-              console.info(`Couldn't parse payload`, payload, e);
-              return;
-            }
-
-            DEBUG && console.info({name, id, payload, executionContextId});
-
-            const result = {};
-            try {
-              result.value = await bridge({name, payload, executionContextId});
-            } catch(e) {
-              const stack = e.stack && '\n' + e.stack.split(/\n/g);
-              result.error = `${e.name}: ${e.message}${stack || ''}`;
-            }
-            const sendResult = await send("Runtime.evaluate", {
-              expression: `globalThis._graderUI(${JSON.stringify({result, id})})`,
-              contextId: executionContextId
+          // get screen details
+            const result = await send("Runtime.evaluate", {
+              expression: `({screenWidth: screen.width, screenHeight: screen.height})`,
+              returnByValue: true
             }, sessionId);
 
-            if ( sendResult.exceptionDetails ) {
-              console.info(`Error talking to _graderUI`, JSON.stringify(sendResult));
-            } else {
-              console.log(`Successfully sent API result to page`, {result}, {sendResult});
-            }
-          });
+            console.log({result});
 
-          await on("Runtime.consoleAPICalled", async ({args}) => {
-            try {
-              if ( args.length == 0 ) return;
+            const {screenWidth, screenHeight} = result;
 
-              const [{value:string}] = args;
+            API.util.kv('screen', {screenWidth, screenHeight});
+        } catch(e) {
+          DEBUG && console.info(`Error install API proxy...`, e);
+        }
+      } else {
+        /**
+          note that doing it like this
+          where we add the binding only to the one isolate JS context
+          where our grader API global is
+          means that no JS scripts on any page 
+          can access either the binding or the global
+          the only way we can access those scripts is 
+          to add a config.js property that whitelists those scripts
+          and import them here using add script (in the same call we already use)
+          or eval them in the isolated world directly
+          this means that to actually talk to the window APIs
+          from a regular script loaded staticly by the browser
+          we need to use postMessage I think
+          this is more work for the dev but ultimately i think
+          a better solution since it's more secure than just with one flag
+          (apiInUI) exposing the service APIs to any script that gets loaded
+          by the UI
+        **/
 
-              let installBinding = false;
+        const {on, send} = UI;
 
-              if ( typeof string == "string" ) {
-                try {
-                  const obj = JSON.parse(string)
-                  if ( obj.graderRequestInstallBinding ) {
-                    installBinding = true;
-                  }
-                } catch(e) {
-                  // not our message 
-                }
+        try {
+          // attach to target
+            DEBUG && console.log({installingAPIProxy:true});
+
+            const {sessionId} = await send("Target.attachToTarget", {
+              targetId: appTarget.targetId,
+              flatten: true
+            });
+
+            UI.sessionId = sessionId;
+
+            await send("Runtime.enable", {}, sessionId);
+            await send("Page.enable", {}, sessionId);
+
+            DEBUG && console.log({attached:{sessionId}});
+
+          // add the proxy script to all frames in this target
+            const script = await send("Page.addScriptToEvaluateOnNewDocument", {
+              source: API_PROXY_SCRIPT,
+            }, sessionId);
+
+            DEBUG && console.log({script});
+
+          // listen for binding request
+            await on("Runtime.bindingCalled", async ({name, payload, executionContextId}) => {
+              DEBUG && console.log("Service side received call from UI binding");
+              let id;
+              try {
+                id = JSON.parse(payload).id;
+              } catch(e) {
+                console.info(`Couldn't parse payload`, payload, e);
+                return;
               }
 
-              if ( installBinding ) {
-                console.log({installBindingCalled:true});
+              DEBUG && console.info({name, id, payload, executionContextId});
 
-                // get top frame
-                  const {frameTree: {frame: {id: frameId}}} = await send(
-                    "Page.getFrameTree", {}, sessionId
-                  );
+              const result = {};
+              try {
+                result.value = await bridge({name, payload, executionContextId});
+              } catch(e) {
+                const stack = e.stack && '\n' + e.stack.split(/\n/g);
+                result.error = `${e.name}: ${e.message}${stack || ''}`;
+              }
+              const sendResult = await send("Runtime.evaluate", {
+                expression: `globalThis._graderUI(${JSON.stringify({result, id})})`,
+                contextId: executionContextId
+              }, sessionId);
 
-                // create an isolate
-                  const {executionContextId} = await send("Page.createIsolatedWorld", {
-                    frameId,
-                    worldName: JS_CONTEXT_NAME,
-                  }, sessionId);
+              if ( sendResult.exceptionDetails ) {
+                console.info(`Error talking to _graderUI`, JSON.stringify(sendResult));
+              } else {
+                console.log(`Successfully sent API result to page`, {result}, {sendResult});
+              }
+            });
 
-                // add a binding to it
-                  if ( bindingRetryCount == 0 ) {
-                    DEBUG && console.log(`Add service binding to ec ${executionContextId}`);
-                    await send("Runtime.addBinding", {
-                      name: BINDING_NAME,
+            await on("Runtime.consoleAPICalled", async ({args}) => {
+              try {
+                if ( args.length == 0 ) return;
+
+                const [{value:string}] = args;
+
+                let installBinding = false;
+
+                if ( typeof string == "string" ) {
+                  try {
+                    const obj = JSON.parse(string)
+                    if ( obj.graderRequestInstallBinding ) {
+                      installBinding = true;
+                    }
+                  } catch(e) {
+                    // not our message 
+                  }
+                }
+
+                if ( installBinding ) {
+                  console.log({installBindingCalled:true});
+
+                  // get top frame
+                    const {frameTree: {frame: {id: frameId}}} = await send(
+                      "Page.getFrameTree", {}, sessionId
+                    );
+
+                  // create an isolate
+                    const {executionContextId} = await send("Page.createIsolatedWorld", {
+                      frameId,
+                      worldName: JS_CONTEXT_NAME,
+                    }, sessionId);
+
+                  // add a binding to it
+                    if ( bindingRetryCount == 0 ) {
+                      DEBUG && console.log(`Add service binding to ec ${executionContextId}`);
+                      await send("Runtime.addBinding", {
+                        name: BINDING_NAME,
+                        executionContextId
+                      }, sessionId);
+                    }
+
+                  // add the service binding script 
+                    // (to receive messages from API proxy and dispatch them to the binding)
+                    DEBUG && console.log(`Add service binding script to ec ${executionContextId}`);
+                    const {result, exceptionDetails} = await send("Runtime.evaluate", {
+                      expression: SERVICE_BINDING_SCRIPT,
+                      returnByValue: true,
                       executionContextId
                     }, sessionId);
-                  }
 
-                // add the service binding script 
-                  // (to receive messages from API proxy and dispatch them to the binding)
-                  DEBUG && console.log(`Add service binding script to ec ${executionContextId}`);
-                  const {result, exceptionDetails} = await send("Runtime.evaluate", {
-                    expression: SERVICE_BINDING_SCRIPT,
-                    returnByValue: true,
-                    executionContextId
-                  }, sessionId);
+                    DEBUG && console.log({result, exceptionDetails});
 
-                  DEBUG && console.log({result, exceptionDetails});
-
-                // reload if needed
-                  if ( exceptionDetails ) {
-                    if ( bindingRetryCount++ < MAX_BINDING_RETRY ) {
-                      // reload the page 
-                        // (binding does not seem to be available to 
-                        // isolated script unless page is reloaded)
-                      await send("Page.reload", {}, sessionId);
+                  // reload if needed
+                    if ( exceptionDetails ) {
+                      if ( bindingRetryCount++ < MAX_BINDING_RETRY ) {
+                        // reload the page 
+                          // (binding does not seem to be available to 
+                          // isolated script unless page is reloaded)
+                        await send("Page.reload", {}, sessionId);
+                      } else {
+                        reject(new Error(`Retries exceeded to add the binding to the page`)); 
+                      }
                     } else {
-                      reject(new Error(`Retries exceeded to add the binding to the page`)); 
+                      resolve({browser, UI});
                     }
-                  } else {
-                    resolve({browser, UI});
-                  }
+                }
+              } catch(e) {
+                DEBUG && console.info(`Error installing binding...`, e);
               }
-            } catch(e) {
-              DEBUG && console.info(`Error installing binding...`, e);
-            }
-          });
+            });
 
-        // reload to create a new document to 
-          // ensure we add the script and request binding installation
-          await send("Page.reload", {}, sessionId);
-      } catch(e) {
-        DEBUG && console.info(`Error install API proxy...`, e);
+          // reload to create a new document to 
+            // ensure we add the script and request binding installation
+            await send("Page.reload", {}, sessionId);
+        } catch(e) {
+          DEBUG && console.info(`Error install API proxy...`, e);
+        }
       }
 
     return pr;
