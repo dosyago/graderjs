@@ -127,7 +127,8 @@
     sessionId: browserSessionId, 
     blank: blank = false,
     ServicePort: ServicePort = undefined,
-    uriPath: uriPath = '/'
+    uriPath: uriPath = '/',
+    headless: headless = false
   } = { sessionId: undefined }) {
     if ( !(browserSessionId && ((ServicePort||'').toString() || blank)) ) {
       throw new TypeError(`newBrowser must be passed a unique browserSessionId and either the 'blank' flag or a ServicePort`);
@@ -195,6 +196,11 @@
         `--aggressive-cache-discard`,
         '--no-sandbox'
       ];
+
+      if ( headless ) {
+        CHROME_OPTS.push('--headless');
+      }
+
       const LAUNCH_OPTS = {
         logLevel: 'verbose',
         chromeFlags:CHROME_OPTS, 
