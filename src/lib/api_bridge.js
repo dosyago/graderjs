@@ -56,7 +56,7 @@ export default async function bridge(...requestArgs) {
     return apiResult;
   } catch(e) {
     console.info(`API proxy could not complete request`, {origin, path, args}, e);
-    throw new TypeError(`Error on API proxy request: ${e}`);
+    throw e;
   }
 }
 

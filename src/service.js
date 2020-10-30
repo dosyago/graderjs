@@ -99,25 +99,6 @@
       console.log(`Launching UI...`);
       let UI, browser;
       try {
-        /**
-          // this doesn't work as expected
-          // and after the page is ready,
-          // use our UI connection to write the correct window box as the page
-
-            // get top frame
-              const {frameTree: {frame: {id: frameId}}} = await UI.send(
-                "Page.getFrameTree", {}, UI.sessionId
-              );
-
-            // write document
-              const html = fs.readFileSync(windowBoxPath).toString();
-              console.log({html, frameId});
-              const result = await UI.send("Page.setDocumentContent", {
-                frameId,
-                html
-              }, UI.sessionId);
-              console.log({result});
-        **/
         ({UI,browser} = await newBrowser({ServicePort, sessionId: SessionId}));
       } catch(e) {
         console.error(e);
@@ -142,13 +123,13 @@
   }
 
   export async function newBrowser({
-    sessionId, 
+    sessionId: browserSessionId, 
     blank: blank = false,
     ServicePort: ServicePort = undefined,
     uriPath: uriPath = '/'
   } = { sessionId: undefined }) {
-    if ( !(sessionId && ((ServicePort||'').toString() || blank)) ) {
-      throw new TypeError(`newBrowser must be passed a unique sessionId and either the 'blank' flag or a ServicePort`);
+    if ( !(browserSessionId && ((ServicePort||'').toString() || blank)) ) {
+      throw new TypeError(`newBrowser must be passed a unique browserSessionId and either the 'blank' flag or a ServicePort`);
     }
     
 
@@ -157,14 +138,14 @@
 
     // set up disk space
       safe_notify('Request UI directories.');
-      if ( !fs.existsSync(temp_browser_cache(sessionId)) ) {
+      if ( !fs.existsSync(temp_browser_cache(browserSessionId)) ) {
         console.log(`Temp browser cache directory does not exist. Creating...`);
-        fs.mkdirSync(temp_browser_cache(sessionId), {recursive:true});
+        fs.mkdirSync(temp_browser_cache(browserSessionId), {recursive:true});
         console.log(`Created.`);
       }
-      if ( !fs.existsSync(app_data_dir(sessionId)) ) {
+      if ( !fs.existsSync(app_data_dir(browserSessionId)) ) {
         console.log(`App data dir does not exist. Creating...`);
-        fs.mkdirSync(app_data_dir(sessionId), {recursive:true});
+        fs.mkdirSync(app_data_dir(browserSessionId), {recursive:true});
         console.log(`Created.`);
       }
       safe_notify('UI data and cache directory created.');
@@ -197,7 +178,7 @@
         `--window-position=${x},${y}`,
         `--window-size=${width},${height}`,
         /*'--restore-last-session',*/
-        `--disk-cache-dir=${temp_browser_cache(sessionId)}`,
+        `--disk-cache-dir=${temp_browser_cache(browserSessionId)}`,
         `--aggressive-cache-discard`
       ] : [
         `--no-default-browser-check`,
@@ -210,14 +191,14 @@
         `--window-position=${x},${y}`,
         `--window-size="${width},${height}"`,
         /*'--restore-last-session',*/
-        `--disk-cache-dir=${temp_browser_cache(sessionId)}`,
+        `--disk-cache-dir=${temp_browser_cache(browserSessionId)}`,
         `--aggressive-cache-discard`,
         '--no-sandbox'
       ];
       const LAUNCH_OPTS = {
         logLevel: 'verbose',
         chromeFlags:CHROME_OPTS, 
-        userDataDir:app_data_dir(sessionId), 
+        userDataDir:app_data_dir(browserSessionId), 
         ignoreDefaultFlags: true,
         /*
         startingUrl: `http://localhost:${ServicePort}${uriPath}`,
@@ -272,7 +253,7 @@
       });
 
       Object.defineProperty(browser, 'sessionId', {
-        value: sessionId
+        value: browserSessionId
       });
 
     // shutdown everything if we detect the UI connection closes
@@ -326,20 +307,30 @@
         // listen for binding request
           await on("Runtime.bindingCalled", async ({name, payload, executionContextId}) => {
             DEBUG && console.log("Service side received call from UI binding");
-            DEBUG && console.info({name, payload, executionContextId});
+            let id;
+            try {
+              id = JSON.parse(payload).id;
+            } catch(e) {
+              console.info(`Couldn't parse payload`, payload, e);
+              return;
+            }
+
+            DEBUG && console.info({name, id, payload, executionContextId});
+
             const result = {};
             try {
               result.value = await bridge({name, payload, executionContextId});
             } catch(e) {
-              result.error = e;
+              const stack = e.stack && '\n' + e.stack.split(/\n/g);
+              result.error = `${e.name}: ${e.message}${stack || ''}`;
             }
             const sendResult = await send("Runtime.evaluate", {
-              expression: `globalThis._graderUI(JSON.stringify({result}))`,
+              expression: `globalThis._graderUI(${JSON.stringify({result, id})})`,
               contextId: executionContextId
-            });
+            }, sessionId);
 
             if ( sendResult.exceptionDetails ) {
-              console.info(`Error talking to _graderUI`, sendResult);
+              console.info(`Error talking to _graderUI`, JSON.stringify(sendResult));
             } else {
               console.log(`Successfully sent API result to page`, {result}, {sendResult});
             }
@@ -440,7 +431,7 @@
 
         // try to delete  
           try {
-            fs.rmdirSync(sessionDir(sessionId), {recursive:true, maxRetries:3, retryDelay:700});
+            fs.rmdirSync(sessionDir(browserSessionId), {recursive:true, maxRetries:3, retryDelay:700});
           } catch(e) {
             DEBUG && console.info(`Error deleting session folder...`, e);
           }
@@ -453,7 +444,7 @@
             } catch(e) {
               DEBUG && console.info(`Unable to read expired sessions file...`, e);
             }
-            expiredSessions.push(sessionId);
+            expiredSessions.push(browserSessionId);
             const tmp = '.new'+Math.random();
             fs.writeFileSync(path.resolve(expiredSessionFile() + tmp), JSON.stringify(expiredSessions));
             fs.renameSync(path.resolve(expiredSessionFile() + tmp), expiredSessionFile());
@@ -602,3 +593,27 @@
     say({service:'Closed'});
   }
 
+// ideas - old code
+
+  // filling a 'blank' page with content without using a server 
+    /**
+      // this doesn't work as expected
+
+      // first start browser and open to blank page
+      // after the page is ready,
+      // use our UI connection to write the correct window box as the page
+
+        // get top frame
+          const {frameTree: {frame: {id: frameId}}} = await UI.send(
+            "Page.getFrameTree", {}, UI.sessionId
+          );
+
+        // write document
+          const html = fs.readFileSync(windowBoxPath).toString();
+          console.log({html, frameId});
+          const result = await UI.send("Page.setDocumentContent", {
+            frameId,
+            html
+          }, UI.sessionId);
+          console.log({result});
+    **/

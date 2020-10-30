@@ -1,8 +1,9 @@
 {
+  const DEBUG = false;
   const GRADER_API_SLOT = 'grader';
   const SLOT_DESCRIPTOR = Object.create(null);
   const $ = Symbol.for(`[[GraderProxyHandlerPrivates]]`);
-  const AwaitingPromises = new Set();
+  const AwaitingPromises = new Map();
 
   const Target = async () => await void 0;
 
@@ -15,10 +16,9 @@
   if ( globalThis.self == globalThis.top ) {
     // we should probably do security checks on origin
     globalThis.top.addEventListener('message', ({origin,data}) => {
-      console.log({origin, data});
       if ( data == "binding ready" ) {
         ready = true;
-        console.log("API Proxy notified that service binding is ready", origin);
+        DEBUG && console.log("API Proxy notified that service binding is ready", origin);
         readyRes(true);
       } else if ( data == "turnOff" ) {
         ready = false;
@@ -44,7 +44,7 @@
             }
           }
         } catch(e) {
-          console.info(`Error when message received`, data, e);
+          DEBUG && console.info(`Error when message received`, data, e);
         }
       }
     });
@@ -73,7 +73,7 @@
       try {
         args = JSON.stringify(args);
       } catch(e) {
-        console.warn(`apply.JSON.stringify error`, e);
+        DEBUG && console.warn(`apply.JSON.stringify error`, e);
         throw new TypeError(`Arguments need to be able to be serialized by JSON.stringify`);
       }
 
@@ -169,11 +169,11 @@
       const error = TypeError(`Binding is not ready yet.`);
       reject(error);
     } else {
-      console.log("Will send", data);
+      DEBUG && console.log("Will send", data);
       const id = nextId();
       const key = id + '';
       AwaitingPromises.set(key, {resolve, reject});
-      globalThis.top.postMessage({apiProxy:data}, "*");
+      globalThis.top.postMessage({id, apiProxy:data}, "*");
     }
 
     return pr;

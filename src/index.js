@@ -300,7 +300,7 @@ export default API;
   }
 
   async function getTitle() {
-    return CONFIG.name;
+    throw new Error(`${CONFIG.name}`);
   }
 
 // control functions

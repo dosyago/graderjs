@@ -34,7 +34,10 @@
       grader.meta.getTitle(),
       grader.meta.getFavicon(),
       grader.meta.getStartURL()
-    ])).map(({value, reason}) => value || reason && new Error(reason));
+    ])).map(({status, value, reason}) => {
+      if ( status == 'fulfilled' ) return value;
+      return reason;
+    });
 
     console.log({title, favicon, startURL});
 
