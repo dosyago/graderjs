@@ -36,7 +36,6 @@
   ).toString();
 
 // global variables 
-  let bindingRetryCount = 0;
   let retryCount = 0;
 
 // main executable block
@@ -151,7 +150,9 @@
     if ( !(browserSessionId && ((ServicePort||'').toString() || blank)) ) {
       throw new TypeError(`newBrowser must be passed a unique browserSessionId and either the 'blank' flag or a ServicePort`);
     }
-    
+   
+    // set up some state to track progress
+      let bindingRetryCount = 0;
 
     // set up a promise to track progress
       let reject, resolve, pr = new Promise((res, rej) => (resolve = res, reject = rej));
