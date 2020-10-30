@@ -12,7 +12,6 @@
     go,                   // start app launch sequence
     stop,                 // kill app, cleanup, and exit (after async jobs parameter completes)
     say,                  // say something to console (throws if console closed)
-    isReady,                // is service ready to accept API calls 
 
     ui : {
       open,               // open UI window
@@ -56,10 +55,6 @@ export default API;
   let App;
 
 // basic functions
-  async function isReady() {
-    return await Service.isReady();
-  }
-
   async function go({
     apiInUI:                              // enable grader API available in UI context
       apiInUI = false,

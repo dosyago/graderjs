@@ -327,7 +327,22 @@
           await on("Runtime.bindingCalled", async ({name, payload, executionContextId}) => {
             DEBUG && console.log("Service side received call from UI binding");
             DEBUG && console.info({name, payload, executionContextId});
-            await bridge({name, payload, executionContextId});
+            const result = {};
+            try {
+              result.value = await bridge({name, payload, executionContextId});
+            } catch(e) {
+              result.error = e;
+            }
+            const sendResult = await send("Runtime.evaluate", {
+              expression: `globalThis._graderUI(JSON.stringify({result}))`,
+              contextId: executionContextId
+            });
+
+            if ( sendResult.exceptionDetails ) {
+              console.info(`Error talking to _graderUI`, sendResult);
+            } else {
+              console.log(`Successfully sent API result to page`, {result}, {sendResult});
+            }
           });
 
           await on("Runtime.consoleAPICalled", async ({args}) => {

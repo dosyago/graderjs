@@ -2,17 +2,20 @@
   const GRADER_API_SLOT = 'grader';
   const SLOT_DESCRIPTOR = Object.create(null);
   const $ = Symbol.for(`[[GraderProxyHandlerPrivates]]`);
+  const AwaitingPromises = new Set();
 
   const Target = async () => await void 0;
 
+  let ID = 1;
   let readyRes;
-  let ServiceIsReady = new Promise((res, rej) => readyRes = res);
+  let ServiceIsReady = new Promise(res => readyRes = res);
   let GraderProxy, HandlerInstance, revoke; 
   let ready = false;
 
   if ( globalThis.self == globalThis.top ) {
     // we should probably do security checks on origin
     globalThis.top.addEventListener('message', ({origin,data}) => {
+      console.log({origin, data});
       if ( data == "binding ready" ) {
         ready = true;
         console.log("API Proxy notified that service binding is ready", origin);
@@ -20,12 +23,36 @@
       } else if ( data == "turnOff" ) {
         ready = false;
         turnOff();
+      } else if ( typeof data == "object" )  {
+        if ( data.apiProxy ) return;
+        if ( !(data.id && data.result) ) return;
+        try {
+          const {id, result} = data;
+          const key = id + '';
+          const {resolve, reject} = AwaitingPromises.get(key);
+          AwaitingPromises.delete(key);
+          if ( ! resolve ) {
+            throw new TypeError(`No resolver for message ${key} with result ${result}`);
+          } else {
+            if ( result.error ) {
+              reject(result.error);
+            } else if ( result.value ) {
+              resolve(result.value); 
+            } else {
+              reject(`Invalid message response`);
+              throw new TypeError(`Invalid message response`);
+            }
+          }
+        } catch(e) {
+          console.info(`Error when message received`, data, e);
+        }
       }
     });
 
-    console.log(JSON.stringify({
-      graderRequestInstallBinding: true
-    }));
+    // a way to communicate with service before we install binding
+      console.log(JSON.stringify({
+        graderRequestInstallBinding: true
+      }));
   }
 
   class Handler {
@@ -135,18 +162,30 @@
   }
 
   // send using binding added with Runtime.addBinding
-  function send(data) {
-    console.log("Will send", data);
+  async function send(data) {
+    let resolve, reject;
+    const pr = new Promise((res, rej) => (resolve = res, reject = rej));
     if ( ! ready ) {
-      throw new TypeError(`Binding is not ready yet.`);
+      const error = TypeError(`Binding is not ready yet.`);
+      reject(error);
     } else {
+      console.log("Will send", data);
+      const id = nextId();
+      const key = id + '';
+      AwaitingPromises.set(key, {resolve, reject});
       globalThis.top.postMessage({apiProxy:data}, "*");
     }
+
+    return pr;
   }
 
   // disable the binding
   function turnOff() {
     revoke();
+  }
+
+  function nextId() {
+    return ID++;
   }
 
   /* eslint-enable no-inner-declarations */

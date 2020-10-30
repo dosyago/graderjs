@@ -13,6 +13,20 @@
     } 
   });
 
+  // add the reverse binding so the service can communicate to the UI
+    // this will be called from service using Runtime.evaluate
+  Object.defineProperty(globalThis, '_graderUI', {
+    value: msg => {
+      const {result} = msg;
+      if ( ! result ) {
+        console.info(`Isolated world _graderUI received invalid result object`, msg);
+        throw new TypeError(`Isolated world _graderUI received invalid result object`);
+      }
+      globalThis.top.postMessage({result});
+      return true;
+    }
+  });
+
   globalThis.top.postMessage("binding ready", "*");
 
   return result;
