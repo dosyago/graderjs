@@ -49,9 +49,9 @@ export default async function bridge(...requestArgs) {
 
     const apiResult = await apiCall(...revivedArgs);
 
-    counter += 1;
+    DEBUG && (counter += 1);
 
-    console.log({counter, apiResult, time: Date.now()});
+    DEBUG && console.log({counter, apiResult, time: Date.now()});
     
     return apiResult;
   } catch(e) {

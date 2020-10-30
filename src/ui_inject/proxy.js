@@ -36,11 +36,8 @@
           } else {
             if ( result.error ) {
               reject(result.error);
-            } else if ( result.value ) {
-              resolve(result.value); 
             } else {
-              reject(`Invalid message response`);
-              throw new TypeError(`Invalid message response`);
+              resolve(result.value); 
             }
           }
         } catch(e) {
