@@ -6,11 +6,6 @@
   import CONFIG from './config.js';
 
 // constants
-  const DEFAULT_WC = {
-    win: false,
-    nix: '/_winctrlbar/nix_winctrl.html',
-    osx: false
-  }
 
 // main export
   const API = {

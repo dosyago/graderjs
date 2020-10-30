@@ -63,6 +63,7 @@
     // start background service
       console.log(`Start service...`);
       notify('Request service start.');
+      console.log({settings});
 
       let service, ServicePort;
       try {
@@ -98,32 +99,26 @@
       console.log(`Launching UI...`);
       let UI, browser;
       try {
-        if ( windowBoxPath ) {
-          // open a window boxed window
-          ({UI,browser} = await newBrowser({ServicePort, uriPath: windowBoxPath, sessionId: SessionId}));
+        /**
+          // this doesn't work as expected
+          // and after the page is ready,
+          // use our UI connection to write the correct window box as the page
 
-          /**
-            // this doesn't work as expected
-            // and after the page is ready,
-            // use our UI connection to write the correct window box as the page
+            // get top frame
+              const {frameTree: {frame: {id: frameId}}} = await UI.send(
+                "Page.getFrameTree", {}, UI.sessionId
+              );
 
-              // get top frame
-                const {frameTree: {frame: {id: frameId}}} = await UI.send(
-                  "Page.getFrameTree", {}, UI.sessionId
-                );
-
-              // write document
-                const html = fs.readFileSync(windowBoxPath).toString();
-                console.log({html, frameId});
-                const result = await UI.send("Page.setDocumentContent", {
-                  frameId,
-                  html
-                }, UI.sessionId);
-                console.log({result});
-          **/
-        } else {
-          ({UI,browser} = await newBrowser({ServicePort, sessionId: SessionId}));
-        }
+            // write document
+              const html = fs.readFileSync(windowBoxPath).toString();
+              console.log({html, frameId});
+              const result = await UI.send("Page.setDocumentContent", {
+                frameId,
+                html
+              }, UI.sessionId);
+              console.log({result});
+        **/
+        ({UI,browser} = await newBrowser({ServicePort, sessionId: SessionId}));
       } catch(e) {
         console.error(e);
         notify('Could not start UI (chrome). Because: ' + JSON.stringify(e)); 
@@ -184,17 +179,28 @@
       }
 
     // start browser
+      const screenWidth = 1280;
+      const screenHeight = 800;
+      const width = 600;
+      const height = 400;
+      const x = Math.round((screenWidth-width)/2);
+      const y = Math.round((screenHeight-height)/2);
+
       const CHROME_OPTS = !NO_SANDBOX ? [
+        `--no-default-browser-check`,
         `--disable-extensions`,
         `--disable-breakpad`,
         `--metrics-recording-only`,
         `--new-window`,
         `--no-first-run`,
         `--app=${startUrl}`,
+        `--window-position=${x},${y}`,
+        `--window-size="${width},${height}"`,
         '--restore-last-session',
         `--disk-cache-dir=${temp_browser_cache(sessionId)}`,
         `--aggressive-cache-discard`
       ] : [
+        `--no-default-browser-check`,
         `--disable-extensions`,
         `--disable-breakpad`,
         `--metrics-recording-only`,
@@ -476,6 +482,7 @@
   }
 
 // helper functions
+  /**
   function getPlatform() {
     const {platform: raw} = process;
 
@@ -495,6 +502,7 @@
         return "win";
     }
   }
+  **/
 
   function randomPort() {
     // choose a port form the dynamic/private range: 49152 - 65535
