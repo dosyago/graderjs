@@ -195,8 +195,8 @@
         `--no-first-run`,
         `--app=${startUrl}`,
         `--window-position=${x},${y}`,
-        `--window-size="${width},${height}"`,
-        '--restore-last-session',
+        `--window-size=${width},${height}`,
+        /*'--restore-last-session',*/
         `--disk-cache-dir=${temp_browser_cache(sessionId)}`,
         `--aggressive-cache-discard`
       ] : [
@@ -207,7 +207,9 @@
         `--new-window`,
         `--no-first-run`,
         `--app=${startUrl}`,
-        '--restore-last-session',
+        `--window-position=${x},${y}`,
+        `--window-size="${width},${height}"`,
+        /*'--restore-last-session',*/
         `--disk-cache-dir=${temp_browser_cache(sessionId)}`,
         `--aggressive-cache-discard`,
         '--no-sandbox'
