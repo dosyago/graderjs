@@ -264,7 +264,20 @@
       console.log(`Connected.`);
       safe_notify('User interface online.');
 
-    // get windowId
+    // prepare cleanup
+      Object.defineProperty(UI, 'shutdown', {
+        value: shutdownFunc
+      });
+
+      // shutdown everything if we detect the UI connection closes
+        UI.socket.on('close', () => UI.shutdown());
+
+      // or if the process exits
+        process.on('beforeExit', () => API.ui.close(UI));
+        process.on('exit', () => API.ui.close(UI));
+        process.on('SIGINT', () => API.ui.close(UI));
+
+    // get a target and (if not 'headless') a windowId
       let windowId;
 
       try {
@@ -278,10 +291,10 @@
           appTarget = targetInfos.find(({type, url}) => {
             return type == 'page' && url.startsWith(startUrl);
           });
+          ({windowId} = await UI.send("Browser.getWindowForTarget", {
+            targetId: appTarget.targetId
+          }));
         }
-        ({windowId} = await UI.send("Browser.getWindowForTarget", {
-          targetId: appTarget.targetId
-        }));
       } catch(e) {
         DEBUG && console.info(`Error getting window ID...`, e);
       }
@@ -294,22 +307,11 @@
         startUrl: {
           value: startUrl
         },
-        shutdown: {
-          value: shutdownFunc 
-        }
       });
 
       Object.defineProperty(browser, 'sessionId', {
         value: browserSessionId
       });
-
-    // shutdown everything if we detect the UI connection closes
-      UI.socket.on('close', () => UI.shutdown());
-
-    // or if the process exits
-      process.on('beforeExit', () => API.ui.close(UI));
-      process.on('exit', () => API.ui.close(UI));
-      process.on('SIGINT', () => API.ui.close(UI));
 
     // install binding and script and reload
       if ( headless ) {
@@ -331,7 +333,7 @@
             DEBUG && console.log({attached:{sessionId}});
 
           // get screen details
-            const result = await send("Runtime.evaluate", {
+            const {result:{value:result}} = await send("Runtime.evaluate", {
               expression: `({screenWidth: screen.width, screenHeight: screen.height})`,
               returnByValue: true
             }, sessionId);
@@ -341,6 +343,8 @@
             const {screenWidth, screenHeight} = result;
 
             API.util.kv('screen', {screenWidth, screenHeight});
+
+          resolve({browser,UI});
         } catch(e) {
           DEBUG && console.info(`Error install API proxy...`, e);
         }
@@ -640,11 +644,16 @@
         DEBUG && console.info(`Error shutting down the browser...`, e);
       }
 
-      if ( bg.listening ) {
-        await stop(bg);
-      } else {
-        say({killService: 'already closed'});
+      try {
+        if ( bg.listening ) {
+          await stop(bg);
+        } else {
+          say({killService: 'already closed'});
+        }
+      } catch(e) {
+        DEBUG && console.info(`Error shutting down the server...`, e);
       }
+
       process.exit(0);
     };
 
