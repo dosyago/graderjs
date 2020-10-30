@@ -6,6 +6,9 @@
   import CONFIG from './config.js';
 
 // constants
+  // simple key value store
+  const KV = {};
+  const HasListeners = new Map();
 
 // main export
   const API = {
@@ -28,6 +31,7 @@
       writePage,          // like document.write if using a custom window control box, writes to the
                           // iframe document inside that
 
+      getScreen,          // get screen dimensions
     },
 
     meta: {
@@ -45,7 +49,10 @@
     },
 
     util: {
-      sleep: Common.sleep
+      sleep: Common.sleep,
+      kv: save,                     // save a (key, value) pair
+      k: load,                      // getrieve a key
+      d: del
     },
   };
 
@@ -120,7 +127,7 @@ export default API;
     try {
       ({UI,browser} = await Service.newBrowser({ServicePort, sessionId}));
     } catch(e) {
-      console.log("open", e);
+      console.log("open.newBrowser", e);
       fs.writeFileSync('grader.error', JSON.stringify({err:e, msg:e+''}));
     }
 
@@ -303,6 +310,39 @@ export default API;
     return CONFIG.name;
   }
 
+// window functions part iii
+  async function getScreen() {
+    let screen = load('screen');
+
+    if ( !screen ) {
+      // open a headless browser to a page that sends us the screen details
+        const {ServicePort} = App;
+        const sessionId = App.newSessionId();
+        let UI;
+        try {
+          ({UI} = await Service.newBrowser({
+            uriPath: '/_api/getscreen.html',
+            headless: true, 
+            ServicePort, 
+            sessionId
+          }));
+        } catch(e) {
+          console.log("getScreen.newBrowser", e);
+          fs.writeFileSync('grader.error', JSON.stringify({err:e, msg:e+''}));
+        }
+      
+      // wait until the key is set
+        await hasKey('screen');
+
+      // kill the browser __ it has served its purpose, honorably and nobly
+        UI.shutdown(); 
+      
+      screen = load('screen');
+    }
+
+    return screen;
+  }
+
 // control functions
   async function send(command, params, UI = App.UI) {
     return await UI.send(command, params);
@@ -315,3 +355,77 @@ export default API;
   function off() {
     throw new TypeError(`off is not implemented yet...`);
   }
+
+// util part i: KV functions (keys are strings)
+  function save(key, value) {
+    key += '';
+    if ( typeof value == "object" ) {
+      // do a pseudo merge
+      let newValue;
+      if ( Array.isArray(value) ) {
+        const existing = KV[key] || [];
+        if ( Array.isArray(existing) ) {
+          newValue = [...existing, ...value];
+        } else if ( typeof existing == "object" ) {
+          value.forEach((v,i) => {
+            existing[i] = v;
+          });
+          newValue = existing;
+        } else {
+          newValue = value;
+        }
+      } else {
+        const existing = KV[key] || {};
+        newValue = Object.assign(existing, value);
+      }
+      KV[key] = newValue;
+    } else {
+      KV[key] = value;
+    }
+
+    // run any listeners waiting for this key to be set
+      let listeners = HasListeners.get(key);
+      if ( listeners ) {
+        HasListeners.delete(key);
+        listeners.forEach(res => {
+          // execute each without a stack
+          setTimeout(() => res(true), 0);
+        });
+      }
+  }
+
+  function load(key) {
+    key += '';
+    return KV[key];
+  }
+
+  function del(key) {
+    key += '';
+    delete KV[key];
+  }
+
+  // returns a promise that resolves to true when the key is set
+    async function hasKey(key) {
+      key += '';
+
+      let resolve;
+      const pr = new Promise(res => resolve = res);
+
+      let hasKey = false;
+
+      hasKey = Object.prototype.hasOwnProperty.call(KV, key);
+
+      if ( hasKey ) {
+        return resolve(true);
+      } else {
+        let listeners = HasListeners.get(key);
+        if ( ! listeners ) {
+          listeners = [];
+          HasListeners.set(key, listeners);
+        }
+        // these listeners will be called by save once key is set
+        listeners.push(resolve);
+      }
+
+      return pr;
+    }

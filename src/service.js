@@ -5,6 +5,7 @@
   import {launch as ChromeLaunch} from 'chrome-launcher';
   import {createHttpTerminator} from 'http-terminator';
 
+  import API from './index.js';
   import CONFIG from './config.js'
   import {
     NO_SANDBOX, sleep, DEBUG, say,
@@ -160,8 +161,7 @@
       }
 
     // start browser
-      const screenWidth = 1280;
-      const screenHeight = 800;
+      const {screenWidth, screenHeight} = await API.getScreen();
       const width = 600;
       const height = 400;
       const x = Math.round((screenWidth-width)/2);
@@ -594,7 +594,6 @@
   }
 
 // ideas - old code
-
   // filling a 'blank' page with content without using a server 
     /**
       // this doesn't work as expected
