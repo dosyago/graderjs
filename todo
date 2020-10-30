@@ -1,3 +1,4 @@
+- improve way to get screen coorindates (faster and less waste, let's try to keep these two browsers using the same session directories)
 - add download_chrome script to pull it in if system doesn't have it
 - implement addHandlers, server and keepConsoleOpen settings (as well as other sketched and unimplemented settings)
 - put archivist in this framework.
