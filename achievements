@@ -16,7 +16,14 @@
 - ensure all sessions are correctly accounted for (seems at least 1 window will not be saved in old session log, need to work out why)
 - create API bridge plumbing!
 - remove bugs about adding binding/related code twice
+- work out that trying make window controls top bar available (for systems that don't use them, like ubuntu) is actually an error because ubuntu does provide them, and trying to provide on ourselves (using app region drag) doesn't work. But be grateful that I got all the plumbing for the API bridge done! YAY
 
+I AM FUCKING AWESOME
+
+:p :) xxx XCHAKKA
+
+
+I AM FUCKING AWESOME 
 THEY WORK
 
 FUCK YEAH I AM THE FUCKING BEST

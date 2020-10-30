@@ -58,8 +58,6 @@ export default API;
   async function go({
     apiInUI:                              // enable grader API available in UI context
       apiInUI = false,
-    titleBar:                             // show the titlebar on desktop systems that support it
-      titleBar = true,                    // false  
     addHandlers:
       addHandlers = undefined,            // callback to add the route handlers to an express app
     server:
@@ -71,7 +69,7 @@ export default API;
       keepConsoleOpen = false,            // keeps the console open in case you need it
   } = {}) {
     App = await Service.go({
-      apiInUI, titleBar, addHandlers, server, keepConsoleOpen
+      apiInUI, addHandlers, server, keepConsoleOpen
     });
 
     API.ServicePort = App.ServicePort;
