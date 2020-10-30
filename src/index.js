@@ -81,7 +81,7 @@ export default API;
         // {screenWidth, screenHeight, x, y, width, height}
   } = {}) {
     App = await Service.go({
-      apiInUI, addHandlers, server, keepConsoleOpen
+      apiInUI, addHandlers, server, keepConsoleOpen, doLayout
     });
 
     API.ServicePort = App.ServicePort;
@@ -316,15 +316,13 @@ export default API;
   }
 
 // window functions part iii
-  async function getScreen() {
+  async function getScreen({ServicePort, sessionId}) {
     let screen = load('screen');
 
     console.log("GET SCREEN");
 
     if ( !screen ) {
       // open a headless browser to a page that sends us the screen details
-        const {ServicePort} = App;
-        const sessionId = App.newSessionId();
         let UI;
         try {
           ({UI} = await Service.newBrowser({

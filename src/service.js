@@ -99,7 +99,10 @@
     // do layout prep if requrested
       let layout;
       if ( settings.doLayout ) {
-        const {screenWidth, screenHeight} = await API.ui.getScreen();
+        const {screenWidth, screenHeight} = await API.ui.getScreen({
+          ServicePort, 
+          sessionId: newSessionId()
+        });
 
         layout = {screenWidth, screenHeight};
 
