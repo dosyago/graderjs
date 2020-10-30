@@ -95,12 +95,24 @@
       }
       fs.writeFileSync(expiredSessionFile(), JSON.stringify(undeletedOldSessions));
 
+    // do layout prep if requrested
+      let layout;
+      if ( settings.doLayout ) {
+        const {screenWidth, screenHeight} = await API.ui.getScreen();
+
+        layout = {screenWidth, screenHeight};
+
+        if ( typeof settings.doLayout === "function" ) {
+          layout = settings.doLayout(layout);
+        }
+      }
+
     // launch UI
       notify('Request user interface.');
       console.log(`Launching UI...`);
       let UI, browser;
       try {
-        ({UI,browser} = await newBrowser({ServicePort, sessionId: SessionId}));
+        ({UI,browser} = await newBrowser({ServicePort, sessionId: SessionId, layout}));
       } catch(e) {
         console.error(e);
         notify('Could not start UI (chrome). Because: ' + JSON.stringify(e)); 
@@ -128,7 +140,8 @@
     blank: blank = false,
     ServicePort: ServicePort = undefined,
     uriPath: uriPath = '/',
-    headless: headless = false
+    headless: headless = false,
+    layout: layout = undefined
   } = { sessionId: undefined }) {
     if ( !(browserSessionId && ((ServicePort||'').toString() || blank)) ) {
       throw new TypeError(`newBrowser must be passed a unique browserSessionId and either the 'blank' flag or a ServicePort`);
@@ -162,12 +175,6 @@
       }
 
     // start browser
-      const {screenWidth, screenHeight} = await API.getScreen();
-      const width = 600;
-      const height = 400;
-      const x = Math.round((screenWidth-width)/2);
-      const y = Math.round((screenHeight-height)/2);
-
       const CHROME_OPTS = !NO_SANDBOX ? [
         `--no-default-browser-check`,
         `--disable-extensions`,
@@ -176,8 +183,6 @@
         `--new-window`,
         `--no-first-run`,
         `--app=${startUrl}`,
-        `--window-position=${x},${y}`,
-        `--window-size=${width},${height}`,
         /*'--restore-last-session',*/
         `--disk-cache-dir=${temp_browser_cache(browserSessionId)}`,
         `--aggressive-cache-discard`
@@ -189,8 +194,6 @@
         `--new-window`,
         `--no-first-run`,
         `--app=${startUrl}`,
-        `--window-position=${x},${y}`,
-        `--window-size="${width},${height}"`,
         /*'--restore-last-session',*/
         `--disk-cache-dir=${temp_browser_cache(browserSessionId)}`,
         `--aggressive-cache-discard`,
@@ -199,6 +202,29 @@
 
       if ( headless ) {
         CHROME_OPTS.push('--headless');
+      }
+
+      if ( layout ) {
+        let {screenWidth, screenHeight, x, y, width, height} = layout;
+        
+        if ( !screenWidth || !screenHeight ) return;
+
+        // auto golden ratio
+          if ( width === undefined || height === undefined ) {
+            width = Math.ceil(0.618 * screenWidth);  
+            height = Math.ceil(0.618 * screenHeight);
+          }
+
+        // auto center
+          if ( x === undefined || y === undefined ) {
+            x = Math.round((screenWidth-width)/2);
+            y = Math.round((screenHeight-height)/2);
+          }
+
+        CHROME_OPTS.push(
+          `--window-position=${x},${y}`,
+          `--window-size="${width},${height}"`,
+        )
       }
 
       const LAUNCH_OPTS = {
