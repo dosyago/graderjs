@@ -229,7 +229,7 @@
 
         CHROME_OPTS.push(
           `--window-position=${x},${y}`,
-          `--window-size="${width},${height}"`,
+          `--window-size=${width},${height}`,
         )
       }
 
@@ -301,9 +301,9 @@
       UI.socket.on('close', () => UI.shutdown());
 
     // or if the process exits
-      process.on('beforeExit', () => UI.shutdown());
-      process.on('exit', () => UI.shutdown());
-      process.on('SIGINT', () => UI.shutdown());
+      process.on('beforeExit', () => API.ui.close(UI));
+      process.on('exit', () => API.ui.close(UI));
+      process.on('SIGINT', () => API.ui.close(UI));
 
     // install binding and script and reload
       /**
@@ -472,7 +472,7 @@
           try {
             await browser.kill();
           } catch(e) {
-            console.log(`Browser already dead...`, e);
+            DEBUG && console.log(`Browser already dead...`, e);
           }
 
         // try to delete  
