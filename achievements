@@ -21,6 +21,15 @@
 - allow setting initial position and size (and get screen size by opening headless chrome window and evaluating screen.width, everytime. We can also use this headless vanguard to provide us other useful properties.)
 - improve way to get screen coorindates (faster and less waste, let's try to keep these two browsers using the same session directories)
 - get rid of console window opening on browser exit / shutdown process
+- implement addHandlers, server and keepConsoleOpen settings (as well as other sketched and unimplemented settings)
+
+Yeah I'm great
+
+I'm the best
+
+;P ;) xxx
+chakka
+
 
 FUCK YEAH I AM FUCKING AWESOME ... it was about getting the chrome-launcher to behave how i wanted
 

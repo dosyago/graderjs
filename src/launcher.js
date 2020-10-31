@@ -23,6 +23,7 @@ async function launchApp() {
     pr.then(() => state = 'complete').catch(() => state = 'rejected');
 
   let appBundle, subprocess = {}, message = '';
+  let preserveConsole = false;
 
   // setup future cleanup
     const killService = (e) => {
@@ -88,8 +89,13 @@ async function launchApp() {
       );
       subprocess.on('error', (...args) => (console.log('err', args), reject(args)));
       subprocess.on('message', (...args) => {
+        if ( ! args[0] ) return;
         if ( typeof args[0] == "string" ) {
           message = args[0];
+        } else {
+          if ( args[0].keepConsoleOpen ) {
+            preserveConsole = true;
+          }
         }
         process.stdout.write('\n'+message);
         resolve(args)
@@ -121,6 +127,12 @@ async function launchApp() {
     console.log('');
 
     DEBUG && console.log({message, state});
+
+  // check for keepConsoleOpen
+    if ( preserveConsole ) {
+      process.stdin.resume();
+      console.log('Persistent console created.');
+    }
 
   // report the outcome
     if ( typeof message == "string" && message.startsWith('App started.') ) {

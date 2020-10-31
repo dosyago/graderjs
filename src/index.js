@@ -126,13 +126,28 @@ export default API;
   }
 
 // window functions
-  async function open() {
+  async function open(settings) {
     const {ServicePort} = App;
     const sessionId = App.newSessionId();
+    // do layout prep if requrested
+      let layout;
+      if ( settings.doLayout ) {
+        const {screenWidth, screenHeight} = await getScreen({
+          ServicePort, 
+          sessionId
+        });
+
+        layout = {screenWidth, screenHeight};
+
+        if ( typeof settings.doLayout === "function" ) {
+          layout = settings.doLayout(layout);
+        }
+      }
+
     fs.writeFileSync('grader.open.log', JSON.stringify({ServicePort, sessionId}));
     let browser, UI;
     try {
-      ({UI,browser} = await Service.newBrowser({ServicePort, sessionId}));
+      ({UI,browser} = await Service.newBrowser({ServicePort, sessionId, layout}));
     } catch(e) {
       console.log("open.newBrowser", e);
       fs.writeFileSync('grader.error', JSON.stringify({err:e, msg:e+''}));

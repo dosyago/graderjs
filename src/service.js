@@ -62,7 +62,9 @@
 
 // main functions
   async function run(app, settings) {
-    console.log("Settings", settings);
+    DEBUG && console.log("Settings", settings);
+    const {keepConsoleOpen, server, addHandlers} = settings;
+
     // start background service
       console.log(`Start service...`);
       notify('Request service start.');
@@ -70,7 +72,7 @@
 
       let service, ServicePort;
       try {
-        ({service, port:ServicePort} = await start({app, desiredPort:CONFIG.desiredPort}));
+        ({service, port:ServicePort} = await start({app, addHandlers, desiredPort:CONFIG.desiredPort}));
         API.ServicePort = ServicePort;
       } catch(e) {
         console.error(e);
@@ -97,6 +99,11 @@
         DEBUG && console.info(`Error deleting sessions from expred sessions file...`, e);
       }
       fs.writeFileSync(expiredSessionFile(), JSON.stringify(undeletedOldSessions));
+
+    // check for keep console open and notify if requested
+      if ( keepConsoleOpen ) {
+        notify({keepConsoleOpen});
+      }
 
     // do layout prep if requrested
       let layout;
@@ -541,25 +548,54 @@
       }
   }
 
-  async function start({app, desiredPort}) {
+  async function start({app, desiredPort, addHandlers, noStandard: noStandard = false, server}) {
+    let service;
+
     let upAt, resolve, reject;
     const pr = new Promise((res, rej) => (resolve = res, reject = rej));
 
     let port = desiredPort;
-    addHandlers(app);
 
-    console.log({DEBUG, port});
+    if ( server ) {
+      service = server;
+      service.listen(Number(port), async err => {
+        if ( PORT_DEBUG || err ) { 
+          console.warn(err);
+          return reject(err);
+        } 
+        upAt = new Date;
+        say({serviceUp:{upAt,port}});
+        resolve({service, upAt, port});
+        console.log(`Ready`);
+      });
+    } else {
+      if ( ! noStandard ) {
+        addStandardHandlers(app);
+      }
 
-    const service = app.listen(Number(port), async err => {
-      if ( PORT_DEBUG || err ) { 
-        console.warn(err);
-        return reject(err);
-      } 
-      upAt = new Date;
-      say({serviceUp:{upAt,port}});
-      resolve({service, upAt, port});
-      console.log(`Ready`);
-    });
+      DEBUG && console.log({startService: port});
+
+      if ( addHandlers ) {
+        try {
+          addHandlers(app);
+        } catch(e) {
+          console.info(`Error adding handlers to app`, app, addHandlers, e); 
+          reject(new TypeError(`Supplied addHandlers function threw error: ${e}`));
+        }
+      }
+
+      service = app.listen(Number(port), async err => {
+        if ( PORT_DEBUG || err ) { 
+          console.warn(err);
+          return reject(err);
+        } 
+        upAt = new Date;
+        say({serviceUp:{upAt,port}});
+        resolve({service, upAt, port});
+        console.log(`Ready`);
+      });
+    }
+
     service.on('error', async err => {
       await sleep(10);
       if ( retryCount++ < MAX_RETRY ) {
@@ -626,7 +662,7 @@
     }
   }
 
-  function addHandlers(app) {
+  function addStandardHandlers(app) {
     app.use(express.urlencoded({extended:true}));
     app.use(express.static(SITE_PATH));
   }
@@ -659,7 +695,7 @@
         DEBUG2 && console.info({killService:8, count});
         }
       } catch(e) {
-        DEBUG2 && console.info(`Error shutting down the server...`, e);
+        DEBUG2 && console.info(`Error shutting down the service...`, e);
       }
 
       DEBUG2 && console.info({killService:9, count});
