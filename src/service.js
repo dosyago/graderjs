@@ -229,7 +229,7 @@
       }
 
       const LAUNCH_OPTS = {
-        logLevel: 'verbose',
+        logLevel: DEBUG ? 'verbose' : 'silent',
         chromeFlags:CHROME_OPTS, 
         userDataDir:app_data_dir(browserSessionId), 
         ignoreDefaultFlags: true,
@@ -260,12 +260,25 @@
       !silent && safe_notify('User interface online.');
 
     // prepare cleanup
+      UI.disconnected = false;
+      UI.browserExited = false;
+
       Object.defineProperty(UI, 'shutdown', {
         value: shutdownFunc
       });
 
+      browser.process.on('exit', () => UI.browserExited = true);
+
       // shutdown everything if we detect the UI connection closes
-        UI.socket.on('close', () => UI.shutdown());
+        UI.socket.on('close', async () => {
+          UI.disconnected = true;
+
+          if ( ! UI.browserExited ) {
+            await browser.kill();
+          }
+
+          UI.shutdown();
+        });
 
       // or if the process exits
         process.on('beforeExit', () => API.ui.close(UI));
@@ -508,10 +521,12 @@
 
         UI.alreadyShutdown = true;
         // try to kill browser
-          try {
-            await browser.kill();
-          } catch(e) {
-            DEBUG && console.log(`Browser already dead...`, e);
+          if ( ! UI.browserExited ) {
+            try {
+              await browser.kill();
+            } catch(e) {
+              DEBUG && console.log(`Browser already dead...`, e);
+            }
           }
 
         if ( ! noDelete ) {

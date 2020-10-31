@@ -26,6 +26,7 @@
       restore,            // switch between maximize and how it was before
       fullscreen,         // UI window to fullscreen
       partscreen,         // UI window to part of screen
+      getLayout,          // get window left, right, width, height and windowState
 
       openBlank,          // open a UI window to about:blank
       writePage,          // like document.write if using a custom window control box, writes to the
@@ -126,7 +127,7 @@ export default API;
   async function open() {
     const {ServicePort} = App;
     const sessionId = App.newSessionId();
-    fs.writeFileSync('grader.open', JSON.stringify({ServicePort, sessionId}));
+    fs.writeFileSync('grader.open.log', JSON.stringify({ServicePort, sessionId}));
     let browser, UI;
     try {
       ({UI,browser} = await Service.newBrowser({ServicePort, sessionId}));
@@ -142,21 +143,21 @@ export default API;
   }
 
   async function close(UI = App.UI) {
-    /*
-    try {
-      await UI.send("Browser.close", {}); 
-    } catch(e) {
-      console.info('Error closing browser', e);
-      return false;
-    }
+    if ( ! UI.disconnected ) {
+      try {
+        await UI.send("Browser.close", {}); 
+      } catch(e) {
+        console.info('Error closing browser', e);
+        return false;
+      }
 
-    try {
-      UI.disconnect()
-    } catch(e) {
-      console.info(`Error disconnecting socket`, e);
-      return false;
+      try {
+        UI.disconnect()
+      } catch(e) {
+        console.info(`Error disconnecting socket`, e);
+        return false;
+      }
     }
-    */
 
     try {
       await UI.shutdown();
@@ -215,27 +216,29 @@ export default API;
   }
 
   async function minimize(UI = App.UI) {
-    if ( UI.windowState == 'minimized' ) return;
+    const {windowState} = await getLayout();
+    if ( windowState == 'minimized' ) return;
     const result = await UI.send("Browser.setWindowBounds", {
       windowId: UI.windowId,
       bounds: {
         windowState: 'minimized'
       }
     });
-    UI.windowState = 'minimized';
     return result;
   }
 
   async function restore(UI = App.UI) {
+    const {windowState} = await getLayout();
+
     let result;
-    if ( UI.windowState == 'maximized' ) {
+
+    if ( windowState == 'maximized' ) {
       result = await UI.send("Browser.setWindowBounds", {
         windowId: UI.windowId,
         bounds: {
           windowState: 'normal'
         }
       });
-      UI.windowState = 'normal';
     } else {
       result = await UI.send("Browser.setWindowBounds", {
         windowId: UI.windowId,
@@ -243,14 +246,14 @@ export default API;
           windowState: 'maximized'
         }
       });
-      UI.windowState = 'maximized';
     }
     return result;
   }
 
   async function maximize(UI = App.UI) {
-    if ( UI.windowState == 'maximized' ) return;
-    if ( UI.windowState == 'minimized' ) {
+    const {windowState} = await getLayout();
+
+    if ( windowState == 'minimized' ) {
       await partscreen(UI);
     }
     const result = await UI.send("Browser.setWindowBounds", {
@@ -259,35 +262,46 @@ export default API;
         windowState: 'maximized'
       }
     });
-    UI.windowState = 'maximized';
     return result;
   }
 
   async function fullscreen(UI = App.UI) {
-    if ( UI.windowState == 'fullscreen' ) return;
-    if ( UI.windowState == 'minimized' ) {
+    const {windowState} = await getLayout();
+
+    if ( windowState == 'minimized' ) {
       await partscreen(UI);
     }
+
     const result = await UI.send("Browser.setWindowBounds", {
       windowId: UI.windowId,
       bounds: {
         windowState: 'fullscreen'
       }
     });
-    UI.windowState = 'fullscreen';
+
     return result;
   }
 
   async function partscreen(UI = App.UI) {
-    if ( UI.windowState == 'normal' ) return;
+    const {windowState} = await getLayout();
+
+    if ( windowState == 'normal' ) return;
+
     const result = await UI.send("Browser.setWindowBounds", {
       windowId: UI.windowId,
       bounds: {
         windowState: 'normal'
       }
     });
-    UI.windowState = 'normal';
+
     return result;
+  }
+
+  async function getLayout(UI = App.UI) {
+    const {bounds} = await UI.send("Browser.getWindowBounds", {
+      windowId: UI.windowId
+    });
+    return bounds;
   }
 
 // window functions part ii

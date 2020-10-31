@@ -20,7 +20,7 @@
     "pack-binary-win": "npx nexe -t windows -o bin/grader.exe -i build/grader.js -r \"./build/*\"",
     "pack-binary-mac": "npx nexe -t macos-x64 -o bin/grader.mac -i build/grader.js -r \"./build/*\"",
     "pack-binary-32": "npx nexe -t windows-x32 -o bin/grader.win32.exe -i build/grader.js -r \"./build/*\" && npx nexe -t linux-x32 -o bin/grader.nix32 -i build/grader.js -r \"./build/*\"",
-    "clean": "rm -rf build/ bin/ src/build/ dev/ || : && mkdir -p build && mkdir -p bin && mkdir -p src/build",
+    "clean": "rm -rf build/ bin/ src/build/ dev/ *.log *.error || : && mkdir -p build && mkdir -p bin && mkdir -p src/build",
     "pack": "upx bin/grader*",
     "test": "npm run test-app",
     "test-svc": "node -r esm src/service.js",
