@@ -1,7 +1,7 @@
-- get rid of console window opening on browser exit / shutdown process
 - add download_chrome script to pull it in if system doesn't have it
 - implement addHandlers, server and keepConsoleOpen settings (as well as other sketched and unimplemented settings)
 - put archivist in this framework.
+- add sessionIds to old-sessions on every exit from the app.
 - add security checks on origin for API proxy
 - improve API based on what I learned from porting and 
 - write documentation about how to use grader to build cross-platform apps 

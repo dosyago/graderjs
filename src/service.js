@@ -2,7 +2,7 @@
   import fs from 'fs';
   import path from 'path';
   import express from 'express';
-  import {launch as ChromeLaunch} from 'chrome-launcher';
+  import {launch as ChromeLaunch} from './lib/vendor/chrome-launcher.js';
   import {createHttpTerminator} from 'http-terminator';
 
   import API from './index.js';

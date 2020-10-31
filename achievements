@@ -20,8 +20,9 @@
 - implement way to pass back info from service side to UI side (promise resolver account)
 - allow setting initial position and size (and get screen size by opening headless chrome window and evaluating screen.width, everytime. We can also use this headless vanguard to provide us other useful properties.)
 - improve way to get screen coorindates (faster and less waste, let's try to keep these two browsers using the same session directories)
+- get rid of console window opening on browser exit / shutdown process
 
-FUCK YEAH ;p ;)) xxxx;;;pppp ;;;;))) xxx;;PPP
+FUCK YEAH I AM FUCKING AWESOME ... it was about getting the chrome-launcher to behave how i wanted
 
 I AM FUCKING AWESOME :p :) xxx
 
