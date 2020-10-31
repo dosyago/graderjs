@@ -233,6 +233,7 @@
         chromeFlags:CHROME_OPTS, 
         userDataDir:app_data_dir(browserSessionId), 
         ignoreDefaultFlags: true,
+        handleSIGINT: false
       }
 
       if ( headless ) {
