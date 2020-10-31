@@ -272,10 +272,10 @@
       });
 
       // shutdown everything if we detect the UI connection closes
-        //UI.socket.on('close', async () => await API.ui.close(UI));
+        UI.socket.on('close', async () => await API.ui.close(UI));
 
       // or if the process exits
-        //process.on('exit', async () => await API.ui.close(UI));
+        //process.on('beforeExit', async () => await API.ui.close(UI));
 
     // get a target and (if not 'headless') a windowId
       let windowId;
@@ -509,18 +509,10 @@
 
     // helper (in scope) functions
       async function shutdownFunc() {
-        if ( UI.alreadyShutdown ) return;
-
-        UI.alreadyShutdown = true;
-
-        await sleep(0);
-
-        if ( ! UI.browserExited ) {
-          try {
-            await browser.kill();
-          } catch(e) {
-            DEBUG && console.log(`Browser already dead...`, e);
-          }
+        try {
+          await browser.kill();
+        } catch(e) {
+          DEBUG && console.log(`Browser already dead...`, e);
         }
 
         if ( ! noDelete ) {
