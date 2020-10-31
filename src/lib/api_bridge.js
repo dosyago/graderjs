@@ -15,7 +15,7 @@ let counter = 0;
 
 export default async function bridge(...requestArgs) {
   counter++;
-  DEBUG && console.info('Bridge called', requestArgs, API);
+  DEBUG && console.info('Bridge called', requestArgs);
 
   const [{name, payload: stringPayload, executionContextId}] = requestArgs;
 
