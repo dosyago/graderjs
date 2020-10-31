@@ -8,7 +8,8 @@
   import API from './index.js';
   import CONFIG from './config.js'
   import {
-    NO_SANDBOX, sleep, DEBUG, say,
+    delayThrow,
+    sleep, DEBUG, say,
     expiredSessionFile,
     appDir,
     sessionDir,
@@ -101,7 +102,7 @@
       if ( settings.doLayout ) {
         const {screenWidth, screenHeight} = await API.ui.getScreen({
           ServicePort, 
-          sessionId: newSessionId()
+          sessionId: SessionId
         });
 
         layout = {screenWidth, screenHeight};
@@ -145,7 +146,9 @@
     ServicePort: ServicePort = undefined,
     uriPath: uriPath = '/',
     headless: headless = false,
-    layout: layout = undefined
+    layout: layout = undefined,
+    noDelete: noDelete = false,
+    silent: silent = false,
   } = { sessionId: undefined }) {
     if ( !(browserSessionId && ((ServicePort||'').toString() || blank)) ) {
       throw new TypeError(`newBrowser must be passed a unique browserSessionId and either the 'blank' flag or a ServicePort`);
@@ -155,10 +158,11 @@
       let bindingRetryCount = 0;
 
     // set up a promise to track progress
-      let reject, resolve, pr = new Promise((res, rej) => (resolve = res, reject = rej));
+      let reject, resolve = x => delayThrow(`Resolve not set: ` + x);
+      const pr = new Promise((res, rej) => (resolve = res, reject = rej));
 
     // set up disk space
-      safe_notify('Request UI directories.');
+      !silent && safe_notify('Request UI directories.');
       if ( !fs.existsSync(temp_browser_cache(browserSessionId)) ) {
         console.log(`Temp browser cache directory does not exist. Creating...`);
         fs.mkdirSync(temp_browser_cache(browserSessionId), {recursive:true});
@@ -169,7 +173,7 @@
         fs.mkdirSync(app_data_dir(browserSessionId), {recursive:true});
         console.log(`Created.`);
       }
-      safe_notify('UI data and cache directory created.');
+      !silent && safe_notify('UI data and cache directory created.');
 
     // construct start URL
       let startUrl;
@@ -181,7 +185,7 @@
       }
 
     // start browser
-      const CHROME_OPTS = !NO_SANDBOX ? [
+      const CHROME_OPTS = [
         `--no-default-browser-check`,
         `--disable-extensions`,
         `--disable-breakpad`,
@@ -191,20 +195,11 @@
         /*'--restore-last-session',*/
         `--disk-cache-dir=${temp_browser_cache(browserSessionId)}`,
         `--aggressive-cache-discard`
-      ] : [
-        `--no-default-browser-check`,
-        `--disable-extensions`,
-        `--disable-breakpad`,
-        `--metrics-recording-only`,
-        `--new-window`,
-        `--no-first-run`,
-        /*'--restore-last-session',*/
-        `--disk-cache-dir=${temp_browser_cache(browserSessionId)}`,
-        `--aggressive-cache-discard`,
-        '--no-sandbox'
       ];
 
       if ( headless ) {
+        // not really headless because we need to use the real display to collect info
+        // but this means it doesn't open a window
         CHROME_OPTS.push('--silent-launch');
       } else {
         CHROME_OPTS.push(`--app=${startUrl}`);
@@ -257,12 +252,12 @@
 
     // connect to UI
       let appTarget;
-      safe_notify('Request interface connection.');
+      !silent && safe_notify('Request interface connection.');
       console.log(`Connecting to UI...`);
       console.log(browser);
       const UI = await connect({port: browser.port, exposeSocket: true});
       console.log(`Connected.`);
-      safe_notify('User interface online.');
+      !silent && safe_notify('User interface online.');
 
     // prepare cleanup
       Object.defineProperty(UI, 'shutdown', {
@@ -519,28 +514,30 @@
             DEBUG && console.log(`Browser already dead...`, e);
           }
 
-        // try to delete  
-          try {
-            fs.rmdirSync(sessionDir(browserSessionId), {recursive:true, maxRetries:3, retryDelay:700});
-          } catch(e) {
-            DEBUG && console.info(`Error deleting session folder...`, e);
-          }
+        if ( ! noDelete ) {
+          // try to delete  
+              try {
+                fs.rmdirSync(sessionDir(browserSessionId), {recursive:true, maxRetries:3, retryDelay:700});
+              } catch(e) {
+                DEBUG && console.info(`Error deleting session folder...`, e);
+              }
 
-        // if it did not delete yet schedule for later
-          try {
-            let expiredSessions = []
+          // if it did not delete yet schedule for later
             try {
-              expiredSessions = JSON.parse(fs.readFileSync(expiredSessionFile()).toString());
+              let expiredSessions = []
+              try {
+                expiredSessions = JSON.parse(fs.readFileSync(expiredSessionFile()).toString());
+              } catch(e) {
+                DEBUG && console.info(`Unable to read expired sessions file...`, e);
+              }
+              expiredSessions.push(browserSessionId);
+              const tmp = '.new'+Math.random();
+              fs.writeFileSync(path.resolve(expiredSessionFile() + tmp), JSON.stringify(expiredSessions));
+              fs.renameSync(path.resolve(expiredSessionFile() + tmp), expiredSessionFile());
             } catch(e) {
-              DEBUG && console.info(`Unable to read expired sessions file...`, e);
+              DEBUG && console.info(`Error scheduling session data for deletion...`, e);
             }
-            expiredSessions.push(browserSessionId);
-            const tmp = '.new'+Math.random();
-            fs.writeFileSync(path.resolve(expiredSessionFile() + tmp), JSON.stringify(expiredSessions));
-            fs.renameSync(path.resolve(expiredSessionFile() + tmp), expiredSessionFile());
-          } catch(e) {
-            DEBUG && console.info(`Error scheduling session data for deletion...`, e);
-          }
+        }
       }
   }
 

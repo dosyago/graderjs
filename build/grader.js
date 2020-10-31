@@ -2510,6 +2510,16 @@ function say(o) {
   console.log(JSON.stringify(o));
 }
 
+function delayThrow(msg) {
+  // collect the stack while it's in frame
+  const err = new TypeError(msg);
+
+  // throw after delay
+  setTimeout(() => { throw err; }, 0);
+
+  return void 0;
+}
+
 // CONCATENATED MODULE: ./src/launcher.js
 // imports
   // node built-in

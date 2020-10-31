@@ -7,9 +7,11 @@ module.exports = {
     path: path.resolve(__dirname, 'build'),
     filename: "grader.js"
   },
+  /*
   optimization: {
     minimize: false
   },
+  */
   target: "node",
   node: {
     __dirname: false

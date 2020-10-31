@@ -1,4 +1,3 @@
-- improve way to get screen coorindates (faster and less waste, let's try to keep these two browsers using the same session directories)
 - get rid of console window opening on browser exit / shutdown process
 - add download_chrome script to pull it in if system doesn't have it
 - implement addHandlers, server and keepConsoleOpen settings (as well as other sketched and unimplemented settings)

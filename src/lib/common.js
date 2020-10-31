@@ -25,3 +25,13 @@ export const sleep = ms => new Promise(res => setTimeout(res, ms));
 export function say(o) {
   console.log(JSON.stringify(o));
 }
+
+export function delayThrow(msg) {
+  // collect the stack while it's in frame
+  const err = new TypeError(msg);
+
+  // throw after delay
+  setTimeout(() => { throw err; }, 0);
+
+  return void 0;
+}

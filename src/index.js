@@ -318,17 +318,17 @@ export default API;
   async function getScreen({ServicePort, sessionId}) {
     let screen = load('screen');
 
-    console.log("GET SCREEN");
-
     if ( !screen ) {
       // open a headless browser to a page that sends us the screen details
         let UI;
         try {
           ({UI} = await Service.newBrowser({
-            uriPath: '/_api/getscreen.html',
+            silent: true,
             headless: true, 
+            uriPath: '/_api/getscreen.html',
             ServicePort, 
-            sessionId
+            sessionId,
+            noDelete: true
           }));
         } catch(e) {
           console.log("getScreen.newBrowser", e);
@@ -339,7 +339,7 @@ export default API;
         await hasKey('screen');
 
       // kill the browser __ it has served its purpose, honorably and nobly
-        UI.shutdown(); 
+        await UI.shutdown(); 
       
       screen = load('screen');
     }
@@ -415,7 +415,7 @@ export default API;
     async function hasKey(key) {
       key += '';
 
-      let resolve;
+      let resolve = x => Common.delayThrow(`Resolve not set: ` + x);
       const pr = new Promise(res => resolve = res);
 
       let hasKey = false;

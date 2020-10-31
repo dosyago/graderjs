@@ -8,9 +8,11 @@ module.exports = {
     path: path.resolve(__dirname, 'build'),
     filename: "service.js"
   },
+  /*
   optimization: {
     minimize: false
   },
+  */
   target: "node",
   node: {
     __dirname: false
