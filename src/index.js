@@ -6,6 +6,8 @@
   import CONFIG from './config.js';
 
 // constants
+  const {sleep, DEBUG} = Common;
+
   // simple key value store
   const KV = {};
   const HasListeners = new Map();
@@ -50,7 +52,7 @@
     },
 
     util: {
-      sleep: Common.sleep,
+      sleep,
       kv: save,                     // save a (key, value) pair
       k: load,                      // getrieve a key
       d: del
@@ -85,7 +87,6 @@ export default API;
       apiInUI, addHandlers, server, keepConsoleOpen, doLayout
     });
 
-    //Common.DEBUG && console.log({App});
     return App;
   }
 
@@ -101,7 +102,7 @@ export default API;
 
   function say(msg) {
     return App.notify(msg, null, {}, e => {
-      Common.DEBUG && console.info("say.App.notify", e);
+      DEBUG && console.info("say.App.notify", e);
       throw new TypeError(
         `Cannot API.say a console message because App Console has already closed.`
       );
@@ -143,30 +144,38 @@ export default API;
   }
 
   async function close(UI = App.UI) {
+    const errors = [];
+
     if ( ! UI.disconnected ) {
       try {
         await UI.send("Browser.close", {}); 
       } catch(e) {
-        console.info('Error closing browser', e);
-        return false;
+        DEBUG && console.info('Error closing browser', e);
+        errors.push({msg:'error closing browser', e});
       }
 
       try {
-        UI.disconnect()
+        UI.disconnect();
       } catch(e) {
-        console.info(`Error disconnecting socket`, e);
-        return false;
+        DEBUG && console.info(`Error disconnecting socket`, e);
+        errors.push({msg:'error disconnecting socket', e});
       }
     }
 
     try {
       await UI.shutdown();
     } catch(e) {
-      console.info(`Error shut down browser.`, e);
-      return false;
+      DEBUG && console.info(`Error shut down browser.`, e);
+      errors.push({msg:'error UI.shutdown', e});
     }
 
-    return true;
+    if ( errors.length ) {
+      DEBUG && console.log(`API.ui.close`, errors);
+      return {status:'fail', errors};
+    } else {
+      DEBUG && console.log(`API.ui.close`, 'success');
+      return {status:'success'};
+    }
   }
 
   async function move({x,y}, UI = App.UI) {
@@ -353,7 +362,7 @@ export default API;
         await hasKey('screen');
 
       // kill the browser __ it has served its purpose, honorably and nobly
-        await UI.shutdown(); 
+        await close(UI); 
       
       screen = load('screen');
     }
@@ -378,7 +387,7 @@ export default API;
 
 // util part i: KV functions (keys are strings)
   function save(key, value) {
-    Common.DEBUG && console.log({save:{key,value}});
+    DEBUG && console.log({save:{key,value}});
     key += '';
     if ( typeof value == "object" ) {
       // do a pseudo merge

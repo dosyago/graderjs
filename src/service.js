@@ -263,27 +263,21 @@
       UI.disconnected = false;
       UI.browserExited = false;
 
+      browser.process.on('exit', () => UI.browserExited = true);
+
       Object.defineProperty(UI, 'shutdown', {
         value: shutdownFunc
       });
 
-      browser.process.on('exit', () => UI.browserExited = true);
-
       // shutdown everything if we detect the UI connection closes
         UI.socket.on('close', async () => {
           UI.disconnected = true;
-
-          if ( ! UI.browserExited ) {
-            await browser.kill();
-          }
-
-          UI.shutdown();
+          await UI.shutdown();
         });
 
       // or if the process exits
-        process.on('beforeExit', () => API.ui.close(UI));
-        process.on('exit', () => API.ui.close(UI));
-        process.on('SIGINT', () => API.ui.close(UI));
+        process.on('exit', async () => await API.ui.close(UI));
+        process.on('SIGINT', async () => await API.ui.close(UI));
 
     // get a target and (if not 'headless') a windowId
       let windowId;
@@ -520,14 +514,16 @@
         if ( UI.alreadyShutdown ) return;
 
         UI.alreadyShutdown = true;
-        // try to kill browser
-          if ( ! UI.browserExited ) {
-            try {
-              await browser.kill();
-            } catch(e) {
-              DEBUG && console.log(`Browser already dead...`, e);
-            }
+
+        await sleep(0);
+
+        if ( ! UI.browserExited ) {
+          try {
+            await browser.kill();
+          } catch(e) {
+            DEBUG && console.log(`Browser already dead...`, e);
           }
+        }
 
         if ( ! noDelete ) {
           // try to delete  
@@ -552,6 +548,8 @@
             } catch(e) {
               DEBUG && console.info(`Error scheduling session data for deletion...`, e);
             }
+        } else {
+          DEBUG && console.info({noDelete: SessionId});
         }
       }
   }
