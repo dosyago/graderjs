@@ -5,9 +5,8 @@ import CONFIG from '../config.js';
 
 // determine where this code is running 
 
-export const DEBUG = process.env.DEBUG_grader || true;
-
-export const NO_SANDBOX = process.env.DEBUG_grader || false;
+export const DEBUG = process.env.DEBUG_grader || false;
+export const DEBUG2 = true;
 
 export const APP_ROOT = __dirname;
 export const appDir = () => DEBUG ?

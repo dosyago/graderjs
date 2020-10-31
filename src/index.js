@@ -6,7 +6,8 @@
   import CONFIG from './config.js';
 
 // constants
-  const {sleep, DEBUG} = Common;
+  const callId = () => (99999*Math.random()+Date.now()).toString(36);
+  const {sleep, DEBUG, DEBUG2} = Common;
 
   // simple key value store
   const KV = {};
@@ -144,36 +145,53 @@ export default API;
   }
 
   async function close(UI = App.UI) {
+    const call = callId();
+    const {browserSessionId,id} = UI;
+    DEBUG2 && console.info({browserSessionId,id,call,close:1});
     const errors = [];
 
     if ( ! UI.disconnected ) {
       try {
+        DEBUG2 && console.info({browserSessionId,id,call,close:2});
         await UI.send("Browser.close", {}); 
+        DEBUG2 && console.info({browserSessionId,id,call,close:3});
       } catch(e) {
-        DEBUG && console.info('Error closing browser', e);
+        DEBUG2 && console.info('Error closing browser', e);
         errors.push({msg:'error closing browser', e});
       }
 
       try {
+        DEBUG2 && console.info({browserSessionId,id,call,close:4});
         UI.disconnect();
+        DEBUG2 && console.info({browserSessionId,id,call,close:5});
       } catch(e) {
-        DEBUG && console.info(`Error disconnecting socket`, e);
+        DEBUG2 && console.info(`Error disconnecting socket`, e);
         errors.push({msg:'error disconnecting socket', e});
       }
+    } 
+
+    try {
+      await UI.browser.kill();
+    } catch(e) {
+      DEBUG2 && console.info(`Error kill browser`, e);
+      errors.push({msg:'error kill browser', e});
     }
 
     try {
-      await UI.shutdown();
+      DEBUG2 && console.info({browserSessionId,id,call,close:6});
+      UI.cleanSessionDirs();
+      DEBUG2 && console.info({browserSessionId,id,call,close:7});
     } catch(e) {
-      DEBUG && console.info(`Error shut down browser.`, e);
-      errors.push({msg:'error UI.shutdown', e});
+      DEBUG2 && console.info(`Error shut down browser.`, e);
+      errors.push({msg:'error UI.cleanSessionDirs', e});
     }
 
+    DEBUG2 && console.info({browserSessionId,id,call,close:8});
     if ( errors.length ) {
-      DEBUG && console.log(`API.ui.close`, errors);
+      DEBUG2 && console.log(`API.ui.close`, errors);
       return {status:'fail', errors};
     } else {
-      DEBUG && console.log(`API.ui.close`, 'success');
+      DEBUG2 && console.log(`API.ui.close`, 'success');
       return {status:'success'};
     }
   }

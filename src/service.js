@@ -9,6 +9,7 @@
   import CONFIG from './config.js'
   import {
     delayThrow,
+    DEBUG2,
     sleep, DEBUG, say,
     expiredSessionFile,
     appDir,
@@ -154,6 +155,10 @@
       throw new TypeError(`newBrowser must be passed a unique browserSessionId and either the 'blank' flag or a ServicePort`);
     }
    
+    // DEBUG
+      const id = (Math.random()*99999+Date.now()).toString(36);
+      DEBUG && console.log({browserStart:{id, browserSessionId, ServicePort}});
+
     // set up some state to track progress
       let bindingRetryCount = 0;
 
@@ -236,10 +241,6 @@
         handleSIGINT: false
       }
 
-      if ( headless ) {
-        LAUNCH_OPTS.startingUrl = startUrl;
-      }
-
       DEBUG && console.log({LAUNCH_OPTS});
 
       let browser;
@@ -260,23 +261,16 @@
       console.log(`Connected.`);
       !silent && safe_notify('User interface online.');
 
+      UI.id = id;
+      UI.browser = browser;
+
     // prepare cleanup
-      /**
-        UI.disconnected = false;
-        UI.browserExited = false;
-
-        browser.process.on('exit', () => UI.browserExited = true);
-      **/
-
-      Object.defineProperty(UI, 'shutdown', {
-        value: shutdownFunc
+      Object.defineProperty(UI, 'cleanSessionDirs', {
+        value: cleanSessionDirs
       });
 
-      // shutdown everything if we detect the UI connection closes
-        UI.socket.on('close', async () => await API.ui.close(UI));
-
       // or if the process exits
-        //process.on('beforeExit', async () => await API.ui.close(UI));
+        process.on('beforeExit', async () => await API.ui.close(UI));
 
     // get a target and (if not 'headless') a windowId
       let windowId;
@@ -308,10 +302,12 @@
         startUrl: {
           value: startUrl
         },
-      });
-
-      Object.defineProperty(browser, 'sessionId', {
-        value: browserSessionId
+        browserSessionId: {
+          value: browserSessionId
+        },
+        browser: {
+          value: browser
+        }
       });
 
     // install binding and script and reload
@@ -509,35 +505,35 @@
     return pr;
 
     // helper (in scope) functions
-      async function shutdownFunc() {
-        try {
-          await browser.kill();
-        } catch(e) {
-          DEBUG && console.log(`Browser already dead...`, e);
-        }
-
+      function cleanSessionDirs() {
+        DEBUG && console.info({cleanSessionDirs:browserSessionId}); 
         if ( ! noDelete ) {
+          DEBUG && console.info({deleteStart:{browserSessionId}});
           // try to delete  
-              try {
-                fs.rmdirSync(sessionDir(browserSessionId), {recursive:true, maxRetries:3, retryDelay:700});
-              } catch(e) {
-                DEBUG && console.info(`Error deleting session folder...`, e);
-              }
+            try {
+              fs.rmdirSync(sessionDir(browserSessionId), {recursive:true, maxRetries:3, retryDelay:700});
+            } catch(e) {
+              DEBUG && console.info(`Error deleting session folder...`, e);
+            }
 
           // if it did not delete yet schedule for later
-            try {
-              let expiredSessions = []
+            if ( fs.existsSync(sessionDir(browserSessionId)) ) {
+              DEBUG && console.info({deleteStart:{browserSessionId}});
               try {
-                expiredSessions = JSON.parse(fs.readFileSync(expiredSessionFile()).toString());
+                let expiredSessions = []
+                try {
+                  expiredSessions = JSON.parse(fs.readFileSync(expiredSessionFile()).toString());
+                } catch(e) {
+                  DEBUG && console.info(`Unable to read expired sessions file...`, e);
+                }
+                expiredSessions.push(browserSessionId);
+                const tmp = '.new'+Math.random();
+                fs.writeFileSync(path.resolve(expiredSessionFile() + tmp), JSON.stringify(expiredSessions));
+                fs.renameSync(path.resolve(expiredSessionFile() + tmp), expiredSessionFile());
+                DEBUG && console.info({expiredSessionsToDeleteLater:expiredSessions});
               } catch(e) {
-                DEBUG && console.info(`Unable to read expired sessions file...`, e);
+                DEBUG && console.info(`Error scheduling session data for deletion...`, e);
               }
-              expiredSessions.push(browserSessionId);
-              const tmp = '.new'+Math.random();
-              fs.writeFileSync(path.resolve(expiredSessionFile() + tmp), JSON.stringify(expiredSessions));
-              fs.renameSync(path.resolve(expiredSessionFile() + tmp), expiredSessionFile());
-            } catch(e) {
-              DEBUG && console.info(`Error scheduling session data for deletion...`, e);
             }
         } else {
           DEBUG && console.info({noDelete: SessionId});
@@ -638,26 +634,39 @@
   function installCleanupHandlers({ui, bg}) {
     // someone closed the browser window
 
-    const killService = async () => {
+    let count = 0;
+
+    const killService = async (...args) => {
+      count++;
+      DEBUG2 && console.info({killService:1, count, args});
       try {
+        DEBUG2 && console.info({killService:2, count});
         await API.ui.close(ui);
+        DEBUG2 && console.info({killService:3, count});
       } catch(e) {
-        DEBUG && console.info(`Error shutting down the browser...`, e);
+        DEBUG2 && console.info(`Error shutting down the browser...`, e);
       }
 
       try {
+        DEBUG2 && console.info({killService:4, count});
         if ( bg.listening ) {
+        DEBUG2 && console.info({killService:5, count});
           await stop(bg);
+        DEBUG2 && console.info({killService:6, count});
         } else {
+        DEBUG2 && console.info({killService:7, count});
           say({killService: 'already closed'});
+        DEBUG2 && console.info({killService:8, count});
         }
       } catch(e) {
-        DEBUG && console.info(`Error shutting down the server...`, e);
+        DEBUG2 && console.info(`Error shutting down the server...`, e);
       }
 
+      DEBUG2 && console.info({killService:9, count});
       process.exit(0);
     };
 
+    ui.socket.on('close', () => ui.disconnected = true);
     ui.socket.on('close', killService);
 
     // process cleanliness 
