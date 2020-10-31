@@ -260,24 +260,22 @@
       !silent && safe_notify('User interface online.');
 
     // prepare cleanup
-      UI.disconnected = false;
-      UI.browserExited = false;
+      /**
+        UI.disconnected = false;
+        UI.browserExited = false;
 
-      browser.process.on('exit', () => UI.browserExited = true);
+        browser.process.on('exit', () => UI.browserExited = true);
+      **/
 
       Object.defineProperty(UI, 'shutdown', {
         value: shutdownFunc
       });
 
       // shutdown everything if we detect the UI connection closes
-        UI.socket.on('close', async () => {
-          UI.disconnected = true;
-          await UI.shutdown();
-        });
+        //UI.socket.on('close', async () => await API.ui.close(UI));
 
       // or if the process exits
-        process.on('exit', async () => await API.ui.close(UI));
-        process.on('SIGINT', async () => await API.ui.close(UI));
+        //process.on('exit', async () => await API.ui.close(UI));
 
     // get a target and (if not 'headless') a windowId
       let windowId;
@@ -649,7 +647,7 @@
 
     const killService = async () => {
       try {
-        await ui.shutdown();
+        await API.ui.close(ui);
       } catch(e) {
         DEBUG && console.info(`Error shutting down the browser...`, e);
       }
