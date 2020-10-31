@@ -1,11 +1,17 @@
-- add download_chrome script to pull it in if system doesn't have it
-  - this can be an npm repo
-  - call a function {install} and depending on win, nix or osx download the right installer and run it
-- put archivist in this framework.
-- add sessionIds to old-sessions on every exit from the app.
-- add security checks on origin for API proxy
-- improve API based on what I learned from porting and 
-- write documentation about how to use grader to build cross-platform apps 
+Priority
+
+  - put archivist in this framework.
+
+  Lesser
+    - add sessionIds to old-sessions on every exit from the app.
+    - add download_chrome script to pull it in if system doesn't have it
+      - this can be an npm repo
+      - call a function {install} and depending on win, nix or osx download the right installer and run it
+    - add security checks on origin for API proxy
+
+Priority
+  - improve API based on what I learned from porting and 
+  - write documentation about how to use grader to build cross-platform apps 
 
 
 
