@@ -427,9 +427,9 @@
               }, sessionId);
 
               if ( sendResult.exceptionDetails ) {
-                console.info(`Error talking to _graderUI`, JSON.stringify(sendResult));
+                DEBUG && console.info(`Error talking to _graderUI`, JSON.stringify(sendResult));
               } else {
-                console.log(`Successfully sent API result to page`, {result}, {sendResult});
+                DEBUG && console.log(`Successfully sent API result to page`, {result}, {sendResult});
               }
             });
 
@@ -453,7 +453,7 @@
                 }
 
                 if ( installBinding ) {
-                  console.log({installBindingCalled:true});
+                  DEBUG && console.log({installBindingCalled:true});
 
                   // get top frame
                     const {frameTree: {frame: {id: frameId}}} = await send(
