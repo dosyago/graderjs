@@ -55,7 +55,7 @@
   "homepage": "https://github.com/c9fe/grader#readme",
   "dependencies": {
     "adm-zip": "^0.4.16",
-    "browser-installer": "^1.2.0",
+    "browser-installer": "^1.2.2",
     "esm": "latest",
     "express": "latest",
     "http-terminator": "^2.0.3",
