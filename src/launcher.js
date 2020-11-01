@@ -6,6 +6,10 @@
 
   // 3rd-party
     import AdmZip from 'adm-zip';
+    import {Launcher} from './lib/vendor/chrome-launcher.js';
+
+  // own 
+    import {install} from 'browser-installer';
 
   // internal
     import {DEBUG, say, sleep, appDir, logFile} from './lib/common.js';
@@ -46,6 +50,22 @@ async function launchApp() {
     } catch(e) {
       console.log('src build service error', e);
       return exit(1);
+    }
+
+  // ensure dependencies are met
+    {
+      let val;
+      try {
+        val = Launcher.getFirstInstallation();
+      } catch(e) {
+        DEBUG && console.info('Dependency check', e);
+        console.log('Discovered upgrade opportunity.');
+      }
+      if ( ! val ) {
+        process.stdout.write(`Installing dependencies...`);
+        await install();
+        console.log('Done! Process upgraded.');
+      }
     }
 
   try {
