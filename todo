@@ -4,9 +4,6 @@ Priority
 
   Lesser
     - add sessionIds to old-sessions on every exit from the app.
-    - add download_chrome script to pull it in if system doesn't have it
-      - this can be an npm repo
-      - call a function {install} and depending on win, nix or osx download the right installer and run it
     - add security checks on origin for API proxy
 
 Priority

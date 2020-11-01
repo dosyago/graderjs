@@ -62,7 +62,7 @@ async function launchApp() {
         console.log('Discovered upgrade opportunity.');
       }
       if ( ! val ) {
-        process.stdout.write(`Installing dependencies...`);
+        console.log(`Installing dependencies...`);
         await install();
         console.log('Done! Process upgraded.');
       }

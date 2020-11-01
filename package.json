@@ -7,7 +7,9 @@
     "myapp": "build/grader.js"
   },
   "scripts": {
-    "stats": "npm run clean || : && rm -rf node_modules || : && getstats && cat stats/* || :",
+    "stats": "npm run super-clean && getstats && cat stats/* || :",
+    "super-clean": "npm run clean || : && rm -rf node_modules || :",
+    "upgrade": "npm run super-clean || : && npm upgrade && npm i",
     "postinstall": "bash ./scripts/build_setup.sh",
     "start": "npm run bundle && node build/grader.js",
     "build": "npm run bundle && npm run pack-binary",
@@ -55,7 +57,7 @@
   "homepage": "https://github.com/c9fe/grader#readme",
   "dependencies": {
     "adm-zip": "^0.4.16",
-    "browser-installer": "^1.2.2",
+    "browser-installer": "^1.4.1",
     "esm": "latest",
     "express": "latest",
     "http-terminator": "^2.0.3",

@@ -254,9 +254,24 @@
       try {
         browser = await ChromeLaunch(LAUNCH_OPTS);
       } catch(e) {
-        DEBUG && console.error(e);
-        fs.writeFileSync('browser.error', JSON.stringify({err:e, msg:e+'', stack:e.stack}));
-        safe_notify('Could not start UI (chrome). Because: ' + JSON.stringify(e)); 
+        let fatal = null;
+        console.log(e, e.code, e.code == "ERR_LAUNCHER_NOT_INSTALLED");
+        if ( e && e.code == "ERR_LAUNCHER_NOT_INSTALLED" ) {
+          try { 
+            await install();
+            browser = await ChromeLaunch(LAUNCH_OPTS);
+          } catch(e2) {
+            fatal = e2;
+          }
+        } else {
+          fatal = e;
+        }
+        if ( fatal ) {
+          DEBUG && console.error('fatal', fatal);
+          fs.writeFileSync('browser.error', JSON.stringify({err:fatal, msg:fatal+'', stack:fatal.stack}));
+          safe_notify('Could not start UI (chrome). Because: ' + JSON.stringify(fatal)); 
+          throw fatal;
+        }
       }
 
     // connect to UI

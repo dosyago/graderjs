@@ -22,6 +22,17 @@
 - improve way to get screen coorindates (faster and less waste, let's try to keep these two browsers using the same session directories)
 - get rid of console window opening on browser exit / shutdown process
 - implement addHandlers, server and keepConsoleOpen settings (as well as other sketched and unimplemented settings)
+- add download_chrome script to pull it in if system doesn't have it
+  - this can be an npm repo
+  - call a function {install} and depending on win, nix or osx download the right installer and run it
+
+GOOD
+;P ;) xxxx XCHAKKA
+
+xxx hahaha ;ppp lll ;;xx i fucking rocks yeah
+
+:p ;) xxx
+
 
 Yeah I'm great
 
