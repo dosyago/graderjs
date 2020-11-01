@@ -1,14 +1,13 @@
 Priority
-
   - put archivist in this framework.
-
-  Lesser
-    - add sessionIds to old-sessions on every exit from the app.
-    - add security checks on origin for API proxy
-
-Priority
   - improve API based on what I learned from porting and 
   - write documentation about how to use grader to build cross-platform apps 
+
+Lesser
+  - improve progress . metrics (no clearline just add 1 dot on each turn using stdout.write)
+  - add sessionIds to old-sessions on every exit path from the app (even before UI launched for example)
+  - add security checks on origin for API proxy
+
 
 
 
