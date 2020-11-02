@@ -58,9 +58,7 @@ const ROOT_SESSION = "browser";
         delete message[sessionId];
       }
       const key = `${sessionId||ROOT_SESSION}:${message.id}`;
-      let resolve, reject = z => console.error( `Reject was not set ${z}` );
-      // typescript is stupid volume 2314832: it thinks the following resolve 
-      // in the catch block can be undefined, even tho it is clearly set below
+      let resolve, reject;
       const promise = new Promise((res, rej) => (resolve = res, reject = rej));
       Resolvers[key] = resolve;
 

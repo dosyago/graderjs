@@ -471,7 +471,7 @@ export default API;
     async function hasKey(key) {
       key += '';
 
-      let resolve = x => Common.delayThrow(`Resolve not set: ` + x);
+      let resolve;
       const pr = new Promise(res => resolve = res);
 
       let hasKey = false;

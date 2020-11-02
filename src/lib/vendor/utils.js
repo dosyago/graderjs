@@ -24,9 +24,11 @@ function defaults(val, def) {
 }
 exports.defaults = defaults;
 function delay(time) {
+    /* eslint-disable require-yield */
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise(resolve => setTimeout(resolve, time));
     });
+    /* eslint-enable require-yield */
 }
 exports.delay = delay;
 class LauncherError extends Error {
@@ -76,6 +78,7 @@ function getPlatform() {
 }
 exports.getPlatform = getPlatform;
 function makeTmpDir() {
+    /* eslint-disable no-fallthrough */
     switch (getPlatform()) {
         case 'darwin':
         case 'linux':
@@ -88,6 +91,7 @@ function makeTmpDir() {
         default:
             throw new UnsupportedPlatformError();
     }
+    /* eslint-enable no-fallthrough */
 }
 exports.makeTmpDir = makeTmpDir;
 function toWinDirFormat(dir = '') {
@@ -101,7 +105,7 @@ function toWinDirFormat(dir = '') {
 }
 exports.toWinDirFormat = toWinDirFormat;
 function getLocalAppDataPath(path) {
-    const userRegExp = /\/mnt\/([a-z])\/Users\/([^\/:]+)\/AppData\//;
+    const userRegExp = /\/mnt\/([a-z])\/Users\/([^/:]+)\/AppData\//;
     const results = userRegExp.exec(path) || [];
     return `/mnt/${results[1]}/Users/${results[2]}/AppData/Local`;
 }

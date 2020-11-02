@@ -1,24 +1,33 @@
 // imports
-  import fs from 'fs';
-  import path from 'path';
-  import express from 'express';
-  import {launch as ChromeLaunch} from './lib/vendor/chrome-launcher.js';
-  import {createHttpTerminator} from 'http-terminator';
+  // node builtin
+    import fs from 'fs';
+    import path from 'path';
+    import express from 'express';
 
-  import API from './index.js';
-  import CONFIG from './config.js'
-  import {
-    delayThrow,
-    DEBUG2,
-    sleep, DEBUG, say,
-    expiredSessionFile,
-    appDir,
-    sessionDir,
-    app_data_dir,
-    temp_browser_cache, 
-  } from './../src/lib/common.js';
-  import connect from './lib/protocol.js';
-  import bridge from './lib/api_bridge.js';
+  // 3rd party
+    import {createHttpTerminator} from 'http-terminator';
+
+  // 3rd party customized and added to repo
+    import {launch as ChromeLaunch} from './lib/vendor/chrome-launcher.js';
+
+  // own 
+    import {install} from 'browser-installer';
+
+  // internal
+    import API from './index.js';
+    import CONFIG from './config.js'
+    import {
+      delayThrow,
+      DEBUG2,
+      sleep, DEBUG, say,
+      expiredSessionFile,
+      appDir,
+      sessionDir,
+      app_data_dir,
+      temp_browser_cache, 
+    } from './../src/lib/common.js';
+    import connect from './lib/protocol.js';
+    import bridge from './lib/api_bridge.js';
 
 // constants
   const PORT_DEBUG = false;
@@ -72,7 +81,9 @@
 
       let service, ServicePort;
       try {
-        ({service, port:ServicePort} = await start({app, addHandlers, desiredPort:CONFIG.desiredPort}));
+        ({service, port:ServicePort} = await start({
+          app, addHandlers, desiredPort:CONFIG.desiredPort, server
+        }));
         API.ServicePort = ServicePort;
       } catch(e) {
         console.error(e);
@@ -160,7 +171,7 @@
     notify && notify(`App started. ${ServicePort}`);
     process.disconnect && process.disconnect();
 
-    return {app, killService, ServicePort, browser, service, UI, notify, newSessionId};
+    return {expressApp: app, killService, ServicePort, browser, service, UI, notify, newSessionId};
   }
 
   export async function newBrowser({
@@ -185,7 +196,7 @@
       let bindingRetryCount = 0;
 
     // set up a promise to track progress
-      let reject, resolve = x => delayThrow(`Resolve not set: ` + x);
+      let reject, resolve;
       const pr = new Promise((res, rej) => (resolve = res, reject = rej));
 
     // set up disk space
@@ -578,7 +589,13 @@
       }
   }
 
-  async function start({app, desiredPort, addHandlers, noStandard: noStandard = false, server}) {
+  async function start({
+    app, 
+    desiredPort, 
+    addHandlers: addHandlers = null, 
+    noStandard: noStandard = false, 
+    server: server = null
+  }) {
     let service;
 
     let upAt, resolve, reject;
