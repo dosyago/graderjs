@@ -26,6 +26,9 @@
   - this can be an npm repo
   - call a function {install} and depending on win, nix or osx download the right installer and run it
 - multiple windows handling
+- fix bug where service doesnt' close after last UI closed (because 'headless' still there)
+
+i am awesome
 
 I AM FUCKING AWESOME
 

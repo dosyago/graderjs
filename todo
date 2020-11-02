@@ -1,5 +1,4 @@
 Priority
-  - fix bug where service doesnt' close after last UI closed (because 'headless' still there)
   - put archivist in this framework.
   - improve API based on what I learned from porting and 
   - write documentation about how to use grader to build cross-platform apps 
@@ -8,6 +7,7 @@ Lesser
   - implement apiInUI flag
   - improve progress . metrics (no clearline just add 1 dot on each turn using stdout.write)
   - add sessionIds to old-sessions on every exit path from the app (even before UI launched for example)
+  - fix it so we ALWAYS (no matter what) delete old sessions
   - add security checks on origin for API proxy
 
 
