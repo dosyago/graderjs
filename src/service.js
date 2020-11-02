@@ -383,22 +383,28 @@
       // standard close stuff
         UI.socket.on('close', () => UI.disconnected = true);
         UI.socket.on('close', async () => {
-          console.log({appUIs:uis, UI});
+          DEBUG && console.log({appUIs:uis, name: UI.name});
+          let App;
           try {
-            const App = API._serviceOnly.getApp();
+            App = API._serviceOnly.getApp();
+          } catch(e) {
+            DEBUG && console.log(`No app yet`, UI);
+          }
+
+          try {
             uis.delete(UI.name);
-            if ( UI === App.UI ) {
+            if ( App && UI === App.UI ) {
               // default UI so remove it from App
               App.UI = undefined;
             }
             DEBUG && console.log({appUIs:uis});
-            if ( uis.size == 0 && ! (App.settings.keepAlive || keepService ) ) {
+            if ( App && uis.size == 0 && ! (App.settings.keepAlive || keepService ) ) {
               await App.killService();
             } else {
               await API.ui.close(UI);
             }
           } catch(e) {
-            console.log(`Error handling socket close`, e);
+            console.log(`Error handling socket close`, e, UI);
           }
         });
 

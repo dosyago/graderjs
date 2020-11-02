@@ -5,13 +5,12 @@ import Grader from './index.js';
   }
 
   export async function windowDemo() {
-    console.log({OK:1});
     await Grader.util.sleep(3000);
-    const {UI} = await Grader.ui.open({doLayout:true, uiName:'window'});
+
+    await Grader.ui.open({doLayout:true, uiName:'window'});
     await Grader.util.sleep(3000);
-    console.log({OK:2});
+
     const {UI:UI2} = await Grader.ui.open({doLayout:true, uiName:'window2'});
-    console.log({OK:3});
 
     await Grader.util.sleep(3000);
     await Grader.ui.close(UI2);
