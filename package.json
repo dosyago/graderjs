@@ -1,6 +1,6 @@
 {
   "name": "graderjs",
-  "version": "1.25.0",
+  "version": "2.0.0",
   "description": "Template for cross-platform Node, JavaScript, HTML & CSS apps without the bloat. 'Massless' apps.",
   "main": "build/grader.js",
   "bin": {
