@@ -135,8 +135,9 @@
     // setup return value 
       const retVal = {
         settings,
+        uis,
         expressApp: app, ServicePort, service, notify, newSessionId,
-        UI: undefined
+        UI: undefined,
       };
 
     // launch UI unless not needed yet
@@ -815,7 +816,7 @@
         DEBUG2 && console.info({killService:2, count});
         for( const {UI} of App.uis.values() ) {
           try {
-            await App.ui.close(UI);
+            await API.ui.close(UI);
           } catch(e2) {
             DEBUG2 && console.info(`Error shutting down the UI ${UI.name}...`, e2);
           }

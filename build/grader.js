@@ -7821,6 +7821,8 @@ var config_default = /*#__PURE__*/__webpack_require__.n(config);
 const DEBUG = (config_default()).DEBUG;
 const DEBUG2 = true;
 
+const newSessionId = () => (Math.random()*1137).toString(36);
+
 const APP_ROOT = __dirname;
 const appDir = () => DEBUG ?
   external_path_default().resolve(__dirname, '..')

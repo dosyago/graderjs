@@ -154,10 +154,11 @@ export default API;
   }
 
 // window functions
-  async function open(name, settings) {
+  async function open(settings) {
     if ( ! App ) throw new TypeError(`Need to call API.go first to create App before opening additional windows.`);
 
     const {uis,ServicePort} = App;
+    const {uiName: name} = settings;
     const sessionId = Common.newSessionId();
     // do layout prep if requrested
       let layout;
