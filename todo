@@ -1,5 +1,5 @@
 Priority
-  - multiple windows handling
+  - fix bug where service doesnt' close after last UI closed (because 'headless' still there)
   - put archivist in this framework.
   - improve API based on what I learned from porting and 
   - write documentation about how to use grader to build cross-platform apps 
