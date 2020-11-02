@@ -8,18 +8,11 @@ module.exports = {
     path: path.resolve(__dirname, 'build'),
     filename: "service.js"
   },
-  /*
   optimization: {
-    minimize: false
+    minimize: CONFIG.DEBUG ? false : true
   },
-  */
   target: "node",
   node: {
     __dirname: false
-  },
-  /*
-  plugins: [
-    new webpack.BannerPlugin({ banner: "#!/usr/bin/env node", raw: true }),
-  ]
-  */
+  }
 };

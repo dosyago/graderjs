@@ -5,8 +5,10 @@ import CONFIG from '../config.js';
 
 // determine where this code is running 
 
-export const DEBUG = process.env.DEBUG_grader || true;
-export const DEBUG2 = false;
+export const DEBUG = CONFIG.DEBUG;
+export const DEBUG2 = true;
+
+export const newSessionId = () => (Math.random()*1137).toString(36);
 
 export const APP_ROOT = __dirname;
 export const appDir = () => DEBUG ?

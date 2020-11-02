@@ -14,6 +14,18 @@
   const HasListeners = new Map();
 
 // main export
+    // note that these calls with UI = App.UI
+    // will run against the default (the first) UI created.
+    // but only when called directly from the service side.
+    // when called from UI side, the calls that have a UI parameter
+    // are called on the UI that makes the call or, if the UI parameter is a string
+    // called on the UI having the name equal to that string.
+    // before the App opens a window or
+    // if the 'default' UI is closed there will be no default UI
+    // and calls made from the service side on functions
+    // requiring a UI parameter and without specifying a UI 
+    // parameter will fail at that time
+    // until a new UI (window) is opened (via API.ui.open())
   const API = {
     go,                   // start app launch sequence
     stop,                 // kill app, cleanup, and exit (after async jobs parameter completes)
@@ -58,6 +70,11 @@
       k: load,                      // getrieve a key
       d: del
     },
+
+    _serviceOnly: {
+      getUI,
+      getApp
+    }
   };
 
 export default API;
@@ -67,6 +84,8 @@ export default API;
 
 // basic functions
   async function go({
+    uiName:
+      uiName = undefined,             // name for first window opened (if any) 
     apiInUI:                              // enable grader API available in UI context
       apiInUI = false,
     addHandlers:
@@ -79,13 +98,20 @@ export default API;
     keepConsoleOpen:
       keepConsoleOpen = false,            // keeps the console open in case you need it
     doLayout:                               
-      doLayout = false                    // control window layout on screen
+      doLayout = false,                   // control window layout on screen
         // true for auto mode or a function 
         // signature: ({screenWidth, screenHeight}) => 
         // {screenWidth, screenHeight, x, y, width, height}
+    keepAlive: 
+      keepAlive = false,                  // keeps the service running after all windows closed
+        // until it is explicitly killed with stop
+    noWindow:
+      noWindow = false,                   // starts the service but doesn't open a window
   } = {}) {
     App = await Service.go({
-      apiInUI, addHandlers, server, keepConsoleOpen, doLayout
+      uiName, 
+      apiInUI, addHandlers, 
+      server, keepConsoleOpen, doLayout, keepAlive, noWindow
     });
 
     return App;
@@ -101,13 +127,15 @@ export default API;
     await App.killService();
   }
 
-  function say(msg) {
-    return App.notify(msg, null, {}, e => {
+  async function say(msg) {
+    try {
+      await App.notify(msg);
+    } catch(e) {
       DEBUG && console.info("say.App.notify", e);
       throw new TypeError(
         `Cannot API.say a console message because App Console has already closed.`
       );
-    });
+    }
   }
 
 // meta functions
@@ -126,17 +154,18 @@ export default API;
   }
 
 // window functions
-  async function open(settings) {
+  async function open(name, settings) {
     if ( ! App ) throw new TypeError(`Need to call API.go first to create App before opening additional windows.`);
 
-    const {ServicePort} = App;
-    const sessionId = App.newSessionId();
+    const {uis,ServicePort} = App;
+    const sessionId = Common.newSessionId();
     // do layout prep if requrested
       let layout;
       if ( settings.doLayout ) {
         const {screenWidth, screenHeight} = await getScreen({
           ServicePort, 
-          sessionId
+          sessionId,
+          uis
         });
 
         layout = {screenWidth, screenHeight};
@@ -149,7 +178,14 @@ export default API;
     fs.writeFileSync('grader.open.log', JSON.stringify({ServicePort, sessionId}));
     let browser, UI;
     try {
-      ({UI,browser} = await Service.newBrowser({ServicePort, sessionId, layout}));
+      ({UI,browser} = await Service.newBrowser({
+        uis,
+        ServicePort, sessionId, layout, name
+      }));
+      // if not UI yet, this is the first so set it as default
+      if ( ! App.UI ) {
+        App.UI = UI;
+      }
     } catch(e) {
       console.log("open.newBrowser", e);
       fs.writeFileSync('grader.error', JSON.stringify({err:e, msg:e+''}));
@@ -157,8 +193,6 @@ export default API;
 
     // don't expose socket
     UI.socket = null;
-
-    App.windows.set(UI.sessionId, {UI,browser});
 
     return {UI,browser};
   }
@@ -375,7 +409,7 @@ export default API;
   }
 
 // window functions part iii
-  async function getScreen({ServicePort, sessionId}) {
+  async function getScreen({ServicePort, sessionId: providedSessionId, uis} = {}) {
     let screen = load('screen');
 
     if ( !screen ) {
@@ -383,12 +417,21 @@ export default API;
         let UI;
         try {
           ({UI} = await Service.newBrowser({
+            uis,
             silent: true,
             headless: true, 
             uriPath: '/_api/getscreen.html',
             ServicePort, 
-            sessionId,
-            noDelete: true
+            sessionId: providedSessionId || Common.newSessionId(),
+            // we will delete directories unless provided with a sessionId
+              // which can save time for main UI startup as the headless
+              // window prepares all the session directories
+            noDelete: providedSessionId ? true : false,
+            // we don't want to kill the whole service when we close this UI
+            // and we have no other UIs open
+            // since often this UI comes before others to provide the screen details
+            // for layout
+            keepService: true
           }));
         } catch(e) {
           console.log("getScreen.newBrowser", e);
@@ -496,3 +539,23 @@ export default API;
 
       return pr;
     }
+
+// service only functions (not available over the API bridge to UI)
+  function getUI(name) {
+    if ( ! App ) {
+      throw new TypeError(`Cannot call getUI when App does not exist.`);
+    }
+    if ( App.uis.has(name) ) {
+      return App.uis.get(name);
+    } else {
+      throw new TypeError(`UI with name ${name} does not exist.`);
+    }
+  }
+
+  function getApp() {
+    if ( ! App ) {
+      throw new TypeError(`Cannot call getApp when App does not exist.`);
+    }
+    return App;
+  }
+  

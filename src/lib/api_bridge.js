@@ -17,7 +17,7 @@ export default async function bridge(...requestArgs) {
   counter++;
   DEBUG && console.info('Bridge called', requestArgs);
 
-  const [{name, payload: stringPayload, executionContextId}] = requestArgs;
+  const [{uiName, name, payload: stringPayload, executionContextId}] = requestArgs;
 
   let payload;
 
@@ -46,6 +46,26 @@ export default async function bridge(...requestArgs) {
     const apiCall = resolvePathToFunction(API, path);
 
     const revivedArgs = JSON.parse(args);
+
+    // this 1 line creates our UI is last argument 
+    // and must be default parameter set to App.UI 
+    // API calling convention
+    if ( apiCall.toString().includes('UI = App.UI') ) {
+      if ( revivedArgs.length == apiCall.length ) {
+        // check if it's a string (must be as it must be the name of UI)
+        // this is how one UI can call API on another UI
+        // by specifying the UI arg as a string name for the other UI
+        const lastArg = revivedArgs.pop();
+        if ( typeof lastArg == "string" ) {
+          revivedArgs.push(API._serviceOnly.getUI(lastArg));
+        } else {
+          throw new TypeError(`If API call has UI as last parameter, caller must either leave it blank (to be called on its own UI) or specify a string name of the UI on which the call is to be made. This call received a last argument of: ${lastArg} which is incorect.`);
+        }
+      } else {
+        // add the requested UI to the end of the args
+        revivedArgs.push(API._serviceOnly.getUI(uiName));
+      }
+    }
 
     const apiResult = await apiCall(...revivedArgs);
 

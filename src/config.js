@@ -12,5 +12,6 @@ module.exports = {
     name: "Grader",
     url: "https://github.com/grader-js"
   },
-  apiOrigins: [],                   // exact origins allowed to call Service API via grader global
+  apiOrigins: [],                   // exact origins allowed to call Service API via grader global,
+  DEBUG: true
 }

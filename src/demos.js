@@ -1,12 +1,10 @@
 import Grader from './index.js'; 
 
   export async function openDemo() {
-    return await Grader.go({doLayout:true});
+    return await Grader.ui.open({doLayout:true});
   }
 
   export async function windowDemo() {
-    const app = await Grader.go({doLayout:true});
-
     console.log({OK:1});
     await Grader.util.sleep(3000);
     console.log({OK:2});
@@ -46,5 +44,5 @@ import Grader from './index.js';
     await Grader.util.sleep(2000);
     await Grader.ui.size({width:200, height:100});
 
-    return app;
+    return UI2;
   }
