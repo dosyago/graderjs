@@ -17,7 +17,6 @@
     import API from './index.js';
     import CONFIG from './config.js'
     import {
-      delayThrow,
       DEBUG2,
       sleep, DEBUG, say,
       expiredSessionFile,
@@ -162,8 +161,15 @@
       console.log(`Chrome started.`);
       notify('User interface created.');
 
+    // setup return value 
+      const retVal = {
+        expressApp: app, ServicePort, browser, service, UI, notify, newSessionId,
+        windows: new Map([UI.sessionId, {browser, UI}])
+      };
+
     // setup future cleanup
-      const killService = installCleanupHandlers({ui: UI, bg: service});
+      const killService = installCleanupHandlers({ui: UI, bg: service, App: retVal});
+      retVal.killService = killService;
 
     // don't keep the socket exposed
       UI.socket = null;
@@ -171,13 +177,7 @@
     notify && notify(`App started. ${ServicePort}`);
     process.disconnect && process.disconnect();
 
-    const retVal = {
-      expressApp: app, killService, ServicePort, browser, service, UI, notify, newSessionId
-    };
-
-    retVal.windows = new Set();
-
-    retVal.windows.set(UI.sessionId, {browser, UI});
+    return retVal;
   }
 
   export async function newBrowser({
@@ -720,7 +720,7 @@
     app.use(express.static(SITE_PATH));
   }
 
-  function installCleanupHandlers({ui, bg}) {
+  function installCleanupHandlers({ui, bg, App}) {
     // someone closed the browser window
 
     let count = 0;
@@ -756,9 +756,12 @@
     };
 
     ui.socket.on('close', () => ui.disconnected = true);
-    ui.socket.on('close', () => {
-      // check if there are no more windows open
-      killService();
+    ui.socket.on('close', async () => {
+      if ( App.windows.size == 0 ) {
+        await killService();
+      } else {
+        await API.ui.close(ui);
+      }
     });
 
     // process cleanliness 

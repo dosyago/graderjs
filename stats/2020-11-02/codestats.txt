@@ -1,0 +1,17 @@
+
+---------- Result ------------
+
+            Physical :  2063
+              Source :  1493
+             Comment :  285
+ Single-line comment :  163
+       Block comment :  122
+               Mixed :  40
+ Empty block comment :  5
+               Empty :  330
+               To Do :  0
+
+Number of files read :  18
+
+----------------------------
+

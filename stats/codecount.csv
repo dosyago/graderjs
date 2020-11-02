@@ -1,29 +1,36 @@
-language,filename,blank,comment,code,"github.com/AlDanial/cloc v 1.82  T=0.03 s (921.6 files/s, 84585.2 lines/s)"
-JavaScript,./src/service.js,110,123,477
-JavaScript,./src/index.js,58,60,320
+language,filename,blank,comment,code,"github.com/AlDanial/cloc v 1.82  T=0.05 s (705.0 files/s, 71575.2 lines/s)"
+JavaScript,./src/service.js,119,129,567
+JavaScript,./src/index.js,76,46,376
+JavaScript,./src/lib/vendor/chrome-launcher.js,3,33,286
+JavaScript,./src/lib/vendor/chrome-finder.js,0,31,201
 Bourne Shell,./.work/win_link.sh,48,35,160
 JavaScript,./src/ui_inject/proxy.js,30,7,152
-JavaScript,./src/lib/protocol.js,20,8,115
-JavaScript,./src/launcher.js,25,14,111
+JavaScript,./src/launcher.js,28,17,137
+JavaScript,./src/lib/protocol.js,20,6,115
+JavaScript,./src/lib/vendor/utils.js,0,11,113
 JavaScript,./src/lib/api_bridge.js,23,2,72
 JavaScript,./src/lib/args.js,17,0,52
 HTML,./src/public/index.html,3,0,43
-JavaScript,./src/demos.js,13,0,28
+JavaScript,./src/demos.js,15,0,35
 Markdown,./.work/icons.md,19,0,26
 JavaScript,./src/ui_inject/binding.js,5,6,26
-JavaScript,./src/lib/common.js,10,3,24
+JavaScript,./src/lib/common.js,9,3,24
 Bourne Shell,./scripts/build_setup.sh,6,0,24
+JavaScript,./src/lib/vendor/flags.js,0,21,19
 JavaScript,./src/config.js,0,0,16
+JavaScript,./src/lib/vendor/random-port.js,0,9,16
 JavaScript,./webpack.config.js,1,5,16
 Bourne Shell,./scripts/compile.sh,14,7,14
-JavaScript,./src/webpack.config.js,2,10,13
 JavaScript,./.eslintrc.js,0,0,13
+JavaScript,./src/lib/vendor/index.js,0,1,13
+JavaScript,./src/webpack.config.js,2,10,13
 HTML,./src/public/_api/getscreen.html,1,0,11
 JavaScript,./scripts/webzip.js,7,0,10
 Bourne Shell,./scripts/test.sh,9,1,10
 Bourne Shell,./scripts/upload.sh,4,0,10
+JavaScript,./src/app.js,9,5,9
 Markdown,./notes/caveats.md,5,0,6
-JavaScript,./src/app.js,4,2,5
+JavaScript,./build/grader.js,0,1,2
 YAML,./.github/FUNDING.yml,1,1,2
-TypeScript,./decs.d.ts,1,0,2
-SUM,,436,284,1758
+JavaScript,./src/build/service.js,0,1,1
+SUM,,474,388,2590
