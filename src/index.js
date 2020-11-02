@@ -72,7 +72,7 @@ export default API;
     addHandlers:
       addHandlers = undefined,            // callback to add the route handlers to an express app
     server:
-      server = true,                      // used to disable or replace default server 
+      server = null,                      // used to replace the default server
         // if you don't want a server or if you need 
         // more control (such as websockets, or TLS)
         // we call listen automatically
@@ -127,6 +127,8 @@ export default API;
 
 // window functions
   async function open(settings) {
+    if ( ! App ) throw new TypeError(`Need to call API.go first to create App before opening additional windows.`);
+
     const {ServicePort} = App;
     const sessionId = App.newSessionId();
     // do layout prep if requrested
@@ -155,6 +157,8 @@ export default API;
 
     // don't expose socket
     UI.socket = null;
+
+    App.windows.set(UI.sessionId, {UI,browser});
 
     return {UI,browser};
   }

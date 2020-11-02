@@ -171,7 +171,13 @@
     notify && notify(`App started. ${ServicePort}`);
     process.disconnect && process.disconnect();
 
-    return {expressApp: app, killService, ServicePort, browser, service, UI, notify, newSessionId};
+    const retVal = {
+      expressApp: app, killService, ServicePort, browser, service, UI, notify, newSessionId
+    };
+
+    retVal.windows = new Set();
+
+    retVal.windows.set(UI.sessionId, {browser, UI});
   }
 
   export async function newBrowser({
@@ -750,7 +756,10 @@
     };
 
     ui.socket.on('close', () => ui.disconnected = true);
-    ui.socket.on('close', killService);
+    ui.socket.on('close', () => {
+      // check if there are no more windows open
+      killService();
+    });
 
     // process cleanliness 
       process.on('beforeExit', killService);
