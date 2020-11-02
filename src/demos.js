@@ -1,7 +1,7 @@
 import Grader from './index.js'; 
 
   export async function openDemo() {
-    return await Grader.ui.open({doLayout:true, uiName: 'open'});
+    return await Grader.ui.open({doLayout:true, uiName: 'open', keepService: true});
   }
 
   export async function windowDemo() {

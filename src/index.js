@@ -158,7 +158,7 @@ export default API;
     if ( ! App ) throw new TypeError(`Need to call API.go first to create App before opening additional windows.`);
 
     const {uis,ServicePort} = App;
-    const {uiName: name} = settings;
+    const {uiName: name, keepService} = settings;
     const sessionId = Common.newSessionId();
     // do layout prep if requrested
       let layout;
@@ -181,7 +181,8 @@ export default API;
     try {
       ({UI,browser} = await Service.newBrowser({
         uis,
-        ServicePort, sessionId, layout, name
+        ServicePort, sessionId, layout, name,
+        keepService
       }));
       // if not UI yet, this is the first so set it as default
       if ( ! App.UI ) {
