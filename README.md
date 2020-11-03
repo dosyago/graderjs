@@ -21,4 +21,3 @@ Then, read the [getting started guide](https://github.com/c9fe/grader-base/blob/
 
 # API reference
 
-
