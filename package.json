@@ -1,12 +1,11 @@
 {
   "name": "graderjs",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "description": "Tool to copy the Grader.JS base repo into the current directory",
   "bin": {
     "graderjs": "scripts/bring_grader.sh"
   },
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/c9fe/graderjs.git"
