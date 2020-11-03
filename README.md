@@ -23,7 +23,69 @@ Then, read the [getting started guide](https://github.com/c9fe/grader-base/blob/
 
 The Grader API is pretty simple. 
 
+```js
+  const API = {
+    go,                   // start app launch sequence
+    stop,                 // kill app, cleanup, and exit (after async jobs parameter completes)
+    say,                  // say something to console (throws if console closed)
 
+    ui : {
+      open,               // open UI window
+      close,              // close UI window
+      move,               // move UI window (throws if no window open)
+      size,               // size UI window (throws if no window open)
+      minimize,           // minimize UI window (throws if no window open)
+      maximize,           // maximize UI window (throws if no window open)
+      restore,            // switch between maximize and how it was before
+      fullscreen,         // UI window to fullscreen
+      partscreen,         // UI window to part of screen
+      getLayout,          // get window left, right, width, height and windowState
+
+      openBlank,          // open a UI window to about:blank
+      writePage,          // like document.write if using a custom window control box, writes to the
+                          // iframe document inside that
+
+      getScreen,          // get screen dimensions
+    },
+
+    meta: {
+      publishAPI,         // publish an API into the UI context (requires apiInUI: true)
+
+      getStartURL,        // gets the start URL for the app 
+      getFavicon,         // gets a (or an optionally named) favicon as a data URL
+      getTitle,           // gets the app title
+    },
+
+    control: {
+      send,               // send a DevTools command (throws if ui not connected yet)
+      on,                 // start listening for a DevTools event (throws if ui not connected yet)
+      off,                // stop listening for a DevTools event (throws if ui not connected yet)
+    },
+
+    util: {
+      sleep,
+      kv: save,           // save a (key, value) pair
+      k: load,            // getrieve a key
+      d: del              // delete a key
+    },
+
+    _serviceOnly: {       // can not be called from UI side
+      getUI,              // returns the named UI
+      getApp              // returns the App
+    }
+  };
+```
+
+# Architecture
+
+Grader consists of 3 parts:
+- a background service running as a server on an available dynamic port 
+- zero or a number of UI windows, using HTML/JS/CSS rendered by Google Chrome
+- a console window which you can optionally keep open
+
+The UI can talk to the service via the included `grader` global API bridge in every UI window. 
+
+Communication between the service and the UI is done via responses to API calls made by the UI. The service can also control a UI using the Chrome DevTools protocol. 
 
 
 # Security
