@@ -1,0 +1,29 @@
+I think it's easier to make it like a create-app or a template repo.
+
+Because ...
+
+To have these apps an author needs 2 parts:
+
+1) Grader API and code
+2) Build their code into a binary
+
+And 2 requires 
+
+3) Correct structure of their code
+
+There could be a post install script, that sets up 3.
+
+And also copies all the required build scripts.
+
+And also sets up their config.
+
+This is an option.
+
+--- but
+
+
+I think at the start, it's easier just to make it a template repository.
+
+
+
+
