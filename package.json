@@ -1,0 +1,33 @@
+{
+  "name": "graderjs",
+  "version": "2.1.0",
+  "description": "Tool to copy the Grader.JS base repo into the current directory",
+  "scripts": {
+    "postinstall": "bash ./scripts/bring_grader.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/c9fe/graderjs.git"
+  },
+  "keywords": [
+    "devtools",
+    "node",
+    "hybrid",
+    "desktop",
+    "template",
+    "electron",
+    "sciter",
+    "gradebr",
+    "cross-platform apps",
+    "chromium",
+    "chrome"
+  ],
+  "author": "@dosy",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/c9fe/graderjs/issues"
+  },
+  "homepage": "https://github.com/c9fe/graderjs#readme",
+  "dependencies": {},
+  "devDependencies": {}
+}

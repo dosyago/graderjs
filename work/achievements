@@ -1,0 +1,29 @@
+- verify window control buttons work
+- add a build step that zips up our website / app directory
+- add the website zip into the nexe build
+- write the server.js and website zip to a temp directory 
+- unzip the website zip
+- start the server
+- refactor to have app as a launch process for a fatter server. app closes quickly, leaving no trace of console.
+- test this on windows and linux (ubuntu vnc)
+- clean up code and remove most of it
+- Decide how to handle config, names, folders of different apps
+- perf: try keeping the chrome profile dir (per app), and experiment with cache dir as temp or persistent. Also try opening chrome earlier and using DevTools if needed as fallback to make it load the UI
+- global $HOME/.grader directory for all grader apps, installs and configs
+- handle picking a random port that's available
+- work out how to delete the session directories on windows
+- make it into a great API and clean the code
+- ensure all sessions are correctly accounted for (seems at least 1 window will not be saved in old session log, need to work out why)
+- create API bridge plumbing!
+- remove bugs about adding binding/related code twice
+- work out that trying make window controls top bar available (for systems that don't use them, like ubuntu) is actually an error because ubuntu does provide them, and trying to provide on ourselves (using app region drag) doesn't work. But be grateful that I got all the plumbing for the API bridge done! YAY
+- implement way to pass back info from service side to UI side (promise resolver account)
+- allow setting initial position and size (and get screen size by opening headless chrome window and evaluating screen.width, everytime. We can also use this headless vanguard to provide us other useful properties.)
+- improve way to get screen coorindates (faster and less waste, let's try to keep these two browsers using the same session directories)
+- get rid of console window opening on browser exit / shutdown process
+- implement addHandlers, server and keepConsoleOpen settings (as well as other sketched and unimplemented settings)
+- add download_chrome script to pull it in if system doesn't have it
+  - this can be an npm repo
+  - call a function {install} and depending on win, nix or osx download the right installer and run it
+- multiple windows handling
+- fix bug where service doesnt' close after last UI closed (because 'headless' still there)
