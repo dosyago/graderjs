@@ -6,14 +6,15 @@ cd ../../
 
 git clone https://github.com/c9fe/grader-base.git
 
+rm -f package*
+rm -rf node_modules
+
 cp -r grader-base/* .
 
 rm -rf grader-base/
 
-rm -rf node_modules/graderjs
-
 echo $(pwd)
 
-npm i
+npm i --verbose
 
 
