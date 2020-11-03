@@ -2,8 +2,10 @@
   "name": "graderjs",
   "version": "2.1.5",
   "description": "Tool to copy the Grader.JS base repo into the current directory",
+  "bin": {
+    "graderjs": "scripts/bring_grader.sh"
+  },
   "scripts": {
-    "postinstall": "bash ./scripts/bring_grader.sh"
   },
   "repository": {
     "type": "git",
