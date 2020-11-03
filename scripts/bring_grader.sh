@@ -10,6 +10,8 @@ cp -r grader-base/* .
 
 rm -rf grader-base/
 
+rm -rf node_modules/graderjs
+
 echo $(pwd)
 
 npm i
