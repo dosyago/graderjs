@@ -21,3 +21,14 @@ Then, read the [getting started guide](https://github.com/c9fe/grader-base/blob/
 
 # API reference
 
+The Grader API is pretty simple. 
+
+
+
+
+# Security
+
+The binaries are built using `nexe`, which uses Node.JS runtimes which I pre-pack with `upx` to save ~75% of the size. Apart from webpack and its minimization, there is no obfuscation applied to the code. The code is packed into a binary by `nexe`.
+
+Aside from a few methods marked `_serviceOnly`, the API is available on the service side (Node.JS) and in the client (via the `grader` global in any UI windows). If you're loading 3rd-party content, you might not want to give them access to the `grader` global, so there is an `apiInUI` flag, as well as origin checks and an allowedOrigins whitelist, I'll implement in future.
+
