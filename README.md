@@ -119,9 +119,8 @@ For more demos see the demos in `src/demos`.
 
 # Configuration
 
-You can configure some options:
+You can configure some options, via the configuration located in `src/config.js`:
 
-`src/config.js`:
 ```js
 module.exports = {
   name: "MyGraderApp",
@@ -132,17 +131,16 @@ module.exports = {
   },
   desiredPort: 49666,
   version: "0.0.1",
-  description: "A Beautiful Demonstration of Just a Tiny Fraction of The Amazing Benevolence Which Grader Hath To Offer",
+  description: "A Beautiful Demonstration",
   source: "https://github.com/my-github-username/MyGraderApp",
   organization: {
     name: "My Org",
     url: "https://github.com/my-github-org-name"
   },
-  apiOrigins: [],                   // exact origins allowed to call Service API via grader global,
-  DEBUG: false                       // switch on debug output when you're ready to go *debug*
+  apiOrigins: [],      // origins allowed to call API from UI (not implemented)
+  DEBUG: false         // switch on debug output when you're ready to debug
 }
 ```
-
 
 # More
 
@@ -154,4 +152,4 @@ See [this list of Electron alternatives](https://github.com/sudhakar3697/electro
 
 ----------------------
 
-# *Grader.JS*
+# *Grader.JS!*
