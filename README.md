@@ -124,73 +124,73 @@
 
   Starts the app launch sequence, and returns the `<App>` object. This will:
 
-    - **create a server.** The server, therwise known as the background service will run on port `<Config>.desiredPort` if available, otherwise on a random port in the dynamic range from 49,152. If the `options.server` is set, Grader uses the `<HTTPServer>` object you pass and attempts to call 'listen' on it. 
-    - **create a UI window.** The UI window will by default load the content served by the background service at the `/` (root) route. In order to render the GUI window, Grader uses the installed Google Chrom(e/ium) browser to run a native UI window using the browser's [`--app=${url}`](https://source.chromium.org/chromium/chromium/src/+/master:chrome/common/chrome_switches.cc;drc=8c4b7bb294e2c96b3aef99fa08effc473fdae015;l=47) [flag](https://peter.sh/experiments/chromium-command-line-switches/#app). If no Google Chrom(e/ium) is installed, one will be downloaded and installed first. Note that unlike [Electron](https://www.electronjs.org/) Grader does not bundle a browser inside the binaries of app, and it does not use a modified version of Chrome, instead using the installed version or downloading the latest version.
+  - **create a server.** The server, therwise known as the background service will run on port `<Config>.desiredPort` if available, otherwise on a random port in the dynamic range from 49,152. If the `options.server` is set, Grader uses the `<HTTPServer>` object you pass and attempts to call 'listen' on it. 
+  - **create a UI window.** The UI window will by default load the content served by the background service at the `/` (root) route. In order to render the GUI window, Grader uses the installed Google Chrom(e/ium) browser to run a native UI window using the browser's [`--app=${url}`](https://source.chromium.org/chromium/chromium/src/+/master:chrome/common/chrome_switches.cc;drc=8c4b7bb294e2c96b3aef99fa08effc473fdae015;l=47) [flag](https://peter.sh/experiments/chromium-command-line-switches/#app). If no Google Chrom(e/ium) is installed, one will be downloaded and installed first. Note that unlike [Electron](https://www.electronjs.org/) Grader does not bundle a browser inside the binaries of app, and it does not use a modified version of Chrome, instead using the installed version or downloading the latest version.
 
   The returned `<App>` object has the following properties:
 
-    - *settings:* the options parameter the `.go()` method was called with
-    - *uis:* the `Map<string,UI>` of UI window names to UI window objects
-    - *expressApp:* the express app object (i.e, returned by `express()`) for the background service
-    - *ServicePort:* the port the background service server is running on
-    - *service:* the background service server object (`<HTTPServer>`)
-    - *notify:* a method (the same as `.say()`) to print to `stdout` in the launcher process
-    - *newSessionId:* a method to create a `session-id` (currently only used internally)
-    - *UI:* the UI window object of the default UI (i.e., the first UI opened), undefined if there isn't one
-    - *killService:* a method to shut down the whole app
+  - *settings:* the options parameter the `.go()` method was called with
+  - *uis:* the `Map<string,UI>` of UI window names to UI window objects
+  - *expressApp:* the express app object (i.e, returned by `express()`) for the background service
+  - *ServicePort:* the port the background service server is running on
+  - *service:* the background service server object (`<HTTPServer>`)
+  - *notify:* a method (the same as `.say()`) to print to `stdout` in the launcher process
+  - *newSessionId:* a method to create a `session-id` (currently only used internally)
+  - *UI:* the UI window object of the default UI (i.e., the first UI opened), undefined if there isn't one
+  - *killService:* a method to shut down the whole app
 
   The `options` parameter supports the following settings:
 
-    - **uiName**: `string`. Required unless `noWindow` is set. `uiName` is the name given to the GUI window. 
-    - **apiInUI**: `boolean`. Make this API (minus the `_serviceOnly` domain) available in all UI windows under the `grader` global object.
-    - **addHandlers**: `function(app: <ExpressAppObject>)`. A function called during background service server startup to add handlers to the created express app server.
-      For example:
+  - **uiName**: `string`. Required unless `noWindow` is set. `uiName` is the name given to the GUI window. 
+  - **apiInUI**: `boolean`. Make this API (minus the `_serviceOnly` domain) available in all UI windows under the `grader` global object.
+  - **addHandlers**: `function(app: <ExpressAppObject>)`. A function called during background service server startup to add handlers to the created express app server.
+    For example:
 
-      ```js
-        function addHandlers(app) {
-           app.post('/file', upload, (req, res) => res.sendStatus(200));
-        }
+    ```js
+      function addHandlers(app) {
+         app.post('/file', upload, (req, res) => res.sendStatus(200));
+      }
 
-        await Grader.go({addHandlers});
-      ```
-      
-      *Note:* By default Grader creates an [Express app](https://expressjs.com/) for the background service server.
+      await Grader.go({addHandlers});
+    ```
+    
+    *Note:* By default Grader creates an [Express app](https://expressjs.com/) for the background service server.
 
-    - **server**: `<HTTPServer> object`. If you want more control over the background service server Grader creates, you can create your own server and pass it in at launch using this option. For example, you might want to add TLS certificates, or you might want to use [Meteor](https://www.meteor.com/) instead of Express. 
-    - **keepConsoleOpen**: `boolean`. Requests that the launcher process not exit and instead keep its console window open.
-    - **doLayout**: `boolean or function(screen: {screenWidth, screenHeight}) -> ({screenWidth, screenHeight, x, y, width, height})`. Passed to the GUI window that automatically opens on app launch. Note that you can disable the default auto-open behaviour by using the `noWindow` flag. 
-      
-      The default value of `doLayout` is `true` which indicates the standard auto-centered golden-ratio dimensions layout where the GUI window opens in the middle of the screen in Golden proportion to the screen dimensions. Alternately you can pass a function. The function is called with the width and height of the screen and your function returns the `x,y` positional coordinates and the `width,height` dimensions of the GUI window that will open on startup. If `doLayout` is `false` then the GUI window will open *wherever* the OS decides to put it. 
-    - **keepAlive**: `boolean`. Default is `false`. Keeps the background service (and therefore the app) running even *after* all GUI windows are closed. This will not kill the service on startup before any windows are open, it only affects behaviour on the closing (or crashing) of a GUI window, where the app will by default close its background service and exit if there are no GUI windows open. Note that this can also be overridden on a per-window basis by the `keepService` flag option to `API.ui.open()`, such that a window opened with `keepService` set to `true` will, when closing having been the last window open, not cause the whole app to exit.
-    - **noWindow**: `boolean`. Default is `false`. Launches the app without opening a GUI window.
+  - **server**: `<HTTPServer> object`. If you want more control over the background service server Grader creates, you can create your own server and pass it in at launch using this option. For example, you might want to add TLS certificates, or you might want to use [Meteor](https://www.meteor.com/) instead of Express. 
+  - **keepConsoleOpen**: `boolean`. Requests that the launcher process not exit and instead keep its console window open.
+  - **doLayout**: `boolean or function(screen: {screenWidth, screenHeight}) -> ({screenWidth, screenHeight, x, y, width, height})`. Passed to the GUI window that automatically opens on app launch. Note that you can disable the default auto-open behaviour by using the `noWindow` flag. 
+    
+    The default value of `doLayout` is `true` which indicates the standard auto-centered golden-ratio dimensions layout where the GUI window opens in the middle of the screen in Golden proportion to the screen dimensions. Alternately you can pass a function. The function is called with the width and height of the screen and your function returns the `x,y` positional coordinates and the `width,height` dimensions of the GUI window that will open on startup. If `doLayout` is `false` then the GUI window will open *wherever* the OS decides to put it. 
+  - **keepAlive**: `boolean`. Default is `false`. Keeps the background service (and therefore the app) running even *after* all GUI windows are closed. This will not kill the service on startup before any windows are open, it only affects behaviour on the closing (or crashing) of a GUI window, where the app will by default close its background service and exit if there are no GUI windows open. Note that this can also be overridden on a per-window basis by the `keepService` flag option to `API.ui.open()`, such that a window opened with `keepService` set to `true` will, when closing having been the last window open, not cause the whole app to exit.
+  - **noWindow**: `boolean`. Default is `false`. Launches the app without opening a GUI window.
     
   *Note:* The standard use of Grader is to create a cross-platform GUI app using Node.JS and web technologies. But, using a couple of flags, you can modify the behaviour to non-standard uses.
 
   ***Note on Non-Standard Uses***
 
-    Using the options passed to `go()` you can customize the app launch behaviour. By passing a dummy object with a no-op `listen()` method in the `server` option, you can disable running a server. By specifying the `noWindow` flag, you can prevent the default behaviour of opening a UI window on app launch, and by requesting `keepConsoleOpen` you can ensure that the terminal console window, normally only open for the launch process and only on Windows, remains open for as long as you want. 
+  Using the options passed to `go()` you can customize the app launch behaviour. By passing a dummy object with a no-op `listen()` method in the `server` option, you can disable running a server. By specifying the `noWindow` flag, you can prevent the default behaviour of opening a UI window on app launch, and by requesting `keepConsoleOpen` you can ensure that the terminal console window, normally only open for the launch process and only on Windows, remains open for as long as you want. 
 
-    So, for example, you can use Grader to create a cross-platform terminal* app, without a GUI window, and optionally with or without a server. Note that static analysis and tree-shaking is performed by `webpack` so the minimum binary sizes will be slightly (but only slightly) affected by the options you specify in `go()`. 
+  So, for example, you can use Grader to create a cross-platform terminal* app, without a GUI window, and optionally with or without a server. Note that static analysis and tree-shaking is performed by `webpack` so the minimum binary sizes will be slightly (but only slightly) affected by the options you specify in `go()`. 
 
-    \**Opening a terminal currently only happens on Windows, as part of the app launch process. See [this SO question](https://stackoverflow.com/questions/50507531/is-there-a-way-to-launch-a-terminal-window-or-cmd-on-windows-and-pass-run-a-co) for an idea of how this could be made into a standardized behaviour across platforms.*
+  \**Opening a terminal currently only happens on Windows, as part of the app launch process. See [this SO question](https://stackoverflow.com/questions/50507531/is-there-a-way-to-launch-a-terminal-window-or-cmd-on-windows-and-pass-run-a-co) for an idea of how this could be made into a standardized behaviour across platforms.*
 
   **Note on Binary sizes**
 
-    The default minimum binary sizes are shown below:
+  The default minimum binary sizes are shown below:
 
-    ![A table showing the approximate default minimum binary sizes for basic "Hello World" GUI apps built with Grader.JS. The minimum size for a Unix or Linux binary is 14.8 Mb. The minimum size for a 32-bit Unix or Linux binary is 14.2 Mb. The minimum size for a Macintosh OSX binary is 12.2 Mb. The minimum size for a Windows binary is 10.4 Mb. The minimum size for a 32-bit Windows binary is 8.5 Mb.](https://github.com/c9fe/graderjs/raw/master/.readme-assets/default%20binary%20sizes.JPG)
+  ![A table showing the approximate default minimum binary sizes for basic "Hello World" GUI apps built with Grader.JS. The minimum size for a Unix or Linux binary is 14.8 Mb. The minimum size for a 32-bit Unix or Linux binary is 14.2 Mb. The minimum size for a Macintosh OSX binary is 12.2 Mb. The minimum size for a Windows binary is 10.4 Mb. The minimum size for a 32-bit Windows binary is 8.5 Mb.](https://github.com/c9fe/graderjs/raw/master/.readme-assets/default%20binary%20sizes.JPG)
 
-    These are the sizes of baseic `hello world` example GUI apps, and the main contribution to the size is the compressed Node.JS executable that is included in the binary package. The minified Node.JS source code has the following sizes:
+  These are the sizes of baseic `hello world` example GUI apps, and the main contribution to the size is the compressed Node.JS executable that is included in the binary package. The minified Node.JS source code has the following sizes:
 
-    | path   | purpose  | size behavior  | uncompressed size (Kb)  | compressed size (Kb) |
-    |---|---|---|---|---|
-    | /build/grader.js  | launcher  |  fixed size | 94  | 31 |
-    | /src/build/service.js  | main app  | size depends on your code | 707 | 282 |
-    | /build/app.zip* | app bundle | size depends on your code | 715* | 283 |
+  | path   | purpose  | size behavior  | uncompressed size (Kb)  | compressed size (Kb) |
+  |---|---|---|---|---|
+  | /build/grader.js  | launcher  |  fixed size | 94  | 31 |
+  | /src/build/service.js  | main app  | size depends on your code | 707 | 282 |
+  | /build/app.zip* | app bundle | size depends on your code | 715* | 283 |
 
-    \**Note: the app.zip bundle includes service.js, only exploded out for illustration*
+  \**Note: the app.zip bundle includes service.js, only exploded out for illustration*
 
-    The reality of the above numbers are that the total code contirbution of a fully functioning `hello world` GUI app is 314 Kb. Your app logic that you add on top of that, including any libraries you import, will add to that code size. But the main contribution to binary size is the size of the compressed Node.JS executable that is included in the binary package. 
+  The reality of the above numbers are that the total code contirbution of a fully functioning `hello world` GUI app is 314 Kb. Your app logic that you add on top of that, including any libraries you import, will add to that code size. But the main contribution to binary size is the size of the compressed Node.JS executable that is included in the binary package. 
 
 #### .stop()
 
@@ -206,26 +206,26 @@
 
   It has 13 methods. They are:
 
-    - open  
-    - close 
-    - move  
-    - size  
-    - minimize 
-    - maximize 
-    - restore  
-    - fullscreen  
-    - partscreen  
-    - getLayout
-    - openBlank
-    - writePage
-    - getScreen
+  - open  
+  - close 
+  - move  
+  - size  
+  - minimize 
+  - maximize 
+  - restore  
+  - fullscreen  
+  - partscreen  
+  - getLayout
+  - openBlank
+  - writePage
+  - getScreen
 
   **Important note about calling from Service or UI side** 
 
   For the functions below that accept a `UI` parameter:
 
-    - if calling from the **service-side** you must use the UI object itself. These are obtainable from the `uis` map on the `app` object (the object returned by `.go()`). If you leave the UI parameter blank in service-side calls, the call will be made on the *default UI*. The *default UI* is simply the first UI window opened. When that first UI window to open, is finally closed, there is no longer a *default UI*.
-    - **But** if calling from the **client-side** you must either leave it blank (in which case the command will be executed on the calling UI window), **or** you must provide the **string name** of the UI window you wish to call the command on.
+  - if calling from the **service-side** you must use the UI object itself. These are obtainable from the `uis` map on the `app` object (the object returned by `.go()`). If you leave the UI parameter blank in service-side calls, the call will be made on the *default UI*. The *default UI* is simply the first UI window opened. When that first UI window to open, is finally closed, there is no longer a *default UI*.
+  - **But** if calling from the **client-side** you must either leave it blank (in which case the command will be executed on the calling UI window), **or** you must provide the **string name** of the UI window you wish to call the command on.
 
 #### .ui.open(options)
 
@@ -233,12 +233,12 @@
 
   The options parameter supports the following settings:
 
-    - **uiName**: `string`. Required. Names the UI window so it can be referenced in other contexts, for example, by other UI windows. This means that one UI window can call commands on another UI window by providing its name.
-    - **keepService**: `boolean`. Defaults to false. If true, specifies that closing this UI window will not terminate the entire app process, even if there are no other UI windows open at the time this UI window is closed. 
-    - **doLayout**: `boolean or function(screen: {screenWidth, screenHeight}) -> ({screenWidth, screenHeight, x, y, width, height})`. Passed to the GUI window that automatically opens on app launch. Note that you can disable the default auto-open behaviour by using the `noWindow` flag. 
-        
-      The default value of `doLayout` is `true` which indicates the standard auto-centered golden-ratio dimensions layout where the GUI window opens in the middle of the screen in Golden proportion to the screen dimensions. Alternately you can pass a function. The function is called with the width and height of the screen and your function returns the `x,y` positional coordinates and the `width,height` dimensions of the GUI window that will open on startup. If `doLayout` is `false` then the GUI window will open *wherever* the OS decides to put it. 
-    - **uriPath**: `string`. Defaults to `/`. Specifies the URL path part of the address that the UI window will open. Useful for opening a UI to a particular starting point in your app.
+  - **uiName**: `string`. Required. Names the UI window so it can be referenced in other contexts, for example, by other UI windows. This means that one UI window can call commands on another UI window by providing its name.
+  - **keepService**: `boolean`. Defaults to false. If true, specifies that closing this UI window will not terminate the entire app process, even if there are no other UI windows open at the time this UI window is closed. 
+  - **doLayout**: `boolean or function(screen: {screenWidth, screenHeight}) -> ({screenWidth, screenHeight, x, y, width, height})`. Passed to the GUI window that automatically opens on app launch. Note that you can disable the default auto-open behaviour by using the `noWindow` flag. 
+      
+    The default value of `doLayout` is `true` which indicates the standard auto-centered golden-ratio dimensions layout where the GUI window opens in the middle of the screen in Golden proportion to the screen dimensions. Alternately you can pass a function. The function is called with the width and height of the screen and your function returns the `x,y` positional coordinates and the `width,height` dimensions of the GUI window that will open on startup. If `doLayout` is `false` then the GUI window will open *wherever* the OS decides to put it. 
+  - **uriPath**: `string`. Defaults to `/`. Specifies the URL path part of the address that the UI window will open. Useful for opening a UI to a particular starting point in your app.
 
 #### .ui.close(UI)
   
