@@ -1,8 +1,10 @@
-# Grader.JS
+![Grader.JS logo image](https://github.com/c9fe/graderjs/raw/master/.readme-assets/grader_logo.PNG)
+
+# [Grader.JS](https://github.com/c9fe/graderjs)
 
 **Grader.JS**, or just **Grader**, is a tool to help you build accessible, cross-platform desktop app binaries in Node.JS, JavaScript, HTML and CSS, without the bloat of Electron, the headaches of Qt or the pernicious dorsal enemas of Babylon.Perl
 
-# Get Started
+## Get Started
 
 Use npm to create a new Grader app like so:
 
