@@ -139,7 +139,7 @@ module.exports = {
     url: "https://github.com/my-github-org-name"
   },
   apiOrigins: [],                   // exact origins allowed to call Service API via grader global,
-  DEBUG: false                       // switch on debug output when you're ready to go *debug*
+  DEBUG: false                      // switch on debug output when you're ready to go *debug*
 }
 ```
 
