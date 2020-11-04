@@ -77,25 +77,25 @@ The Grader API is pretty simple.
   };
 ```
 
-# Top-level API method
+# Top-level domain API methods
 
-The top-level methods have to do with launching and stopping the app, and saying something to the launcher console. They are:
+The top-level domain methods have to do with launching and stopping the app, and saying something to the launcher console. They are:
 
 - API.go(options)
 - API.stop()
-- API.say(msg)
+- API.say(msg) *launcher console currently only opens on Windows*
 
 ## API.go(options)
 
 Starts the app launch sequence. This will:
 
 - **create a server.** The server, therwise known as the background service will run on port `<Config>.desiredPort` if available, otherwise on a random port in the dynamic range from 49,152. If the `options.server` is set, Grader uses the `<HTTPServer>` object you pass and attempts to call 'listen' on it. 
-- **create a UI window.** Grader uses the installed Google Chrom(e/ium) browser to run a native UI window using the browser's [`--app=${url}`](https://source.chromium.org/chromium/chromium/src/+/master:chrome/common/chrome_switches.cc;drc=8c4b7bb294e2c96b3aef99fa08effc473fdae015;l=47) [flag](https://peter.sh/experiments/chromium-command-line-switches/#app). If no Google Chrom(e/ium) is installed, one will be downloaded and installed first. Note that unlike [Electron](https://www.electronjs.org/) Grader does not bundle a browser inside the binaries of app, and it does not use a modified version of Chrome, instead using the installed version or downloading the latest version.
+- **create a UI window.** The UI window will by default load the content served by the background service at the `/` (root) route. In order to render the GUI window, Grader uses the installed Google Chrom(e/ium) browser to run a native UI window using the browser's [`--app=${url}`](https://source.chromium.org/chromium/chromium/src/+/master:chrome/common/chrome_switches.cc;drc=8c4b7bb294e2c96b3aef99fa08effc473fdae015;l=47) [flag](https://peter.sh/experiments/chromium-command-line-switches/#app). If no Google Chrom(e/ium) is installed, one will be downloaded and installed first. Note that unlike [Electron](https://www.electronjs.org/) Grader does not bundle a browser inside the binaries of app, and it does not use a modified version of Chrome, instead using the installed version or downloading the latest version.
 
 The method supports the following options:
 
-- **apiInUI**: boolean. Make this API (minus the `_serviceOnly` domain) available in all UI windows under the `grader` global object.
-- **addHandlers**: function(Express App object). A function called during background service server startup to add handlers to the created express app server.
+- **apiInUI**: `boolean`. Make this API (minus the `_serviceOnly` domain) available in all UI windows under the `grader` global object.
+- **addHandlers**: `function(app: <ExpressAppObject>)`. A function called during background service server startup to add handlers to the created express app server.
   For example:
 
   ```js
@@ -107,9 +107,15 @@ The method supports the following options:
   ```
   
   By default Grader creates an [Express app](https://expressjs.com/) for the background service server.
-- **server**: `<HTTPServer>` object. If you want more control over the background service server Grader creates, you can create your own server and pass it in at launch using this option. For example, you might want to add TLS certificates, or you might want to use [Meteor](https://www.meteor.com/) instead of Express. 
-- **keepConsoleOpen**: boolean. Requests that the launcher process not exit and instead keep its console window open.
-
+- **server**: `<HTTPServer> object`. If you want more control over the background service server Grader creates, you can create your own server and pass it in at launch using this option. For example, you might want to add TLS certificates, or you might want to use [Meteor](https://www.meteor.com/) instead of Express. 
+- **keepConsoleOpen**: `boolean`. Requests that the launcher process not exit and instead keep its console window open.
+- **doLayout**: `boolean or function(screen: {screenWidth, screenHeight}) -> ({screenWidth, screenHeight, x, y, width, height})`. Passed to the GUI window that automatically opens on app launch. Note that you can disable the default auto-open behaviour by using the `noWindow` flag. 
+  
+  The default value of `doLayout` is `true` which indicates the standard auto-centered golden-ratio dimensions layout where the GUI window opens in the middle of the screen in Golden proportion to the screen dimensions. Alternately you can pass a function. The function is called with the width and height of the screen and your function returns the `x,y` positional coordinates and the `width,height` dimensions of the GUI window that will open on startup. If `doLayout` is `false` then the GUI window will open *wherever* the OS decides to put it. 
+  - **keepAlive**: `boolean`. Default is `false`. Keeps the background service (and therefore the app) running even *after* all GUI windows are closed. This will not kill the service on startup before any windows are open, it only affects behaviour on the closing (or crashing) of a GUI window, where the app will by default close its background service and exit if there are no GUI windows open. Note that this can also be overridden on a per-window basis by the `keepService` flag option to `API.ui.open()`, such that a window opened with `keepService` set to `true` will, when closing having been the last window open, not cause the whole app to exit.
+  - **noWindow**: `boolean`. Default is `false`. Launches the app without opening a GUI window.
+  
+  
 The standard use of Grader is to create a cross-platform GUI app using Node.JS and web technologies. But, using a couple of flags, you can modify the behaviour to non-standard uses.
 
 ***Note on Non Standard Uses***
