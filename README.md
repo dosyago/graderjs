@@ -1,6 +1,6 @@
 # Grader.JS
 
-**Grader.JS**, or just **Grader**, is a tool to help you build cross-platform desktop app binaries in Node.JS, JavaScript, HTML and CSS, without the bloat of Electron.
+**Grader.JS**, or just **Grader**, is a tool to help you build accessible, cross-platform desktop app binaries in Node.JS, JavaScript, HTML and CSS, without the bloat of Electron, the headaches of Qt or the pernicious dorsal enemas of Babylon.Perl
 
 # Get Started
 
@@ -124,7 +124,7 @@ So, for example, you can use Grader to create a cross-platform terminal* app, wi
 
 The default minimum binary sizes are shown below:
 
-![img](ok)
+![A table showing the approximate default minimum binary sizes for basic "Hello World" GUI apps built with Grader.JS. The minimum size for a Unix or Linux binary is 14.8 Mb. The minimum size for a 32-bit Unix or Linux binary is 14.2 Mb. The minimum size for a Macintosh OSX binary is 12.2 Mb. The minimum size for a Windows binary is 10.4 Mb. The minimum size for a 32-bit Windows binary is 8.5 Mb.](https://github.com/c9fe/graderjs/raw/master/.readme-assets/default%20binary%20sizes.JPG)
 
 These are the sizes of baseic `hello world` example GUI apps, and the main contribution to the size is the compressed Node.JS executable that is included in the binary package. The minified Node.JS source code has the following sizes:
 
