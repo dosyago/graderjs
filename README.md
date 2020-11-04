@@ -1,4 +1,4 @@
-![Grader.JS logo image](https://github.com/c9fe/graderjs/raw/master/.readme-assets/grader_logo.PNG)
+<p align=center><img alt="Grader.JS logo image" src=https://github.com/c9fe/graderjs/raw/master/.readme-assets/grader_logo.png></p>
 
 # [Grader.JS](https://github.com/c9fe/graderjs)
 
