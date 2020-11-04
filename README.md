@@ -17,7 +17,7 @@
 
 ## Get Started from GitHub
 
-Click "Use This Template" and you will have a new repo, then clone it to your workspace and `cd` into it, and run:
+Click ["Use This Template"](https://github.com/c9fe/grader-base) on the base-repo and you will have a new repo, then clone it to your workspace and `cd` into it, and run:
 
 ```sh
 npm i
