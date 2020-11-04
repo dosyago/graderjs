@@ -21,23 +21,23 @@
 
 ### Client, and Server on the Desktop
 
-    The **service code** lives in your `./src/app.js` (or whatever you specify in `CONFIG.entry`). It is written in Node.JS, can import or require any Node modules (except, for now, those requiring native binaries). This code can control and interact with your background service (the server, running on port `CONFIG.desiredPort` or the next available dynamic port), your UI windows, and anything else Node.JS can access, such as: the network, the file system, the operating system.
+  The **service code** lives in your `./src/app.js` (or whatever you specify in `CONFIG.entry`). It is written in Node.JS, can import or require any Node modules (except, for now, those requiring native binaries). This code can control and interact with your background service (the server, running on port `CONFIG.desiredPort` or the next available dynamic port), your UI windows, and anything else Node.JS can access, such as: the network, the file system, the operating system.
 
-    The **client code** lives in your `./src/public/` folder. It is written in HTML, JavaScript and CSS. You can "bring your own framework" or "bring your own build step" to use your favorite tooling, and write in whatever compiles down to JS, HTML and CSS, but in those cases you need to set up the necessary build-steps yourself. The client code is also *privileged*. It can access, via the installed `.grader` global on every Window object in every context in your UI windows, the Grader API specified here (with the exception only of the `._serviceOnly` domain). If that's not-enough power, you can publish your own additional APIs and extensions to the provided functionality using `._serviceOnly.publishAPI` and your extensions will then also be available in your UI windows. 
+  The **client code** lives in your `./src/public/` folder. It is written in HTML, JavaScript and CSS. You can "bring your own framework" or "bring your own build step" to use your favorite tooling, and write in whatever compiles down to JS, HTML and CSS, but in those cases you need to set up the necessary build-steps yourself. The client code is also *privileged*. It can access, via the installed `.grader` global on every Window object in every context in your UI windows, the Grader API specified here (with the exception only of the `._serviceOnly` domain). If that's not-enough power, you can publish your own additional APIs and extensions to the provided functionality using `._serviceOnly.publishAPI` and your extensions will then also be available in your UI windows. 
 
-    The client code, and the service code together make up what you can do and what you can create with a Grader app. In addition, it's also useful to consider the internal architecture of a Grader app, to better understand how it works. But before we get to that, here's an *important note about security.*
+  The client code, and the service code together make up what you can do and what you can create with a Grader app. In addition, it's also useful to consider the internal architecture of a Grader app, to better understand how it works. But before we get to that, here's an *important note about security.*
 
-    **An important note about security**
+  **An important note about security**
 
-    On the other hand if you are concerned that's *"too much power"* worry not because we will soon implement additional security checks such as origin checks and domain whitelists. Of course, the general use case of Grader is not to simply use it to open content on the open web, and provide it with a powerful API to run code on a person's local machine outside of a normal browser sandbox, the general use case is for you to open **client code** in your `./src/public/` folder, and only open "open web" content on sites that you control, or trust. But until we support the additional security checks, we don't advise you to open web resources outside of what you put locally inside your `./src/public` folder.
+  On the other hand if you are concerned that's *"too much power"* worry not because we will soon implement additional security checks such as origin checks and domain whitelists. Of course, the general use case of Grader is not to simply use it to open content on the open web, and provide it with a powerful API to run code on a person's local machine outside of a normal browser sandbox, the general use case is for you to open **client code** in your `./src/public/` folder, and only open "open web" content on sites that you control, or trust. But until we support the additional security checks, we don't advise you to open web resources outside of what you put locally inside your `./src/public` folder.
 
 ### Architecture
 
   A running Grader app consists of 3 parts:
 
-    - a background service running as a server on an available dynamic port 
-    - zero or a number of UI windows, using HTML/JS/CSS rendered by Google Chrome
-    - a console window which you can optionally keep open
+  - a background service running as a server on an available dynamic port 
+  - zero or a number of UI windows, using HTML/JS/CSS rendered by Google Chrome
+  - a console window which you can optionally keep open
 
   The UI can talk to the service via the included `grader` global API bridge in every UI window. 
 
@@ -47,12 +47,12 @@
 
   The Grader API is pretty simple. Methods are arranged into Six Domains:
 
-    - `.` top-level domain
-    - `.ui` UI domain
-    - `.meta` meta domain
-    - `.control` control domain
-    - `.util` util domain
-    - `._serviceOnly` domain that can only be used service-side (in Node.JS) and not from the UI
+  - `.` top-level domain
+  - `.ui` UI domain
+  - `.meta` meta domain
+  - `.control` control domain
+  - `.util` util domain
+  - `._serviceOnly` domain that can only be used service-side (in Node.JS) and not from the UI
 
   These domains provide you nearly everything you need to start writing great apps. If you need more, you can even use `_serviceOnly.publishAPI` to add your own API domain that you will be able to use anywhere in your Grader App, on the service (in Node.JS) or in the UI client, in JavaScript.
 
@@ -397,7 +397,7 @@ The format is:
     },
     desiredPort: 49666,
     version: "0.0.1",
-    description: "A Beautiful Demonstration of Just a Tiny Fraction of The Amazing Benevolence Which Grader Hath To Offer",
+    description: "Make Descriptions Great Again",
     source: "https://github.com/my-github-username/MyGraderApp",
     organization: {
       name: "My Org",
