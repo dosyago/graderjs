@@ -6,24 +6,28 @@
 
 ## Get Started
 
-Use npm to create a new Grader app like so:
+Use npm to get the [Grader.JS tool](https://github.com/c9fe/graderjs) to automatically populate your new grader app.
 
 ```sh
-  mkdir my-app
-  cd my-app
-  # make it git
-  git init
-  # make it grader
-  npm i graderjs
+  $ npm i -g graderjs@latest
+  $ graderjs my-new-app
 ```
 
-And the [Grader.JS tool](https://github.com/c9fe/graderjs) will automatically populate your repo.
+Then, read the [getting started guide](https://github.com/c9fe/grader-base/blob/master/README.md) or see below for a details API reference.
 
-Then, read the [getting started guide](https://github.com/c9fe/grader-base/blob/master/README.md) or see below for an API reference.
+## API reference
 
-# API reference
+The Grader API is pretty simple. Methods are arranged into Five Domains:
 
-The Grader API is pretty simple. 
+- Top-level
+- UI
+- Meta
+- Control, and
+- _serviceOnly
+
+These domains provide you nearly everything you need to start writing great apps. If you need more, you can even use `_serviceOnly.publishAPI` to add your own API domain that you will be able to use anywhere in your Grader App, on the service (in Node.JS) or in the UI client, in JavaScript.
+
+### Brief run-down of all available commands
 
 ```js
   const API = {
@@ -79,15 +83,15 @@ The Grader API is pretty simple.
   };
 ```
 
-# Top-level domain API methods
+### Top-level Domain
 
-The top-level domain methods have to do with launching and stopping the app, and saying something to the launcher console. They are:
+The top-level domain methods have to do with launching and stopping the app, and saying something to the launcher console. It has 3 methods. They are:
 
-- API.go(options)
-- API.stop()
-- API.say(msg) *launcher console currently only opens on Windows*
+- .go(options)
+- .stop()
+- .say(msg) *launcher console currently only opens on Windows*
 
-## API.go(options)
+#### .go(options)
 
 Starts the app launch sequence. This will:
 
@@ -117,10 +121,9 @@ The method supports the following options:
   - **keepAlive**: `boolean`. Default is `false`. Keeps the background service (and therefore the app) running even *after* all GUI windows are closed. This will not kill the service on startup before any windows are open, it only affects behaviour on the closing (or crashing) of a GUI window, where the app will by default close its background service and exit if there are no GUI windows open. Note that this can also be overridden on a per-window basis by the `keepService` flag option to `API.ui.open()`, such that a window opened with `keepService` set to `true` will, when closing having been the last window open, not cause the whole app to exit.
   - **noWindow**: `boolean`. Default is `false`. Launches the app without opening a GUI window.
   
-  
-The standard use of Grader is to create a cross-platform GUI app using Node.JS and web technologies. But, using a couple of flags, you can modify the behaviour to non-standard uses.
+*Node:* The standard use of Grader is to create a cross-platform GUI app using Node.JS and web technologies. But, using a couple of flags, you can modify the behaviour to non-standard uses.
 
-***Note on Non Standard Uses***
+***Note on Non-Standard Uses***
 
 Using the options passed to `go()` you can customize the app launch behaviour. By passing a dummy object with a no-op `listen()` method in the `server` option, you can disable running a server. By specifying the `noWindow` flag, you can prevent the default behaviour of opening a UI window on app launch, and by requesting `keepConsoleOpen` you can ensure that the terminal console window, normally only open for the launch process and only on Windows, remains open for as long as you want. 
 
@@ -146,15 +149,38 @@ These are the sizes of baseic `hello world` example GUI apps, and the main contr
 
 The reality of the above numbers are that the total code contirbution of a fully functioning `hello world` GUI app is 314 Kb. Your app logic that you add on top of that, including any libraries you import, will add to that code size. But the main contribution to binary size is the size of the compressed Node.JS executable that is included in the binary package. 
 
-## API.stop()
+#### API.stop()
 
 Stops the background service server (if it is listening), shuts any UI windows that remain open, and exits the process. But note that if you requested `keepConsoleOpen` you might need to close stdin yourself, as `keepConsoleOpen` runs `process.stdin.resume()`.
 
-## API.say(msg)
+#### API.say(msg)
 
 Writes a message to `process.stdout` of the launcher process, so this message will shop up in the launcher console window. If the launcher process has already exited (as it will unless you request `keepConsoleOpen`), this method will throw.
 
-# Configuration
+### UI Domain
+
+The UI domain concerns itself with the opening, closing and modification of app GUI windows. 
+
+It has 13 methods. They are:
+  - open  
+  - close 
+  - move  
+  - size  
+  - minimize 
+  - maximize 
+  - restore  
+  - fullscreen  
+  - partscreen  
+  - getLayout
+  - openBlank
+  - writePage
+  - getScreen
+
+#### .ui.open(options)
+
+---- to do 
+
+## Configuration
 
 Grader can be configured by the `src/config.js` file.
 
