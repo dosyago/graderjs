@@ -142,6 +142,11 @@ module.exports = {
 }
 ```
 
+# Screenshots
+
+![Windows Grader](https://github.com/c9fe/graderjs/raw/master/.readme-assets/wingrader.JPG)
+![Linux Grader](https://github.com/c9fe/graderjs/raw/master/.readme-assets/grader.JPG)
+
 # More
 
 See [the API docs](https://github.com/c9fe/grader-base) for more. Or just read the README.md of the grader app you've just created, it contains the full API docs. You can also take a look at the API code in `src/index.js'.
