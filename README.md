@@ -13,7 +13,7 @@
     $ graderjs my-new-app
   ```
 
-  Then, read the [getting started guide](https://github.com/c9fe/grader-base/blob/master/README.md) or see below for an Overview and a detailed API reference.
+  Then, read the [API docs](https://github.com/c9fe/grader-base/blob/master/README.md) or see below for the Getting Started Goose Guide.
 
 ## Get Started from GitHub
 
