@@ -25,7 +25,7 @@ npm i
 
 ## Start Building!
 
-Read [the API docs](https://github.com/c9fe/grader-base), or create binaries right away:
+Read [the API docs](https://github.com/c9fe/grader-base), or create yer binaries right away:
 
 ```sh
 ./scripts/compile.sh
