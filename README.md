@@ -1,6 +1,6 @@
 <p align=center><img alt="Grader.JS logo image" src=https://github.com/c9fe/graderjs/raw/master/.readme-assets/grader_logo.png></p>
 
-# [Grader.JS](https://github.com/c9fe/graderjs)
+# [:goggles: Grader.JS](https://github.com/c9fe/graderjs) ![npm downloads](https://img.shields.io/npm/dt/graderjs?label=npm%20downloads) ![version](https://img.shields.io/npm/v/graderjs?label=version)
 
 **Grader.JS**, or just **Grader**, is a tool to help you build accessible, cross-platform desktop app binaries in Node.JS, JavaScript, HTML and CSS, without the bloat of Electron, the headaches of Qt or the pernicious dorsal enemas of Babylon.Perl
 
@@ -141,6 +141,11 @@ module.exports = {
   DEBUG: false         // switch on debug output when you're ready to debug
 }
 ```
+
+# Screenshots
+
+![Windows Grader](https://github.com/c9fe/graderjs/raw/master/.readme-assets/wingrader.JPG)
+![Linux Grader](https://github.com/c9fe/graderjs/raw/master/.readme-assets/grader.JPG)
 
 # More
 
