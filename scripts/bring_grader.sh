@@ -36,6 +36,7 @@ rm -rf node_modules
 rm -rf grader-base/.git
 
 cp -r grader-base/* .
+cp -r grader-base/.gitignore .
 
 rm -rf grader-base/
 
