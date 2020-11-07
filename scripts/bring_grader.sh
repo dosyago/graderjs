@@ -41,6 +41,8 @@ rm -rf grader-base/
 
 npm i --verbose
 
+echo 'grader_app_name="'$1'"' > name.txt
+
 echo
 echo "Grader app directory created!"
 echo
