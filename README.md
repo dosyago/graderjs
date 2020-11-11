@@ -5,7 +5,7 @@
 **Grader.JS**, or just **Grader**, is a tool to help you build accessible, cross-platform desktop app binaries in Node.JS, JavaScript, HTML and CSS, without the bloat of Electron, the headaches of Qt or the pernicious dorsal enemas of Babylon.Perl
 
 -------------------
-- [Overview](#overview)
+- [Overview](##goggles-graderjs---)
   * [License](#license)
   * [Get Started from the Command line](#get-started-from-the-command-line)
   * [Get Started from GitHub](#get-started-from-github)
