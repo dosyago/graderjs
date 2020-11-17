@@ -11,6 +11,7 @@
   * [Get Started from GitHub](#get-started-from-github)
   * [Start Building!](#start-building)
   * [Start Coding](#start-coding)
+- [API](#api)
 - [Then build it](#then-build-it)
 - [Configuration](#configuration)
 - [Screenshots](#screenshots)
@@ -127,6 +128,10 @@ And put your JS/HTML/CSS into, `src/public/index.html`:
       })();
     </script>
 ```
+
+# API
+
+Read [the API docs](https://github.com/c9fe/grader-base)!
 
 # Then build it
 
