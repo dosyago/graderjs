@@ -340,6 +340,12 @@ See [this list of Electron alternatives](https://github.com/sudhakar3697/electro
 
 <p align=right><a href=#top>Top</a></p>
 
+## nerding warnung
+
+**WARNING:** This project uses Google Chrome to display the UI. Running this will download and install Google Chrome if you don't already have it installed. If you are allergic to Google Chrome, please avoid running or ingesting this coode.
+
+<p align=right><a href=#top>Top</a></p>
+
 ----------------------
 
 # *Grader.JS!*
