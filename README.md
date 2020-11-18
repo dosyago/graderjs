@@ -1,4 +1,4 @@
-<p align=center><img alt="Grader.JS logo image" src=https://github.com/c9fe/graderjs/raw/master/.readme-assets/grader_logo.png></p>
+<p id=top align=center><img width=200 alt="Grader.JS logo image" src=https://github.com/c9fe/graderjs/raw/master/.readme-assets/grader_logo.png></p>
 
 # [:goggles: GRaderJS](https://github.com/c9fe/graderjs) ![npm downloads](https://img.shields.io/npm/dt/graderjs?label=npm%20downloads) ![version](https://img.shields.io/npm/v/graderjs?label=version) [![visitors+++](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fc9fe%2Fgraderjs&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=%28today%2Ftotal%29%20visitors%2B%2B%2B%20since%20Nov%209%202020&edge_flat=false)](https://hits.seeyoufarm.com) 
 
@@ -8,10 +8,14 @@ Build cross-platform desktop apps without the bloat using JS, HTML and CSS.
 
 Minimal binary is 10Mb (Windows, Hello World App). Typical Linux/MacOS binary is 14Mb (Hello World App).
 
+[Jump to TOC](#toc)
+
 ## Advantages
 
 - Simplicity. Grader is just a web server running on localhost viewed with the user's browser. If they have Chrome installed then you get a proper looking desktop app (thanks to the --app flag), and access to a bunch of cool APIs to control the browser (thanks to remote DevToosl protocol).
 - Extensive APIs. Because you have access to Node.JS and, with Chrome, DevTools APIs there's so many things you can do. You can do almost anything.
+
+<p align=right><a href=#top>Top</a></p>
 
 ## Disadvantages (...or, Opportunities, and Opportunities for Improvement? Yes)
 
@@ -21,30 +25,49 @@ Minimal binary is 10Mb (Windows, Hello World App). Typical Linux/MacOS binary is
 - API still undeveloped and likely to change.
 - Icons (for the binary) don't work (and it's a hard problem).
 
+<p align=right><a href=#top>Top</a></p>
+
 ## Grader Workflow 
 
 1. Create a new Grader app
 2. Fill out the sections with your business logic and app specific node
 3. Compile to get cross-platform binaries
 
+<p align=right><a href=#top>Top</a></p>
+
 ## Extended Workflow 
 
 4. Code-sign your binaries and upload them to app stores or GitHub releases or your own website.
+
+<p align=right><a href=#top>Top</a></p>
 
 ## Ultimate Workflow (still impossible)
 
 5. Use ~impossible non-existant~ ~(future?)~ packaging tool to bundle each binary in a soothing bath of platform specific app metadata that includes icons and associated weird OS specific coolness to make things truly awesome.
 
+<p align=right><a href=#top>Top</a></p>
+
+<span id=toc></span>
 -------------------
 - [Overview](##goggles-graderjs---)
   * [Details](#details)
   * [Advantages](#advantages)
-  * [Disadvantages](#disadvantages)
+  * [Disadvantages](#disadvantages-or-opportunities-and-opportunities-for-improvement-yes)
   * [Grader workflow](#grader-workflow)
   * [Extended Workflow](#extended-workflow)
-  * [Ultimate Workflow](#ultimate-workflow--still-impossible-)
+  * [Ultimate Workflow](#ultimate-workflow-still-impossible)
+  * [TOC](#toc)
   * [License](#license)
   * [Built with Grader](#built-with-grader)
+- [Getting Started](#getting-started) 
+  * [API & Documentation](#api-&-documentation)
+  * [Extraordinary Control](#extraordinary-control)
+  * {NodeJS related](#nodejs-related)
+  * [App lifecycle](#app-lifecycle)
+  * [Window related](#window-related)
+  * [Docketty Docs](#docketty-docs)
+  * [Questions](#questions)
+- [Step by step guide](#step-by-step-guide)
   * [Get Started from the Command line](#get-started-from-the-command-line)
   * [Get Started from GitHub](#get-started-from-github)
   * [Start Building!](#start-building)
@@ -68,10 +91,14 @@ License information can be found in the LICENSE file.
 
 This software is dual-licensed. For information about commercial licensing, see [Dosyago Commercial License for OEMs, ISVs and VARs](https://github.com/dosyago/dual-licensing).
 
+<p align=right><a href=#top>Top</a></p>
+
 ## Built with Grader
 
 - [wingrader](https://github.com/c9fe/winrader) - windows 95 cross platform
 - [jspaint.exe](https://github.com/c9fe/jspaint.exe) - classic paint cross platform
+
+<p align=right><a href=#top>Top</a></p>
 
 ## Getting Started
 
@@ -79,9 +106,13 @@ This software is dual-licensed. For information about commercial licensing, see 
 npx graderjs my-app
 ```
 
-## API & Documentation
+<p align=right><a href=#top>Top</a></p>
+
+### API & Documentation
 
 Only a couple of API calls:
+
+<p align=right><a href=#top>Top</a></p>
 
 ### Extraordinary Control
 
@@ -89,6 +120,8 @@ Only a couple of API calls:
 - control.on(eventName, handlerFunction) (also off)
 
 *See commands available at [DevTools protocol homepage](https://chromedevtools.github.io/devtools-protocol/tot/)*
+
+<p align=right><a href=#top>Top</a></p>
 
 ### NodeJS related
 
@@ -98,6 +131,8 @@ Only a couple of API calls:
 
 - launch: `go()` 
 - shutdown: `stop()`
+
+<p align=right><a href=#top>Top</a></p>
 
 ### Window Related
 
@@ -115,14 +150,20 @@ Only a couple of API calls:
   - ui.writePage (*not yet implemented*)
   - ui.getScreen
 
-## Docketty Docs
+<p align=right><a href=#top>Top</a></p>
+
+### Docketty Docs
 
 Then, read the [API docs](https://github.com/c9fe/grader-base/blob/master/README.md) or see below for the Getting Started Goose Guide.
+
+<p align=right><a href=#top>Top</a></p>
 
 ### Questions
 
 Open an issue!
   
+<p align=right><a href=#top>Top</a></p>
+
 ## Step By Step Guide
 
 ### Get Started from Command line
@@ -136,6 +177,8 @@ Use npm to get the [Grader.JS tool](https://github.com/c9fe/graderjs) to automat
 
 Then, read the [API docs](https://github.com/c9fe/grader-base/blob/master/README.md) or see below for the Getting Started Goose Guide.
 
+<p align=right><a href=#top>Top</a></p>
+
 ### Get Started from GitHub
 
 Click ["Use This Template"](https://github.com/c9fe/grader-base) on the base-repo and you will have a new repo, then clone it to your workspace and `cd` into it, and run:
@@ -143,6 +186,8 @@ Click ["Use This Template"](https://github.com/c9fe/grader-base) on the base-rep
 ```sh
 npm i
 ```
+
+<p align=right><a href=#top>Top</a></p>
 
 ### Start Building!
 
@@ -157,6 +202,8 @@ You now have a GUI app in Node.JS and JavaScript/HTML/CSS.
 And you will have cross-platform binaries available in `/bin`
 
 (*and also for download from the computer you're on at port 8080.*)
+
+<p align=right><a href=#top>Top</a></p>
 
 ### Start Coding
 
@@ -228,6 +275,8 @@ And put your JS/HTML/CSS into, `src/public/index.html`:
 
 Read [the API docs](https://github.com/c9fe/grader-base)!
 
+<p align=right><a href=#top>Top</a></p>
+
 ### Build it
 
 ```sh
@@ -267,22 +316,32 @@ module.exports = {
 }
 ```
 
+<p align=right><a href=#top>Top</a></p>
+
 ## Screenshots
 
 ![Windows Grader](https://github.com/c9fe/graderjs/raw/master/.readme-assets/wingrader.JPG)
 ![Linux Grader](https://github.com/c9fe/graderjs/raw/master/.readme-assets/grader.JPG)
 
+<p align=right><a href=#top>Top</a></p>
+
 ## More
 
-See [the API docs](https://github.com/c9fe/grader-base) for more. Or just read the README.md of the grader app you've just created, it contains the full API docs. You can also take a look at the API code in `src/index.js'.
+See [the API docs](https://github.com/c9fe/grader-base) for more. Or just read the README.md of the grader app you've just created, it contains the full API docs. You can also take a look at the API code in `src/index.js`.
+
+<p align=right><a href=#top>Top</a></p>
 
 ## Licensing
 
 You're free to use this so long as you abide by AGPL-3.0. If you want to use it commercially or don't want this license, you can [purchase an exemption](mailto:cris@dosycorp.com?subject=Grader.JS).
 
+<p align=right><a href=#top>Top</a></p>
+
 ## Related projects
 
 See [this list of Electron alternatives](https://github.com/sudhakar3697/electron-alternatives) for more options for cross-platform desktop app developement using web technologies.
+
+<p align=right><a href=#top>Top</a></p>
 
 ----------------------
 
