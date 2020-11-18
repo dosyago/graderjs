@@ -1,11 +1,48 @@
 <p align=center><img alt="Grader.JS logo image" src=https://github.com/c9fe/graderjs/raw/master/.readme-assets/grader_logo.png></p>
 
-# [:goggles: Grader.JS](https://github.com/c9fe/graderjs) ![npm downloads](https://img.shields.io/npm/dt/graderjs?label=npm%20downloads) ![version](https://img.shields.io/npm/v/graderjs?label=version) [![visitors+++](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fc9fe%2Fgraderjs&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=%28today%2Ftotal%29%20visitors%2B%2B%2B%20since%20Nov%209%202020&edge_flat=false)](https://hits.seeyoufarm.com) 
+# [:goggles: GRaderJS](https://github.com/c9fe/graderjs) ![npm downloads](https://img.shields.io/npm/dt/graderjs?label=npm%20downloads) ![version](https://img.shields.io/npm/v/graderjs?label=version) [![visitors+++](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fc9fe%2Fgraderjs&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=%28today%2Ftotal%29%20visitors%2B%2B%2B%20since%20Nov%209%202020&edge_flat=false)](https://hits.seeyoufarm.com) 
 
-**Grader.JS**, or just **Grader**, is a tool to help you build accessible, cross-platform desktop app binaries in Node.JS, JavaScript, HTML and CSS, without the bloat of Electron, the headaches of Qt or the pernicious dorsal enemas of Babylon.Perl
+Build cross-platform desktop apps without the bloat using JS, HTML and CSS.
+
+## Details
+
+Minimal binary is 10Mb (Windows, Hello World App). Typical Linux/MacOS binary is 14Mb (Hello World App).
+
+## Advantages
+
+- Simplicity. Grader is just a web server running on localhost viewed with the user's browser. If they have Chrome installed then you get a proper looking desktop app (thanks to the --app flag), and access to a bunch of cool APIs to control the browser (thanks to remote DevToosl protocol).
+- Extensive APIs. Because you have access to Node.JS and, with Chrome, DevTools APIs there's so many things you can do. You can do almost anything.
+
+## Disadvantages (...or, Opportunities, and Opportunities for Improvement? Yes)
+
+- New. Undeveloped. Embryonic. Fragile. Untested. Unknown (relatively).
+- Requires Chrome to be installed for a great experience (some people don't have it).
+- Bundles Node.JS (and packs using upx but the binaries are still bigger than using Tauri or Neutralino).
+- API still undeveloped and likely to change.
+- Icons (for the binary) don't work (and it's a hard problem).
+
+## Grader Workflow 
+
+1. Create a new Grader app
+2. Fill out the sections with your business logic and app specific node
+3. Compile to get cross-platform binaries
+
+## Extended Workflow 
+
+4. Code-sign your binaries and upload them to app stores or GitHub releases or your own website.
+
+## Ultimate Workflow (still impossible)
+
+5. Use ~impossible non-existant~ ~(future?)~ packaging tool to bundle each binary in a soothing bath of platform specific app metadata that includes icons and associated weird OS specific coolness to make things truly awesome.
 
 -------------------
 - [Overview](##goggles-graderjs---)
+  * [Details](#details)
+  * [Advantages](#advantages)
+  * [Disadvantages](#disadvantages)
+  * [Grader workflow](#grader-workflow)
+  * [Extended Workflow](#extended-workflow)
+  * [Ultimate Workflow](#ultimate-workflow--still-impossible-)
   * [License](#license)
   * [Built with Grader](#built-with-grader)
   * [Get Started from the Command line](#get-started-from-the-command-line)
@@ -36,18 +73,70 @@ This software is dual-licensed. For information about commercial licensing, see 
 - [wingrader](https://github.com/c9fe/winrader) - windows 95 cross platform
 - [jspaint.exe](https://github.com/c9fe/jspaint.exe) - classic paint cross platform
 
-## Get Started from the Command line
+## Getting Started
 
-  Use npm to get the [Grader.JS tool](https://github.com/c9fe/graderjs) to automatically populate your new grader app.
+```sh
+npx graderjs my-app
+```
 
-  ```sh
-    $ npm i -g graderjs@latest
-    $ graderjs my-new-app
-  ```
+## API & Documentation
 
-  Then, read the [API docs](https://github.com/c9fe/grader-base/blob/master/README.md) or see below for the Getting Started Goose Guide.
+Only a couple of API calls:
 
-## Get Started from GitHub
+### Extraordinary Control
+
+- constrol.send(command, params)
+- control.on(eventName, handlerFunction) (also off)
+
+*See commands available at [DevTools protocol homepage](https://chromedevtools.github.io/devtools-protocol/tot/)*
+
+### NodeJS related
+
+*As normal just use npm to add dependencies and import to use them*
+
+### App Lifecycle
+
+- launch: `go()` 
+- shutdown: `stop()`
+
+### Window Related
+
+  - ui.open  
+  - ui.close 
+  - ui.move  
+  - ui.size  
+  - ui.minimize 
+  - ui.maximize 
+  - ui.restore  
+  - ui.fullscreen  
+  - ui.partscreen  
+  - ui.getLayout
+  - ui.openBlank (*not yet implemented*)
+  - ui.writePage (*not yet implemented*)
+  - ui.getScreen
+
+## Docketty Docs
+
+Then, read the [API docs](https://github.com/c9fe/grader-base/blob/master/README.md) or see below for the Getting Started Goose Guide.
+
+### Questions
+
+Open an issue!
+  
+## Step By Step Guide
+
+### Get Started from Command line
+
+Use npm to get the [Grader.JS tool](https://github.com/c9fe/graderjs) to automatically populate your new grader app.
+
+```sh
+  $ npm i -g graderjs@latest
+  $ graderjs my-new-app
+```
+
+Then, read the [API docs](https://github.com/c9fe/grader-base/blob/master/README.md) or see below for the Getting Started Goose Guide.
+
+### Get Started from GitHub
 
 Click ["Use This Template"](https://github.com/c9fe/grader-base) on the base-repo and you will have a new repo, then clone it to your workspace and `cd` into it, and run:
 
@@ -55,7 +144,7 @@ Click ["Use This Template"](https://github.com/c9fe/grader-base) on the base-rep
 npm i
 ```
 
-## Start Building!
+### Start Building!
 
 Read [the API docs](https://github.com/c9fe/grader-base), or create yer binaries right away:
 
@@ -69,7 +158,7 @@ And you will have cross-platform binaries available in `/bin`
 
 (*and also for download from the computer you're on at port 8080.*)
 
-## Start Coding
+### Start Coding
 
 Put your own code into, `src/app.js`:
 
@@ -135,11 +224,11 @@ And put your JS/HTML/CSS into, `src/public/index.html`:
     </script>
 ```
 
-# API
+### API
 
 Read [the API docs](https://github.com/c9fe/grader-base)!
 
-# Then build it
+### Build it
 
 ```sh
 ./scripts/compile.sh
@@ -153,7 +242,7 @@ and also for download from the computer you're on at port 8080.
 
 For more demos see the demos in `src/demos`.
 
-# Configuration
+### Configuration
 
 You can configure some options, via the configuration located in `src/config.js`:
 
@@ -178,20 +267,20 @@ module.exports = {
 }
 ```
 
-# Screenshots
+## Screenshots
 
 ![Windows Grader](https://github.com/c9fe/graderjs/raw/master/.readme-assets/wingrader.JPG)
 ![Linux Grader](https://github.com/c9fe/graderjs/raw/master/.readme-assets/grader.JPG)
 
-# More
+## More
 
 See [the API docs](https://github.com/c9fe/grader-base) for more. Or just read the README.md of the grader app you've just created, it contains the full API docs. You can also take a look at the API code in `src/index.js'.
 
-# Licensing
+## Licensing
 
 You're free to use this so long as you abide by AGPL-3.0. If you want to use it commercially or don't want this license, you can [purchase an exemption](mailto:cris@dosycorp.com?subject=Grader.JS).
 
-# Related projects
+## Related projects
 
 See [this list of Electron alternatives](https://github.com/sudhakar3697/electron-alternatives) for more options for cross-platform desktop app developement using web technologies.
 
