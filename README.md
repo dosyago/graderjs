@@ -177,7 +177,7 @@ Then, read the [API docs](https://github.com/c9fe/grader-base/blob/master/README
 
 <p align=right><a href=#top>Top</a></p>
 
-### Get Started from GitHub
+### Or, get Started from GitHub
 
 Click ["Use This Template"](https://github.com/c9fe/grader-base) on the base-repo and you will have a new repo, then clone it to your workspace and `cd` into it, and run:
 
