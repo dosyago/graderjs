@@ -17,7 +17,6 @@ Minimal binary is 10Mb (Windows, Hello World App). Typical Linux/MacOS binary is
   * [Grader workflow](#grader-workflow)
   * [Extended Workflow](#extended-workflow)
   * [Ultimate Workflow](#ultimate-workflow-still-impossible)
-  * [TOC](#toc)
   * [License](#license)
   * [Built with Grader](#built-with-grader)
 - [Getting Started](#getting-started) 
