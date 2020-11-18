@@ -8,7 +8,39 @@ Build cross-platform desktop apps without the bloat using JS, HTML and CSS.
 
 Minimal binary is 10Mb (Windows, Hello World App). Typical Linux/MacOS binary is 14Mb (Hello World App).
 
-[Jump to TOC](#toc)
+<span id=toc></span>
+-------------------
+- [Overview](##goggles-graderjs---)
+  * [Details](#details)
+  * [Advantages](#advantages)
+  * [Disadvantages](#disadvantages-or-opportunities-and-opportunities-for-improvement-yes)
+  * [Grader workflow](#grader-workflow)
+  * [Extended Workflow](#extended-workflow)
+  * [Ultimate Workflow](#ultimate-workflow-still-impossible)
+  * [TOC](#toc)
+  * [License](#license)
+  * [Built with Grader](#built-with-grader)
+- [Getting Started](#getting-started) 
+  * [API & Documentation](#api-&-documentation)
+  * [Extraordinary Control](#extraordinary-control)
+  * [NodeJS related](#nodejs-related)
+  * [App lifecycle](#app-lifecycle)
+  * [Window related](#window-related)
+  * [Docketty Docs](#docketty-docs)
+  * [Questions](#questions)
+- [Step by step guide](#step-by-step-guide)
+  * [Get Started from the Command line](#get-started-from-the-command-line)
+  * [Get Started from GitHub](#get-started-from-github)
+  * [Start Building!](#start-building)
+  * [Start Coding](#start-coding)
+- [API](#api)
+- [Then build it](#then-build-it)
+- [Configuration](#configuration)
+- [Screenshots](#screenshots)
+- [More](#more)
+- [Licensing](#licensing)
+- [Related projects](#related-projects)
+--------------------
 
 ## Advantages
 
@@ -46,40 +78,6 @@ Minimal binary is 10Mb (Windows, Hello World App). Typical Linux/MacOS binary is
 5. Use ~impossible non-existant~ ~(future?)~ packaging tool to bundle each binary in a soothing bath of platform specific app metadata that includes icons and associated weird OS specific coolness to make things truly awesome.
 
 <p align=right><a href=#top>Top</a></p>
-
-<span id=toc></span>
--------------------
-- [Overview](##goggles-graderjs---)
-  * [Details](#details)
-  * [Advantages](#advantages)
-  * [Disadvantages](#disadvantages-or-opportunities-and-opportunities-for-improvement-yes)
-  * [Grader workflow](#grader-workflow)
-  * [Extended Workflow](#extended-workflow)
-  * [Ultimate Workflow](#ultimate-workflow-still-impossible)
-  * [TOC](#toc)
-  * [License](#license)
-  * [Built with Grader](#built-with-grader)
-- [Getting Started](#getting-started) 
-  * [API & Documentation](#api-&-documentation)
-  * [Extraordinary Control](#extraordinary-control)
-  * {NodeJS related](#nodejs-related)
-  * [App lifecycle](#app-lifecycle)
-  * [Window related](#window-related)
-  * [Docketty Docs](#docketty-docs)
-  * [Questions](#questions)
-- [Step by step guide](#step-by-step-guide)
-  * [Get Started from the Command line](#get-started-from-the-command-line)
-  * [Get Started from GitHub](#get-started-from-github)
-  * [Start Building!](#start-building)
-  * [Start Coding](#start-coding)
-- [API](#api)
-- [Then build it](#then-build-it)
-- [Configuration](#configuration)
-- [Screenshots](#screenshots)
-- [More](#more)
-- [Licensing](#licensing)
-- [Related projects](#related-projects)
---------------------
 
 ## License 
 
