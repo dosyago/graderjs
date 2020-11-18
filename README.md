@@ -7,6 +7,7 @@
 -------------------
 - [Overview](##goggles-graderjs---)
   * [License](#license)
+  * [Built with Grader](#built-with-grader)
   * [Get Started from the Command line](#get-started-from-the-command-line)
   * [Get Started from GitHub](#get-started-from-github)
   * [Start Building!](#start-building)
@@ -29,6 +30,11 @@ This is a release of Grader, an cross-platform app builder.
 License information can be found in the LICENSE file.
 
 This software is dual-licensed. For information about commercial licensing, see [Dosyago Commercial License for OEMs, ISVs and VARs](https://github.com/dosyago/dual-licensing).
+
+## Built with Grader
+
+- [wingrader](https://github.com/c9fe/winrader) - windows 95 cross platform
+- [jspaint.exe](https://github.com/c9fe/jspaint.exe) - classic paint cross platform
 
 ## Get Started from the Command line
 
