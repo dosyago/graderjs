@@ -27,7 +27,7 @@ Minimal binary is 10Mb (Windows, Hello World App). Typical Linux/MacOS binary is
   * [License](#license)
   * [Built with Grader](#built-with-grader)
 - [Getting Started](#getting-started) 
-  * [API & Documentation](#api-&-documentation)
+  * [API & Documentation](#api--documentation)
   * [Extraordinary Control](#extraordinary-control)
   * [NodeJS related](#nodejs-related)
   * [App lifecycle](#app-lifecycle)
@@ -114,16 +114,20 @@ npx graderjs my-app
 
 ### API & Documentation
 
-Only a couple of API calls:
+Only a couple of API calls, classed into four categories: Protocol, NodeJS, App, Window.
+
+Read [the API docs](https://github.com/c9fe/grader-base) for a detailed usage or see below for an overview.
 
 <p align=right><a href=#top>Top</a></p>
 
-### Extraordinary Control
+### Protocol Control
+
+Instrument the browser directly with DevTools\*.
 
 - constrol.send(command, params)
 - control.on(eventName, handlerFunction) (also off)
 
-*See commands available at [DevTools protocol homepage](https://chromedevtools.github.io/devtools-protocol/tot/)*
+\**See commands available at [DevTools protocol homepage](https://chromedevtools.github.io/devtools-protocol/tot/)*
 
 <p align=right><a href=#top>Top</a></p>
 
