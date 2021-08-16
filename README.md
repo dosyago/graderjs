@@ -1,5 +1,3 @@
-<p align=center><img src=https://api.kindspeech.org/v1/badge></p>
-
 <p align=center><img width=200 alt="Grader.JS logo image" src=https://github.com/c9fe/graderjs/raw/master/.readme-assets/grader_logo.png></p>
 
 <p align=center>
@@ -362,5 +360,6 @@ See [this list of Electron alternatives](https://github.com/sudhakar3697/electro
 <p align=right><a href=#top>Top</a></p>
 
 ----------------------
+
 
 # *Grader.JS!*
