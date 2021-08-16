@@ -170,7 +170,7 @@ Open an issue!
 
 ## Step By Step Guide
 
-### Get Started from Command line
+### Get Started from the Command line
 
 Use npm to get the [Grader.JS tool](https://github.com/c9fe/graderjs) to automatically populate your new grader app.
 
@@ -181,15 +181,19 @@ Use npm to get the [Grader.JS tool](https://github.com/c9fe/graderjs) to automat
 
 Then, read the [API docs](https://github.com/c9fe/grader-base/blob/master/README.md) or see below for the Getting Started Goose Guide.
 
+*Or...*
+
 <p align=right><a href=#top>Top</a></p>
 
-### Or, get Started from GitHub
+### Get Started from GitHub
 
 Click ["Use This Template"](https://github.com/c9fe/grader-base) on the base-repo and you will have a new repo, then clone it to your workspace and `cd` into it, and run:
 
 ```sh
 npm i
 ```
+
+*Then...*
 
 <p align=right><a href=#top>Top</a></p>
 
