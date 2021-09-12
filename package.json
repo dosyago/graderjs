@@ -1,6 +1,6 @@
 {
   "name": "graderjs",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Tool to copy the Grader.JS base repo into the current directory",
   "bin": {
     "graderjs": "scripts/bring_grader.sh"
