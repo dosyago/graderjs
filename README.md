@@ -30,7 +30,22 @@ Build cross-platform desktop apps without the bloat using JS, HTML and CSS.
 
 ## What are apps built with GraderJS, technically?
 
-A GraderJS app is just a full-stack application written in NodeJS that runs locally on your client's machine.
+A GraderJS app is just a full-stack application written in NodeJS that runs locally on your client's machine. It achieves this by:
+
+- bundling a NodeJS (for the target platform) and your back-end and front-end source code into the binary.
+- on execution the binary:
+  1. starts the back-end service
+  2. unzips the front-end to a temporary directory
+  3. probes the screen to find its dimensions using a silently launched chrome window (and downloads and installs chrome if it is not)
+  4. opens an "app view" chrome UI window to display the front-end
+
+GraderJS apps are un-opinionated. You can code the front and back-end however you like, and all details like persisting state to the client's machine, and other useful things, are left to the app author to figure out themselves, and decide which way they want to go.
+
+Unlike a regular full-stack app, GraderJS apps:
+
+1. Look like a native app and run on the desktop.
+2. Have full access to the system.
+3. Have full access to the Chrome DevTools API to be able to fully utilize the great browser APIs, enabling you to incorporate "browser power" (think, automation of browsers, but that's just a fraction of what's possible) into your app experiences
 
 ## Details
 
