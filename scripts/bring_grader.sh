@@ -17,7 +17,7 @@ cd $1
 set +e
 bash -e <<TRY
   git init
-  git clone https://github.com/c9fe/grader-base.git
+  git clone https://github.com/i5ik/grader-base.git
 TRY
 
 set -e
