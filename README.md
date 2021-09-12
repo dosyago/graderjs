@@ -1,17 +1,17 @@
-<p align=center><img width=200 alt="Grader.JS logo image" src=https://github.com/c9fe/graderjs/raw/master/.readme-assets/grader_logo.png></p>
+<p align=center><img width=200 alt="Grader.JS logo image" src=https://github.com/i5ik/graderjs/raw/master/.readme-assets/grader_logo.png></p>
 
 <p align=center>
- <img alt="Windows Grader app screenshot" src=https://github.com/c9fe/graderjs/raw/master/.readme-assets/wingrader.JPG width=222>
- <img alt="Ubuntu Linux Grader app screenshot" src=https://github.com/c9fe/graderjs/raw/master/.readme-assets/grader.JPG width=222>
+ <img alt="Windows Grader app screenshot" src=https://github.com/i5ik/graderjs/raw/master/.readme-assets/wingrader.JPG width=222>
+ <img alt="Ubuntu Linux Grader app screenshot" src=https://github.com/i5ik/graderjs/raw/master/.readme-assets/grader.JPG width=222>
 </p>
 
-# [:goggles: GRaderJS](https://github.com/c9fe/graderjs) ![npm downloads](https://img.shields.io/npm/dt/graderjs?label=npm%20downloads) ![version](https://img.shields.io/npm/v/graderjs?label=version) [![visitors+++](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fc9fe%2Fgraderjs&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=%28today%2Ftotal%29%20visitors%2B%2B%2B%20since%20Nov%209%202020&edge_flat=false)](https://hits.seeyoufarm.com) 
+# [:goggles: GRaderJS](https://github.com/i5ik/graderjs) ![npm downloads](https://img.shields.io/npm/dt/graderjs?label=npm%20downloads) ![version](https://img.shields.io/npm/v/graderjs?label=version) [![visitors+++](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fi5ik%2Fgraderjs&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=%28today%2Ftotal%29%20visitors%2B%2B%2B%20since%20Nov%209%202020&edge_flat=false)](https://hits.seeyoufarm.com) 
 
 Build cross-platform desktop apps without the bloat using JS, HTML and CSS.
 
 ## Details
 
-Minimal binary is 10Mb (Windows, Hello World App, using node v12.10.0). Typical Linux/MacOS binary is 14Mb (Hello World App, using node v12.10.0). These days we have upgraded to node v14.15.3, but you can control the version (as long as the required nexe pre-built node binaries are available for that version).
+Minimal binary is 10MB (Windows, Hello World App, using node v12.10.0). Typical Linux/MacOS binary is 14MB (Hello World App, using node v12.10.0). These days we have upgraded to node v14.15.3, but you can control the version (as long as the required nexe pre-built node binaries are available for that version). Node v14.15.3 binaries are larger (~19 - 24 MB).
 
 <span id=top></span>
 -------------------
@@ -97,8 +97,8 @@ This software is dual-licensed. For information about commercial licensing, see 
 
 ## Built with Grader
 
-- [wingrader](https://github.com/c9fe/winrader) - windows 95 cross platform
-- [jspaint.exe](https://github.com/c9fe/jspaint.exe) - classic paint cross platform
+- [wingrader](https://github.com/i5ik/winrader) - windows 95 cross platform
+- [jspaint.exe](https://github.com/i5ik/jspaint.exe) - classic paint cross platform
 
 <p align=right><a href=#top>Top</a></p>
 
@@ -114,7 +114,7 @@ npx graderjs my-app
 
 Only a couple of API calls, classed into four categories: Protocol, NodeJS, App, Window.
 
-Read [the API docs](https://github.com/c9fe/grader-base) for a detailed usage or see below for an overview.
+Read [the API docs](https://github.com/i5ik/grader-base) for a detailed usage or see below for an overview.
 
 <p align=right><a href=#top>Top</a></p>
 
@@ -160,7 +160,7 @@ Instrument the browser directly with DevTools\*.
 
 ### Docketty Docs
 
-Then, read the [API docs](https://github.com/c9fe/grader-base/blob/master/README.md) or see below for the Getting Started Goose Guide.
+Then, read the [API docs](https://github.com/i5ik/grader-base/blob/master/README.md) or see below for the Getting Started Goose Guide.
 
 <p align=right><a href=#top>Top</a></p>
 
@@ -174,14 +174,14 @@ Open an issue!
 
 ### Get Started from the Command line
 
-Use npm to get the [Grader.JS tool](https://github.com/c9fe/graderjs) to automatically populate your new grader app.
+Use npm to get the [Grader.JS tool](https://github.com/i5ik/graderjs) to automatically populate your new grader app.
 
 ```sh
   $ npm i -g graderjs@latest
   $ graderjs my-new-app
 ```
 
-Then, read the [API docs](https://github.com/c9fe/grader-base/blob/master/README.md) or see below for the Getting Started Goose Guide.
+Then, read the [API docs](https://github.com/i5ik/grader-base/blob/master/README.md) or see below for the Getting Started Goose Guide.
 
 *Or...*
 
@@ -189,7 +189,7 @@ Then, read the [API docs](https://github.com/c9fe/grader-base/blob/master/README
 
 ### Get Started from GitHub
 
-Click ["Use This Template"](https://github.com/c9fe/grader-base) on the base-repo and you will have a new repo, then clone it to your workspace and `cd` into it, and run:
+Click ["Use This Template"](https://github.com/i5ik/grader-base) on the base-repo and you will have a new repo, then clone it to your workspace and `cd` into it, and run:
 
 ```sh
 npm i
@@ -201,7 +201,7 @@ npm i
 
 ### Start Building!
 
-Read [the API docs](https://github.com/c9fe/grader-base), or create yer binaries right away:
+Read [the API docs](https://github.com/i5ik/grader-base), or create yer binaries right away:
 
 ```sh
 ./scripts/compile.sh
@@ -283,7 +283,7 @@ And put your JS/HTML/CSS into, `src/public/index.html`:
 
 ### API
 
-Read [the API docs](https://github.com/c9fe/grader-base)!
+Read [the API docs](https://github.com/i5ik/grader-base)!
 
 <p align=right><a href=#top>Top</a></p>
 
@@ -330,14 +330,14 @@ module.exports = {
 
 ## Screenshots
 
-![Windows Grader](https://github.com/c9fe/graderjs/raw/master/.readme-assets/wingrader.JPG)
-![Linux Grader](https://github.com/c9fe/graderjs/raw/master/.readme-assets/grader.JPG)
+![Windows Grader](https://github.com/i5ik/graderjs/raw/master/.readme-assets/wingrader.JPG)
+![Linux Grader](https://github.com/i5ik/graderjs/raw/master/.readme-assets/grader.JPG)
 
 <p align=right><a href=#top>Top</a></p>
 
 ## More
 
-See [the API docs](https://github.com/c9fe/grader-base) for more. Or just read the README.md of the grader app you've just created, it contains the full API docs. You can also take a look at the API code in `src/index.js`.
+See [the API docs](https://github.com/i5ik/grader-base) for more. Or just read the README.md of the grader app you've just created, it contains the full API docs. You can also take a look at the API code in `src/index.js`.
 
 <p align=right><a href=#top>Top</a></p>
 

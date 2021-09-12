@@ -8,7 +8,7 @@
   "scripts": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/c9fe/graderjs.git"
+    "url": "git+https://github.com/i5ik/graderjs.git"
   },
   "keywords": [
     "devtools",
@@ -26,9 +26,9 @@
   "author": "@dosy",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/c9fe/graderjs/issues"
+    "url": "https://github.com/i5ik/graderjs/issues"
   },
-  "homepage": "https://github.com/c9fe/graderjs#readme",
+  "homepage": "https://github.com/i5ik/graderjs#readme",
   "dependencies": {},
   "devDependencies": {}
 }
