@@ -9,6 +9,29 @@
 
 Build cross-platform desktop apps without the bloat using JS, HTML and CSS.
 
+## Features that work right out of the box
+
+- Create a downloadable binary for any platform full support
+- NodeJS full support
+- Chrome DevTools API full support
+- GUI in HTML/JavaScript/CSS full support
+- BYO front-end framework full support
+- BYO back-end framework full support
+- A GUI window with system-chrome (default topbar controls) that can be dragged around and aximized, minimized, resized (or the same via API).
+- GUI window has app title and can have app icon.
+- ES6 all the latest features (that work in the latest Chrome).
+- Cross-platform builds (build for everywhere on Linux, or Mac or Windows).
+
+## Features that don't (yet?) work
+
+- App binary icons (it's just the NodeJS icon)
+- App system tray icons (on Mac, tray icons work on Windows)
+- Code signing and associated bona fides that give apps a "passport for safe and unimpeded passage" through your system (it's not built in, but you can sign your own binary, if you have the right setup).
+
+## What are apps built with GraderJS, technically?
+
+A GraderJS app is just a full-stack application written in NodeJS that runs locally on your client's machine.
+
 ## Details
 
 Minimal binary is 10MB (Windows, Hello World App, using node v12.10.0). Typical Linux/MacOS binary is 14MB (Hello World App, using node v12.10.0). These days we have upgraded to node v14.15.3, but you can control the version (as long as the required nexe pre-built node binaries are available for that version). Node v14.15.3 binaries are larger (~19 - 24 MB).
