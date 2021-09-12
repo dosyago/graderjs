@@ -11,7 +11,7 @@ Build cross-platform desktop apps without the bloat using JS, HTML and CSS.
 
 ## Details
 
-Minimal binary is 10Mb (Windows, Hello World App). Typical Linux/MacOS binary is 14Mb (Hello World App).
+Minimal binary is 10Mb (Windows, Hello World App, using node v12.10.0). Typical Linux/MacOS binary is 14Mb (Hello World App, using node v12.10.0). These days we have upgraded to node v14.15.3, but you can control the version (as long as the required nexe pre-built node binaries are available for that version).
 
 <span id=top></span>
 -------------------
