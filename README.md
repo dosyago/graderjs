@@ -1,4 +1,3 @@
-<p align=center><img width=200 alt="Grader.JS logo image" src=https://github.com/i5ik/graderjs/raw/master/.readme-assets/grader_logo.png></p>
 
 <p align=center>
  <img alt="Windows Grader app screenshot" src=https://github.com/i5ik/graderjs/raw/master/.readme-assets/wingrader.JPG width=222>
