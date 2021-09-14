@@ -9,24 +9,26 @@
 
 Build cross-platform desktop apps without the bloat using JS, HTML and CSS.
 
+✔️
+
 ## Features that work right out of the box
 
-- Create a downloadable binary for any platform full support
-- NodeJS full support
-- Chrome DevTools API full support
-- GUI in HTML/JavaScript/CSS full support
-- BYO front-end framework full support
-- BYO back-end framework full support
+- Create a downloadable binary for any platform ✔️
+- NodeJS ✔️
+- Chrome DevTools API ✔️
+- GUI in HTML/JavaScript/CSS ✔️
+- BYO front-end framework ✔️
+- BYO back-end framework ✔️
 - A GUI window with system-chrome (default topbar controls) that can be dragged around and aximized, minimized, resized (or the same via API).
-- GUI window has app title and can have app icon.
-- ES6 all the latest features (that work in the latest Chrome).
-- Cross-platform builds (build for everywhere on Linux, or Mac or Windows).
+- GUI window has app title and can have app icon. ✔️
+- ES6 all the latest features (that work in the latest Chrome). ✔️
+- Cross-platform builds (build for everywhere on Linux, or Mac or Windows). ✔️
 
 ## Features that don't (yet?) work
 
-- App binary icons (it's just the NodeJS icon)
-- App system tray icons (on Mac, tray icons work on Windows)
-- Code signing and associated bona fides that give apps a "passport for safe and unimpeded passage" through your system (it's not built in, but you can sign your own binary, if you have the right setup).
+- App binary icons (it's just the NodeJS icon) 💀
+- App system tray icons (on Mac, tray icons work on Windows) 💀
+- Code signing and associated bona fides that give apps a "passport for safe and unimpeded passage" through your system (it's not built in, but you can sign your own binary, if you have the right setup). 💀
 
 ## What are apps built with GraderJS, technically?
 
