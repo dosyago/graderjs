@@ -16,7 +16,8 @@ Turn your full-stack NodeJS application into a downloadable cross-platform binar
 - GUI in HTML/JavaScript/CSS ✔️
 - BYO front-end framework ✔️
 - BYO back-end framework ✔️
-- A GUI window with system-chrome (default topbar controls) that can be dragged around and aximized, minimized, resized (or the same via API).
+- A GUI window with OS-default topbar controls that can be dragged, maximized, minimized, resized ✔️
+- A simple API for controlling windows, and interacting with DevTools ✔️
 - GUI window has app title and can have app icon. ✔️
 - ES6 all the latest features (that work in the latest Chrome). ✔️
 - Cross-platform builds (build for everywhere on Linux, or Mac or Windows). ✔️
