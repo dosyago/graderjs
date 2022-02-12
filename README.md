@@ -49,7 +49,7 @@ Unlike a regular full-stack app, GraderJS apps:
 
 ## Details
 
-Minimal binary is 10MB (Windows, Hello World App, using node v12.10.0). Typical Linux/MacOS binary is 14MB (Hello World App, using node v12.10.0). These days we have upgraded to node v14.15.3, but you can control the version (as long as the required nexe pre-built node binaries are available for that version). Node v14.15.3 binaries are larger (~19 - 24 MB).
+Minimal binary is 10MB (Windows, Hello World App, using node v12.10.0, prepacked with upx before bundling with nexe). Typical Linux/MacOS binary is 14MB (Hello World App, using node v12.10.0). These days we have upgraded to node v14.15.3, but you can control the version (as long as the required nexe pre-built node binaries are available for that version). Node v14.15.3 binaries are larger (~19 - 24 MB).
 
 <span id=top></span>
 -------------------
