@@ -1,10 +1,10 @@
 
 <p align=center>
- <img alt="Windows Grader app screenshot" src=https://github.com/i5ik/graderjs/raw/master/.readme-assets/wingrader.JPG width=222>
- <img alt="Ubuntu Linux Grader app screenshot" src=https://github.com/i5ik/graderjs/raw/master/.readme-assets/grader.JPG width=222>
+ <img alt="Windows Grader app screenshot" src=https://github.com/crisdosyago/graderjs/raw/master/.readme-assets/wingrader.JPG width=222>
+ <img alt="Ubuntu Linux Grader app screenshot" src=https://github.com/crisdosyago/graderjs/raw/master/.readme-assets/grader.JPG width=222>
 </p>
 
-# [:sweat_drops: GRaderJS](https://github.com/i5ik/graderjs) ![npm downloads](https://img.shields.io/npm/dt/graderjs?label=npm%20downloads) ![version](https://img.shields.io/npm/v/graderjs?label=version) [![visitors+++](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fc9fe%2Fgraderjs&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=%28today%2Ftotal%29%20visitors%2B%2B%2B%20since%20Nov%209%202020&edge_flat=false)](https://hits.seeyoufarm.com) 
+# [:sweat_drops: GRaderJS](https://github.com/crisdosyago/graderjs) ![npm downloads](https://img.shields.io/npm/dt/graderjs?label=npm%20downloads) ![version](https://img.shields.io/npm/v/graderjs?label=version) [![visitors+++](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fc9fe%2Fgraderjs&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=%28today%2Ftotal%29%20visitors%2B%2B%2B%20since%20Nov%209%202020&edge_flat=false)](https://hits.seeyoufarm.com) 
 
 Turn your full-stack NodeJS application into a downloadable cross-platform binary. Also works for SPAs, or regular web-sites.
 
@@ -135,8 +135,8 @@ This software is dual-licensed. For information about commercial licensing, see 
 
 ## Built with Grader
 
-- [wingrader](https://github.com/i5ik/winrader) - windows 95 cross platform
-- [jspaint.exe](https://github.com/i5ik/jspaint.exe) - classic paint cross platform
+- [wingrader](https://github.com/crisdosyago/winrader) - windows 95 cross platform
+- [jspaint.exe](https://github.com/crisdosyago/jspaint.exe) - classic paint cross platform
 
 <p align=right><a href=#top>Top</a></p>
 
@@ -152,7 +152,7 @@ npx graderjs my-app
 
 Only a couple of API calls, classed into four categories: Protocol, NodeJS, App, Window.
 
-Read [the API docs](https://github.com/i5ik/grader-base) for a detailed usage or see below for an overview.
+Read [the API docs](https://github.com/crisdosyago/grader-base) for a detailed usage or see below for an overview.
 
 <p align=right><a href=#top>Top</a></p>
 
@@ -198,7 +198,7 @@ Instrument the browser directly with DevTools\*.
 
 ### Docketty Docs
 
-Then, read the [API docs](https://github.com/i5ik/grader-base/blob/master/README.md) or see below for the Getting Started Goose Guide.
+Then, read the [API docs](https://github.com/crisdosyago/grader-base/blob/master/README.md) or see below for the Getting Started Goose Guide.
 
 <p align=right><a href=#top>Top</a></p>
 
@@ -212,14 +212,14 @@ Open an issue!
 
 ### Get Started from the Command line
 
-Use npm to get the [Grader.JS tool](https://github.com/i5ik/graderjs) to automatically populate your new grader app.
+Use npm to get the [Grader.JS tool](https://github.com/crisdosyago/graderjs) to automatically populate your new grader app.
 
 ```sh
   $ npm i -g graderjs@latest
   $ graderjs my-new-app
 ```
 
-Then, read the [API docs](https://github.com/i5ik/grader-base/blob/master/README.md) or see below for the Getting Started Goose Guide.
+Then, read the [API docs](https://github.com/crisdosyago/grader-base/blob/master/README.md) or see below for the Getting Started Goose Guide.
 
 *Or...*
 
@@ -227,7 +227,7 @@ Then, read the [API docs](https://github.com/i5ik/grader-base/blob/master/README
 
 ### Get Started from GitHub
 
-Click ["Use This Template"](https://github.com/i5ik/grader-base) on the base-repo and you will have a new repo, then clone it to your workspace and `cd` into it, and run:
+Click ["Use This Template"](https://github.com/crisdosyago/grader-base) on the base-repo and you will have a new repo, then clone it to your workspace and `cd` into it, and run:
 
 ```sh
 npm i
@@ -239,7 +239,7 @@ npm i
 
 ### Start Building!
 
-Read [the API docs](https://github.com/i5ik/grader-base), or create yer binaries right away:
+Read [the API docs](https://github.com/crisdosyago/grader-base), or create yer binaries right away:
 
 ```sh
 ./scripts/compile.sh
@@ -321,7 +321,7 @@ And put your JS/HTML/CSS into, `src/public/index.html`:
 
 ### API
 
-Read [the API docs](https://github.com/i5ik/grader-base)!
+Read [the API docs](https://github.com/crisdosyago/grader-base)!
 
 <p align=right><a href=#top>Top</a></p>
 
@@ -368,14 +368,14 @@ module.exports = {
 
 ## Screenshots
 
-![Windows Grader](https://github.com/i5ik/graderjs/raw/master/.readme-assets/wingrader.JPG)
-![Linux Grader](https://github.com/i5ik/graderjs/raw/master/.readme-assets/grader.JPG)
+![Windows Grader](https://github.com/crisdosyago/graderjs/raw/master/.readme-assets/wingrader.JPG)
+![Linux Grader](https://github.com/crisdosyago/graderjs/raw/master/.readme-assets/grader.JPG)
 
 <p align=right><a href=#top>Top</a></p>
 
 ## More
 
-See [the API docs](https://github.com/i5ik/grader-base) for more. Or just read the README.md of the grader app you've just created, it contains the full API docs. You can also take a look at the API code in `src/index.js`.
+See [the API docs](https://github.com/crisdosyago/grader-base) for more. Or just read the README.md of the grader app you've just created, it contains the full API docs. You can also take a look at the API code in `src/index.js`.
 
 <p align=right><a href=#top>Top</a></p>
 

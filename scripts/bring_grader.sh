@@ -17,14 +17,14 @@ cd $1
 set +e
 bash -e <<TRY
   git init
-  git clone https://github.com/i5ik/grader-base.git
+  git clone https://github.com/crisdosyago/grader-base.git
 TRY
 
 set -e
 
 if [ $? -ne 0 ]; then
   echo "Git not installed. That's ok. Downloading zip/tar ball..."
-  curl -o grader-base-master.zip -L https://github.com/i5ik/grader-base/archive/master.zip
+  curl -o grader-base-master.zip -L https://github.com/crisdosyago/grader-base/archive/master.zip
   unzip grader-base-master.zip
   mv grader-base-master grader-base
 fi
@@ -54,7 +54,7 @@ echo "right now to get some binaries."
 echo "Or copy your SPA into the ./$1/src/public/ folder (or start editing in there)"
 echo "Or if you need more functionality you can also edit ./$1/src/app.js"
 echo "to build your own app."
-echo "See the docs: https://github.com/i5ik/graderjs or open the README.md in this directory"
+echo "See the docs: https://github.com/crisdosyago/graderjs or open the README.md in this directory"
 echo "Happy Grading!"
 echo
 
